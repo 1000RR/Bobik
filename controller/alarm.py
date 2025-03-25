@@ -326,8 +326,8 @@ def possiblyAddMember(msg):
         readableTimestamp = getReadableTime()
 
         if (hex(msg[0]) not in memberDevices) :
-            print(f"Adding new device to members list {hex(msg[0])} at {readableTimestamp}")
-            addEvent({"event": "NEW_MEMBER", "trigger": hex(msg[0]), "time": readableTimestamp})
+            print(f"Adding new device to members list {deviceDictionary[hex(msg[0])]} at {readableTimestamp}")
+            addEvent({"event": "NEW_MEMBER", "trigger": deviceDictionary[hex(msg[0])], "time": readableTimestamp})
             memberDevices[hex(msg[0])] = {
                 'id': hex(msg[0]),
                 'firstSeen': now,
@@ -581,16 +581,16 @@ def handleMessage(msg):
                 print (f">>>>>currentAlarmProfile {currentAlarmProfile}")
                 sendMessage([homeBaseId, 0xFF, 0xA0, msg[0]]) #send to the home base's arduino a non-forwardable message with the ID of the alarm-generating device to be added to the list
             else:
-                addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
+                addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": deviceDictionary[hex(msg[0])], "time": getReadableTimeFromTimestamp(now)})
         else:
-            addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
+            addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": deviceDictionary[hex(msg[0])], "time": getReadableTimeFromTimestamp(now)})
 
     #a no-alarm message is coming in from a device that is in the alarmed device list
     elif ((msg[1]==homeBaseId or msg[1]==broadcastId) and msg[2]==0x00 and hex(msg[0]) in currentlyAlarmedDevices):
         print(f"DEVICE {hex(msg[0])} NO LONGER IN currentlyAlarmedDevices - MESSAGE TO REMOVE FROM OLED")
         #home base's arduino should not show this device's ID as one that is currently alarmed
         currentlyAlarmedDevices.pop(hex(msg[0]))
-        addEvent({"event": "TRIGGER-STOPPED", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
+        addEvent({"event": "TRIGGER-STOPPED", "trigger": deviceDictionary[hex(msg[0])], "time": getReadableTimeFromTimestamp(now)})
         sendMessage([homeBaseId, 0xFF, 0xB0, msg[0]])
         updateCurrentlyTriggeredDevices();
 
@@ -776,6 +776,10 @@ def run(webserver_message_queue):
             previouslyMissingDevices = currentlyMissingDevices
             currentlyMissingDevices = checkMembersOnline()
             newMissingDevices = list(set(currentlyMissingDevices) - set(previouslyMissingDevices))
+            backOnlineDevices = list(set(previouslyMissingDevices) - set(currentlyMissingDevices))
+
+            for backOnlineDevice in backOnlineDevices:
+                addEvent({"event": "DEVICE-NO-LONGER-MISSING", "trigger": deviceDictionary[backOnlineDevice], "time": getReadableTimeFromTimestamp(lastAlarmTime)})
 
             if (armed and len(newMissingDevices) > 0):
                 updateCurrentlyTriggeredDevices()
@@ -784,14 +788,13 @@ def run(webserver_message_queue):
                 for missingDevice in newMissingDevices:
                     if (not "missingDevicesThatTriggerAlarm" in alarmProfiles[currentAlarmProfile] or missingDevice in alarmProfiles[currentAlarmProfile]["missingDevicesThatTriggerAlarm"]):
                         shouldSetNewAlarm = True
-                        break;
 
                     if (shouldSetNewAlarm):
                         alarmed = True
                         lastAlarmTime = getTimeSec()
-                        addEvent({"event": "DEVICE-MISSING-ALARM", "trigger": alarmReason, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+                        addEvent({"event": "DEVICE-MISSING-ALARM", "trigger": f"missing {deviceDictionary[missingDevice]}", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
                     else :
-                        addEvent({"event": "DEVICE-MISSING-NOALARM", "trigger": alarmReason, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+                        addEvent({"event": "DEVICE-MISSING-NOALARM", "trigger": f"missing {deviceDictionary[missingDevice]}", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
 
         #if currently alarmed and there are no missing or alarmed devices and it's been long enough that alarmTimeLengthSec has run out, DISABLE ALARM FLAG
         if (alarmed and getCurrentProfileAlarmTime() > -1 and lastAlarmTime + getCurrentProfileAlarmTime() < getTimeSec() and len(currentlyMissingDevices) == 0 and len(currentlyAlarmedDevices) == 0):
