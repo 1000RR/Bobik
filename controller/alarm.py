@@ -193,6 +193,7 @@ def addEvent(event):
 def getArmedStatus():
     return armed
 
+
 def toggleArmed(now, method):
     global lastArmedTogglePressed
     global alarmed
@@ -417,7 +418,7 @@ def setDenonPlayState(startPowerStatus, startChannelStatus, volume, cwd):
 def setDenonOriginalState(startPowerStatus, startChannelStatus, startVolume, cwd):
     #turn off if was off before
     if (startPowerStatus != 'ON'): #TODO: add condition: and the alarm has been canceled
-        subprocess.run(os.path.dirname(__file__) + "/denonoff.sh", cwd=cwd)
+        subprocess.run(getThisDirAddress() + "/denonoff.sh", cwd=cwd)
     #otherwise, set volume to old volume
     else :
         subprocess.run(["./denonvol.sh", startVolume], cwd=cwd)
@@ -769,26 +770,28 @@ def run(webserver_message_queue):
 
         handleMessage(msg)
 
-
         if (lastCheckedMissingDevicesMsec+checkForMissingDevicesEveryMsec < getTimeMsec()):  #do a check for missing devices
             if (debug): 
                 print(f">>>Checking for missing devices at {getTimeMsec()}")
+            previouslyMissingDevices = currentlyMissingDevices
             currentlyMissingDevices = checkMembersOnline()
+            newMissingDevices = list(set(currentlyMissingDevices) - set(previouslyMissingDevices))
 
-            if (armed and len(currentlyMissingDevices) > 0):
+            if (armed and len(newMissingDevices) > 0):
                 updateCurrentlyTriggeredDevices()
                 print(f">>>>>>>>>>>>>>>>>>>> ADDING MISSING DEVICES {arrayToString(currentlyMissingDevices)} at {getReadableTime()}<<<<<<<<<<<<<<<<<<<")
                 shouldSetNewAlarm = False;
-                for missingDevice in currentlyMissingDevices:
+                for missingDevice in newMissingDevices:
                     if (not "missingDevicesThatTriggerAlarm" in alarmProfiles[currentAlarmProfile] or missingDevice in alarmProfiles[currentAlarmProfile]["missingDevicesThatTriggerAlarm"]):
                         shouldSetNewAlarm = True
                         break;
-                if (shouldSetNewAlarm):
-                    alarmed = True
-                    lastAlarmTime = getTimeSec()
-                    addEvent({"event": "DEVICE-MISSING-ALARM", "trigger": alarmReason, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
-                else :
-                    addEvent({"event": "DEVICE-MISSING-NOALARM", "trigger": alarmReason, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+
+                    if (shouldSetNewAlarm):
+                        alarmed = True
+                        lastAlarmTime = getTimeSec()
+                        addEvent({"event": "DEVICE-MISSING-ALARM", "trigger": alarmReason, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+                    else :
+                        addEvent({"event": "DEVICE-MISSING-NOALARM", "trigger": alarmReason, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
 
         #if currently alarmed and there are no missing or alarmed devices and it's been long enough that alarmTimeLengthSec has run out, DISABLE ALARM FLAG
         if (alarmed and getCurrentProfileAlarmTime() > -1 and lastAlarmTime + getCurrentProfileAlarmTime() < getTimeSec() and len(currentlyMissingDevices) == 0 and len(currentlyAlarmedDevices) == 0):
