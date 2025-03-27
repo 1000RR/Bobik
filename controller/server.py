@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 import threading
 import alarm
 import json
@@ -8,13 +11,12 @@ from flask import Flask, jsonify
 from flask_socketio import SocketIO, emit
 from uuid import uuid4
 
-
 # Create a queue for communication between main program and daemon thread
 webserver_message_queue = Queue()
 responseQueues = {}
 # Set up the Flask web API
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins=["https://bobik.lan:5020", "https://192.168.2.100", "https://192.168.2.100:443", "https://192.168.2.100:5020", "https://192.168.2.100:5010", "http://192.168.2.100:3000", "https://bobik.lan","https://192.168.99.5"], ping_timeout=11, ping_interval=5, async_mode="threading")
+socketio = SocketIO(app, cors_allowed_origins=["https://bobik.lan:5020", "https://192.168.2.100", "https://192.168.2.100:443", "https://192.168.2.100:5020", "https://192.168.2.100:5010", "http://192.168.2.100:3000", "https://bobik.lan","https://192.168.99.5"], ping_timeout=11, ping_interval=5, async_mode="eventlet")
 thread = None
 thread_lock = threading.Lock()
 new_client_exists = False
@@ -22,6 +24,7 @@ alarmQueueMessages = {}
 thisDir = os.path.dirname(os.path.abspath(__file__))
 serverKeysDir = thisDir + "/server-keys"
 print(thisDir)
+client_count = 0
 
 def main():
     global responseQueues
@@ -161,13 +164,21 @@ def main():
     def error(e):
         print('Error', e)
        
-    sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    sslContext.load_cert_chain(certfile=serverKeysDir+'/bobik-cert.pem', keyfile=serverKeysDir+'/bobik-key.pem')
+    #for sure wth werkzeug
+    # sslContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    # sslContext.load_cert_chain(certfile=serverKeysDir+'/bobik-cert.pem', keyfile=serverKeysDir+'/bobik-key.pem')
 
+    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    ssl_context.load_cert_chain(certfile=serverKeysDir+'/bobik-cert.pem', keyfile=serverKeysDir+'/bobik-key.pem')
 
-    # Run the Flask app
+    # Run the Flask app / werkzeug
     #socketio.run(app, host='0.0.0.0', port=8080, allow_unsafe_werkzeug=True)
-    socketio.run(app, host='0.0.0.0', port=8080, ssl_context=sslContext, allow_unsafe_werkzeug=True)
+    #socketio.run(app, host='0.0.0.0', port=8080, ssl_context=sslContext, allow_unsafe_werkzeug=True)
+    # Run the Flask app with eventlet
+    listener = eventlet.listen(('0.0.0.0', 8080))
+    wrapped_socket = ssl_context.wrap_socket(listener, server_side=True)
+    eventlet.wsgi.server(wrapped_socket, app)
+   
 
 def update_status_thread():
     last_status_str = 0
