@@ -71,12 +71,20 @@ const SensorsPanel: React.FC<{
     });
 
     stateDeviceList?.forEach((device: string) => {
-        if (device.indexOf('SENSOR |') == 0) {
+        let isSensorType = false;
+        let isUnknownType = false;
+        
+        if (device.indexOf('SENSOR |') == 0)
+            isSensorType = true;
+        else if (device.indexOf('UNKNOWN |') == 0)
+            isUnknownType = true;
+        
+        if (isSensorType || isUnknownType) {
             const name = device.substring(9, device.indexOf('| 0x')-1);
             const id = device.substring(device.indexOf('| 0x')+2);
 
             deviceList.push({
-                name: name,
+                name: `${name}${isUnknownType ? " " + id : ""}`,
                 id: id,
                 enabled: alarmArmed && (!sensorsThatTriggerAlarm || sensorsThatTriggerAlarm.includes(id)), //if sensorsThatTriggerAlarm not included, all alarms are supposed to be enabled
                 missing: missingDevices && missingDevices.includes(id),
