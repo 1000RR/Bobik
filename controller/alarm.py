@@ -43,7 +43,7 @@ lastCheckedMissingDevicesMsec = 0
 checkForMissingDevicesEveryMsec = 750
 currentAlarmProfile = 0 # 0 = default
 threadShouldTerminate = False
-canDebugMessage = ""
+canDebugMessage = []
 shouldSendDebugRepeatedly = False
 shouldSendDebugMessage = False
 alwaysKeepOnSet = {"0x30", "0x31", "0x40", "0x50"} #set of devices to always keep powered on (active). This should be limited to non-emitting sensors. #TODO: removing this logic inhibited the intended operation of the garage door sensor when disarmed. It makes sense to always have non-relay devices transmitting and not respond to base power commands, with base filtering the.
@@ -326,8 +326,8 @@ def possiblyAddMember(msg):
         readableTimestamp = getReadableTime()
 
         if (hex(msg[0]) not in memberDevices) :
-            print(f"Adding new device to members list {deviceDictionary[hex(msg[0])]} at {readableTimestamp}")
-            addEvent({"event": "NEW_MEMBER", "trigger": deviceDictionary[hex(msg[0])], "time": readableTimestamp})
+            print(f"Adding new device to members list {hex(msg[0])} at {readableTimestamp}")
+            addEvent({"event": "NEW_MEMBER", "trigger": hex(msg[0]), "time": readableTimestamp})
             memberDevices[hex(msg[0])] = {
                 'id': hex(msg[0]),
                 'firstSeen': now,
@@ -465,7 +465,7 @@ def getFriendlyDeviceNamesFromDeviceDictionary(dict):
         if key in deviceDictionary:
             friendlyDeviceNames.append(deviceDictionary[key])
         else:
-            friendlyDeviceNames.append("unknown " + key)
+            friendlyDeviceNames.append("UNKNOWN | UNKNOWN DEVICE | " + key)
     return friendlyDeviceNames;
 
 
@@ -581,16 +581,16 @@ def handleMessage(msg):
                 print (f">>>>>currentAlarmProfile {currentAlarmProfile}")
                 sendMessage([homeBaseId, 0xFF, 0xA0, msg[0]]) #send to the home base's arduino a non-forwardable message with the ID of the alarm-generating device to be added to the list
             else:
-                addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": deviceDictionary[hex(msg[0])], "time": getReadableTimeFromTimestamp(now)})
+                addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
         else:
-            addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": deviceDictionary[hex(msg[0])], "time": getReadableTimeFromTimestamp(now)})
+            addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
 
     #a no-alarm message is coming in from a device that is in the alarmed device list
     elif ((msg[1]==homeBaseId or msg[1]==broadcastId) and msg[2]==0x00 and hex(msg[0]) in currentlyAlarmedDevices):
         print(f"DEVICE {hex(msg[0])} NO LONGER IN currentlyAlarmedDevices - MESSAGE TO REMOVE FROM OLED")
         #home base's arduino should not show this device's ID as one that is currently alarmed
         currentlyAlarmedDevices.pop(hex(msg[0]))
-        addEvent({"event": "TRIGGER-STOPPED", "trigger": deviceDictionary[hex(msg[0])], "time": getReadableTimeFromTimestamp(now)})
+        addEvent({"event": "TRIGGER-STOPPED", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
         sendMessage([homeBaseId, 0xFF, 0xB0, msg[0]])
         updateCurrentlyTriggeredDevices();
 
@@ -779,7 +779,7 @@ def run(webserver_message_queue):
             backOnlineDevices = list(set(previouslyMissingDevices) - set(currentlyMissingDevices))
 
             for backOnlineDevice in backOnlineDevices:
-                addEvent({"event": "DEVICE-NO-LONGER-MISSING", "trigger": deviceDictionary[backOnlineDevice], "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+                addEvent({"event": "DEVICE-NO-LONGER-MISSING", "trigger": backOnlineDevice, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
 
             if (armed and len(newMissingDevices) > 0):
                 updateCurrentlyTriggeredDevices()
@@ -792,10 +792,17 @@ def run(webserver_message_queue):
                     if (shouldSetNewAlarm):
                         alarmed = True
                         lastAlarmTime = getTimeSec()
-                        addEvent({"event": "DEVICE-MISSING-ALARM", "trigger": f"missing {deviceDictionary[missingDevice]}", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+                        addEvent({"event": "DEVICE-MISSING-ALARM", "trigger": f"missing {missingDevice}", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
                     else :
-                        addEvent({"event": "DEVICE-MISSING-NOALARM", "trigger": f"missing {deviceDictionary[missingDevice]}", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
-
+                        addEvent({"event": "DEVICE-MISSING-NOALARM", "trigger": f"missing {missingDevice}", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+            elif (
+                alarmed and
+                len(currentlyMissingDevices) > 0 and
+                len(
+                    set(alarmProfiles[currentAlarmProfile]["missingDevicesThatTriggerAlarm"]).union(set(currentlyMissingDevices))   
+                ) == 0
+            ):
+                stopAlarm()
         #if currently alarmed and there are no missing or alarmed devices and it's been long enough that alarmTimeLengthSec has run out, DISABLE ALARM FLAG
         if (alarmed and getCurrentProfileAlarmTime() > -1 and lastAlarmTime + getCurrentProfileAlarmTime() < getTimeSec() and len(currentlyMissingDevices) == 0 and len(currentlyAlarmedDevices) == 0):
             stopAlarm()
@@ -887,7 +894,7 @@ def sendcan(message, repeatedly):
             else:
                 arrCanDebugMessage[index]=int(i, 16)
         if messageConforms:
-            print('SENDING FAKE MESSAGE FROM UI ' + str(arrCanDebugMessage) + (" REPEATEDLY " if repeatedly else ""))
+            print('SENDING FAKE MESSAGE FROM UI ' + ', '.join([hex(n) for n in arrCanDebugMessage]) + (" REPEATEDLY " if repeatedly else ""))
             addEvent({
                 "event": "STARTING SENDING DEBUG CAN MESSAGE " + str(arrCanDebugMessage) + " FROM UI" + (" REPEATEDLY" if repeatedly else ""),
                 "time": getReadableTimeFromTimestamp(getTimeSec()),
