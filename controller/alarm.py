@@ -7,17 +7,18 @@ import atexit
 import json
 import subprocess
 import os
+import debugpy
 from threading import Thread
 
 debug = False
-LISTEN_PORT=8080
+LISTEN_PORT = 8080
 memberDevices = {} #map of {string hex id:{properties}}
 denonId = 0x77
 testAlarmId = 0xDE
 checkPhonesId = 0x17
 garageDoorOpenerId = 0xD0
 garageDoorSensorId = 0x30
-exceptMissingDevices = {hex(denonId): True, hex(garageDoorOpenerId): True}
+exceptMissingDevices = {hex(denonId): True}
 denonPlayThread = 0
 lastSentMessageTimeMsec = 0
 homeBaseId = 0x14 #interdependent with deviceDictionary
@@ -33,14 +34,14 @@ everMissingDevices = {}
 lastAlarmTime = 0
 armed = False #initial condition
 lastArmedTogglePressed = 0
-deviceAbsenceThresholdSec = 7
+deviceAbsenceThresholdSec = 3 #seconds before a device is considered missing
 firstPowerCommandNeedsToBeSent = True
 timeAllottedToBuildOutMembersSec = 2
 initWaitSeconds = 5
 alarmReason = ""
 sendTimeoutMsec = 500
 lastCheckedMissingDevicesMsec = 0
-checkForMissingDevicesEveryMsec = 750
+checkForMissingDevicesEveryMsec = 1500
 currentAlarmProfile = 0 # 0 = default
 threadShouldTerminate = False
 canDebugMessage = []
@@ -48,7 +49,7 @@ shouldSendDebugRepeatedly = False
 shouldSendDebugMessage = False
 alwaysKeepOnSet = {"0x30", "0x31", "0x40", "0x50"} #set of devices to always keep powered on (active). This should be limited to non-emitting sensors. #TODO: removing this logic inhibited the intended operation of the garage door sensor when disarmed. It makes sense to always have non-relay devices transmitting and not respond to base power commands, with base filtering the.
 avrSoundChannel = "SAT/CBL"
-
+quickSetAlarmProfiles = [0,1,3,15,2,7] #quick set alarm profile buttons in UI (subset of all profiles, indexed by respective array index)
 
 deviceDictionary = {
     "0x80": "SENSOR | GARAGE MOVEMENT | 0x80",
@@ -127,6 +128,11 @@ with open(getThisDirAddress() + '/alarmProfiles.json', 'r') as file:
 #05 door open sensor
 #06 device controller
 #07 temperature/humidity sensor
+
+
+#DEBUGGER debugpy
+debugpy.listen(("0.0.0.0", 5678))
+print("Waiting for debugger attach...")
 
 #name of ARDUINO tty device
 #on mac: /dev/tty.usbserial-10
@@ -258,16 +264,13 @@ def decodeLine(line):
 def encodeLine(message): #[myCanId, addressee, message, myDeviceType]
     printableArr = message.copy()
     printableArr.append(getTimeSec())
-    #print("SENDING ", np.array(printableArr)); #TODO: uncomment
+    #print("SENDING ", np.array(printableArr));
     return (hex(message[0]) + "-" + hex(message[1]) + "-" + hex(message[2]) + "-" + hex(message[3]) + "-\n")
 
 
 def sendMessage(messageArray): 
     global lastSentMessageTimeMsec
     global denonPlayThread
-    # global everTriggeredWithinAlarmCycle
-    # global mp3AlarmDictionary
-    # global currentlyAlarmedDevices
 
     outgoing = encodeLine(messageArray)
     ser.write(bytearray(outgoing, 'ascii'))
@@ -340,8 +343,8 @@ def possiblyAddMember(msg):
         else :
             memberDevices[hex(msg[0])]['lastSeen'] = now
             memberDevices[hex(msg[0])]['lastSeenReadable'] = readableTimestamp
-            # if (hex(msg[0]) in currentlyMissingDevices):
-            #     print(f"Removing missing device {hex(msg[0])} at {getReadableTime()}.")
+            if (hex(msg[0]) in currentlyMissingDevices and debug):
+                print(f"Removing missing device {hex(msg[0])} at {getReadableTime()}.")
 
 
 def playDenonThreadMain(currentlyAlarmedDevices, everAlarmedDuringAlarm, mp3AlarmDictionary):
@@ -473,13 +476,14 @@ def checkMembersOnline():
     now = getTimeSec()
     global lastCheckedMissingDevicesMsec
     global missingDevicesInCurrentArmCycle
+    global everMissingDevices
     lastCheckedMissingDevicesMsec = getTimeMsec()
     missingMembers = []
     for memberId in memberDevices :
         if (not memberId in exceptMissingDevices and memberDevices[memberId]['lastSeen'] + deviceAbsenceThresholdSec < now) :
             print(f"Adding missing device {memberId} at {getReadableTime()}. missing for {(getTimeSec()-memberDevices[memberId]['lastSeen'])} seconds")
             missingMembers.append(memberId)
-            everMissingDevices[memberId] = True;
+            everMissingDevices[memberId] = True
             missingDevicesInCurrentArmCycle[memberId] = now
     return missingMembers
 
@@ -576,7 +580,7 @@ def handleMessage(msg):
                 lastAlarmTime = now;
                 alarmedDevicesInCurrentArmCycle[hex(msg[0])] = now;
                 everTriggeredWithinAlarmCycle[hex(msg[0])] = now;
-                updateCurrentlyTriggeredDevices();
+                updateCurrentAlarmReason();
                 addEvent({"event": "TRIGGERED-ALARM", "trigger": alarmReason, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
                 print (f">>>>>currentAlarmProfile {currentAlarmProfile}")
                 sendMessage([homeBaseId, 0xFF, 0xA0, msg[0]]) #send to the home base's arduino a non-forwardable message with the ID of the alarm-generating device to be added to the list
@@ -592,10 +596,10 @@ def handleMessage(msg):
         currentlyAlarmedDevices.pop(hex(msg[0]))
         addEvent({"event": "TRIGGER-STOPPED", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
         sendMessage([homeBaseId, 0xFF, 0xB0, msg[0]])
-        updateCurrentlyTriggeredDevices();
+        updateCurrentAlarmReason();
 
 
-def updateCurrentlyTriggeredDevices():
+def updateCurrentAlarmReason():
     global alarmReason
     global currentlyAlarmedDevices
     global currentlyMissingDevices
@@ -605,7 +609,7 @@ def updateCurrentlyTriggeredDevices():
         alarmReason += ("" if not alarmReason else " ") + "missing " + missingId
     for alarmedId in currentlyAlarmedDevices:
         alarmReason += ("" if not alarmReason else " ") + "tripped " + alarmedId
-    if (debug): print("Updated alarm reason to: " + alarmReason)
+    #if (debug): print("Updated alarm reason to: " + alarmReason)
 
 
 def getProfilesJsonString():
@@ -635,7 +639,8 @@ def getStatusJsonString():
     outgoingMessage += '"everMissingDevices": ' + str(list(everMissingDevices.keys())).replace("'","\"") + ","
     outgoingMessage += '"memberCount": ' + str(len(memberDevices)) + ','
     outgoingMessage += '"memberDevices": ' + str(list(memberDevices.keys())).replace("'","\"") + ','
-    outgoingMessage += '"memberDevicesReadable": ' + str(getFriendlyDeviceNamesFromDeviceDictionary(list(memberDevices.keys()))).replace("'","\"")
+    outgoingMessage += '"memberDevicesReadable": ' + str(getFriendlyDeviceNamesFromDeviceDictionary(list(memberDevices.keys()))).replace("'","\"") + ','
+    outgoingMessage += '"quickSetAlarmProfiles": ' + str(quickSetAlarmProfiles)
     outgoingMessage += '}'
     return outgoingMessage
 
@@ -657,7 +662,7 @@ def stopAlarm():
     addEvent({"event": "FINISHED_ALARM", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
     everTriggeredWithinAlarmCycle = {}
     currentlyAlarmedDevices = {}
-    updateCurrentlyTriggeredDevices()
+    updateCurrentAlarmReason()
     sendMessage([homeBaseId, 0xFF, 0xC0, 0x01])
 
 
@@ -693,7 +698,7 @@ def run(webserver_message_queue):
     print(f"DONE WAITING, OPERATIONAL NOW AT {getReadableTimeFromTimestamp(getTimeSec())}. STATUS:\nARMED: {armed}\nALARMED: {alarmed}\n\n\n")
 
     ser.flushOutput()
-    ser.flushInput()
+    ser.flushInput() #this clears the input buffer, and should not be done routinely during the receiving loop - leads to dropped messages and thus missing devices
     sendMessage([homeBaseId, 0x00, 0xCC, 0x01]) #reset all devices (broadcast)
     sendArmedLedSignal()
     firstTurnedOnTimestamp = getTimeSec()
@@ -742,8 +747,6 @@ def run(webserver_message_queue):
 
 
         if (not line): continue #nothing on CAN -> repeat while loop (since web server message is already taken care of above)
-        
-        ser.flushInput()
 
         if (firstPowerCommandNeedsToBeSent and getTimeSec() > firstTurnedOnTimestamp + timeAllottedToBuildOutMembersSec):
             firstPowerCommandNeedsToBeSent = False
@@ -782,7 +785,7 @@ def run(webserver_message_queue):
                 addEvent({"event": "DEVICE-NO-LONGER-MISSING", "trigger": backOnlineDevice, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
 
             if (armed and len(newMissingDevices) > 0):
-                updateCurrentlyTriggeredDevices()
+                updateCurrentAlarmReason()
                 print(f">>>>>>>>>>>>>>>>>>>> ADDING MISSING DEVICES {arrayToString(currentlyMissingDevices)} at {getReadableTime()}<<<<<<<<<<<<<<<<<<<")
                 shouldSetNewAlarm = False;
                 for missingDevice in newMissingDevices:
@@ -806,10 +809,10 @@ def run(webserver_message_queue):
         #if currently alarmed and there are no missing or alarmed devices and it's been long enough that alarmTimeLengthSec has run out, DISABLE ALARM FLAG
         if (alarmed and getCurrentProfileAlarmTime() > -1 and lastAlarmTime + getCurrentProfileAlarmTime() < getTimeSec() and len(currentlyMissingDevices) == 0 and len(currentlyAlarmedDevices) == 0):
             stopAlarm()
-            updateCurrentlyTriggeredDevices()
+            updateCurrentAlarmReason()
 
         else:
-            updateCurrentlyTriggeredDevices()
+            updateCurrentAlarmReason()
 
         #possibly send a message (if it's been sendTimeoutMsec)
         if (getTimeMsec() > (lastSentMessageTimeMsec+sendTimeoutMsec)):
