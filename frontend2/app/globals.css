@@ -120,9 +120,9 @@ pre {
 }
 
 .alarm_button_disabled {
-	background-color: rgba(72, 2, 194, 1) !important;
-	border-color: rgba(255, 170, 0, 1) !important;
-	color: rgba(255, 170, 0, 1) !important;
+	background-color: rgba(4, 113, 205, 1) !important;
+	border-color: rgba(0, 208, 255, 1) !important;
+	color: rgba(0, 208, 255, 1) !important;
 
 	&:focus {
 		filter: brightness(120%);
@@ -152,10 +152,10 @@ pre {
 }
 
 .alarm_button_enabled {
-	background-color: rgba(255, 170, 0, 1) !important;
+	background-color: rgba(0, 208, 255, 1) !important;
 	border-width: 3px !important;
-	border-color:rgba(72, 2, 194, 1) !important;
-	color: rgba(72, 2, 194, 1) !important;
+	border-color:rgba(4, 113, 205, 1) !important;
+	color: rgba(4, 113, 205, 1) !important;
 
 	&:focus {
 		filter: brightness(110%);
