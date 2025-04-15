@@ -41,6 +41,7 @@ export type StatusResponse = {
     memberCount: number;
     memberDevices: string[];
     memberDevicesReadable: string[];
+    quickSetAlarmProfiles: number[];
 }
 
 export interface AppState {
@@ -71,7 +72,8 @@ const initialState: AppState = {
     everMissingDevices: [],
     memberCount: 0,
     memberDevices: [],
-    memberDevicesReadable: []
+    memberDevicesReadable: [],
+    quickSetAlarmProfiles: []
   },
   pastEvents: {
     pastEvents: []
