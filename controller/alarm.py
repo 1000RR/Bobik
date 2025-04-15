@@ -88,8 +88,9 @@ with open(getThisDirAddress() + '/alarmProfiles.json', 'r') as file:
     alarmProfiles = json.loads(file.read())
 
 ###################### MESSAGES #######################
-# 0xBB - alarm on signal
-# 0xCC - alarm off signal
+# 0xAA - alarm triggered signal
+# 0xBB - alarm device enabled signal
+# 0xCC - alarm device disabled signal
 # 0xD1 - sent to home base arduino - arm 
 # 0xD0 - sent to home base arduino - disarm
 # 0x0F - power off sensor
@@ -150,7 +151,7 @@ def setDevicesPower():
     # if not armed, send OFF to all
     # if armed, send OFF or ON to all depending on whether the device is in the profile's sensorsthattrigger
     if not armed:
-        sendPowerCommand([], True, False)
+        sendPowerCommand([], True, False) #devicesOverrideArray, shouldBroadcast, powerState
         sendPowerCommand(list(alwaysKeepOnSet), False, True)
     else:
         offDevices, onDevices = getDevicesPowerStateLists()
@@ -200,7 +201,7 @@ def getArmedStatus():
     return armed
 
 
-def toggleArmed(now, method):
+def toggleArmed(now, strActionOrigin):
     global lastArmedTogglePressed
     global alarmed
     global armed
@@ -213,8 +214,8 @@ def toggleArmed(now, method):
     
     lastArmedTogglePressed = now
     if (armed == True):
-        print(f">>>>>>>>TURNING OFF ALARM AT {getReadableTimeFromTimestamp(now)} PER {method}<<<<<<<<<")
-        addEvent({"event": "DISARMED", "time": getReadableTimeFromTimestamp(now), "method": method})
+        print(f">>>>>>>>TURNING OFF ALARM AT {getReadableTimeFromTimestamp(now)} PER {strActionOrigin}<<<<<<<<<")
+        addEvent({"event": "DISARMED", "time": getReadableTimeFromTimestamp(now), "actionOrigin": strActionOrigin})
         armed = False #TODO: add logging of event and source
         alarmed = False #reset alarmed state
         everTriggeredWithinAlarmCycle = {}
@@ -222,8 +223,8 @@ def toggleArmed(now, method):
         alarmedDevicesInCurrentArmCycle = {}
         missingDevicesInCurrentArmCycle = {}
     else:
-        print(f">>>>>>>>TURNING ON ALARM AT {getReadableTimeFromTimestamp(now)} PER {method}<<<<<<<<<")
-        addEvent({"event": "ARMED", "time": getReadableTimeFromTimestamp(now), "method": method})
+        print(f">>>>>>>>TURNING ON ALARM AT {getReadableTimeFromTimestamp(now)} PER {strActionOrigin}<<<<<<<<<")
+        addEvent({"event": "ARMED", "time": getReadableTimeFromTimestamp(now), "actionOrigin": strActionOrigin})
         armed = True #TODO: add logging of event and source
         alarmed = False #reset alarmed state
         everTriggeredWithinAlarmCycle = {}
@@ -500,10 +501,7 @@ def sendArmedLedSignal():
 
 #by default, sends to all members of current profile, unless overridden with at most 1 of the first 2 params
 def sendPowerCommand(devicesOverrideArray, shouldBroadcast, powerState): #two op
-    # global memberDevices
-    # global currentAlarmProfile
-    # global alarmProfiles
-    
+
     devicesToSendTo = devicesOverrideArray if devicesOverrideArray else memberDevices if shouldBroadcast else alarmProfiles[currentAlarmProfile]["sensorsThatTriggerAlarm"] if "sensorsThatTriggerAlarm" in alarmProfiles[currentAlarmProfile] else memberDevices
 
     if (shouldBroadcast):
@@ -538,10 +536,6 @@ def arrayToString(array):
 
 
 def handleMessage(msg):
-    if (debug):
-        print(f"SENDER {hex(msg[0])} RECEIVER {hex(msg[1])} MESSAGE {hex(msg[2])} DEVICE-TYPE {hex(msg[3])}")
-
-    possiblyAddMember(msg)
     global alarmed
     global homeBaseId
     global lastAlarmTime
@@ -555,7 +549,11 @@ def handleMessage(msg):
     global canDebugMessage
     global shouldSendDebugRepeatedly
     global shouldSendDebugMessage
+    
+    if (debug):
+        print(f"SENDER {hex(msg[0])} RECEIVER {hex(msg[1])} MESSAGE {hex(msg[2])} DEVICE-TYPE {hex(msg[3])}")
 
+    possiblyAddMember(msg)
     now = getTimeSec()
 
     #if we are faking output from a certain device, ignore all messages from that device and replace with 
@@ -590,7 +588,7 @@ def handleMessage(msg):
             addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
 
     #a no-alarm message is coming in from a device that is in the alarmed device list
-    elif ((msg[1]==homeBaseId or msg[1]==broadcastId) and msg[2]==0x00 and hex(msg[0]) in currentlyAlarmedDevices):
+    elif ((msg[1]==homeBaseId or msg[1]==broadcastId) and msg[2]!=0xAA and hex(msg[0]) in currentlyAlarmedDevices):
         print(f"DEVICE {hex(msg[0])} NO LONGER IN currentlyAlarmedDevices - MESSAGE TO REMOVE FROM OLED")
         #home base's arduino should not show this device's ID as one that is currently alarmed
         currentlyAlarmedDevices.pop(hex(msg[0]))
