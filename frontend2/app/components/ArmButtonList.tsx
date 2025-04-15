@@ -35,15 +35,23 @@ const ArmButtonContainer: React.FC<{
         enabled: !alarmArmed
     }] : [];
 
-    alarmProfiles?.forEach((alarmProfile: AlarmProfile, index: number) => {
-        if (isQuickSetAlarmMode && alarmProfilesToDisplay.includes(index) || !isQuickSetAlarmMode) {
+    if (isQuickSetAlarmMode) { //traverse special profiles in order
+        alarmProfilesToDisplay?.forEach((index: number) => {
             generatedAlarmProfileList.push({
-                name: (!isQuickSetAlarmMode ? `${index}: ` : `Arm `) + alarmProfile.name,
+                name: (`Arm ${alarmProfiles[index].name}`),
                 id: index,
-                enabled: ((isQuickSetAlarmMode && alarmArmed) || !isQuickSetAlarmMode) && selectedProfileNumber === index
+                enabled: alarmArmed && selectedProfileNumber === index
             });
-        }
-    });
+        });
+    } else {
+        alarmProfiles?.forEach((alarmProfile: AlarmProfile, index: number) => {
+            generatedAlarmProfileList.push({
+                name: (`${index}: ${alarmProfile.name}`),
+                id: index,
+                enabled: selectedProfileNumber === index
+            });
+        });
+    }
 
     const clickHandler:React.MouseEventHandler<HTMLButtonElement> = function(event) {
         const profileId =  Number.parseInt(event.currentTarget.id); //-1 is disable button manually added
