@@ -30,7 +30,7 @@ const ArmButtonContainer: React.FC<{
         return state.appState.status.armStatus === 'ARMED';
     });
     const generatedAlarmProfileList:Array<AlarmProfileDescriptor> = isQuickSetAlarmMode ?[{
-        name: "Disarm",
+        name: "⏻ Disarm",
         id: -1,
         enabled: !alarmArmed
     }] : [];
@@ -38,7 +38,7 @@ const ArmButtonContainer: React.FC<{
     if (isQuickSetAlarmMode) { //traverse special profiles in order
         alarmProfilesToDisplay?.forEach((index: number) => {
             generatedAlarmProfileList.push({
-                name: (`Arm ${alarmProfiles[index].name}`),
+                name: (`🔒 Arm ${alarmProfiles[index].name}`),
                 id: index,
                 enabled: alarmArmed && selectedProfileNumber === index
             });

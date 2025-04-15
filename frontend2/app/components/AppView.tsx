@@ -82,7 +82,7 @@ const AppView: React.FC = () => {
                             </div>
                             <pre id="eventsContainer" className="dimmable">{JSON.stringify(appState.pastEvents, null, 2)}</pre>
                         </ButtonWithDrawer>
-                        <ButtonWithDrawer flexDirection="column" justifyContent="flex-start" buttonText="Profiles" containsScrollable>
+                        <ButtonWithDrawer flexDirection="column" justifyContent="flex-start" buttonText="Profile Definitions" containsScrollable>
                             <div style={{display: "flex", gap: 10}}>
                                 <Button onClick={(e) => {scrollToBottom("profilesContainer")}} className="scrollToBottomBtn scroll-btn">Bottom</Button>
                                 <Button onClick={(e) => {scrollToTop("profilesContainer")}}  className="scrollToTopBtn scroll-btn">Top</Button>

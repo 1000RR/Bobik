@@ -3,7 +3,7 @@ import React from "react";
 import styled, {css} from "styled-components";
 import Panel from "@components/Panel"
 import { useSelector } from "react-redux";
-import { AlarmProfilesResponse, AppState, AppStateSlice, StatusResponse } from "./AppStateSlice";
+import { AlarmProfilesResponse, AppStateSlice, StatusResponse } from "./AppStateSlice";
 import Image from "next/image";
 
 type DeviceDescriptor = {

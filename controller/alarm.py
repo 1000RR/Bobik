@@ -638,7 +638,8 @@ def getStatusJsonString():
     outgoingMessage += '"memberCount": ' + str(len(memberDevices)) + ','
     outgoingMessage += '"memberDevices": ' + str(list(memberDevices.keys())).replace("'","\"") + ','
     outgoingMessage += '"memberDevicesReadable": ' + str(getFriendlyDeviceNamesFromDeviceDictionary(list(memberDevices.keys()))).replace("'","\"") + ','
-    outgoingMessage += '"quickSetAlarmProfiles": ' + str(quickSetAlarmProfiles)
+    outgoingMessage += '"quickSetAlarmProfiles": ' + str(quickSetAlarmProfiles) + ','
+    outgoingMessage += '"profileDefinition": ' + json.dumps(alarmProfiles[currentAlarmProfile])
     outgoingMessage += '}'
     return outgoingMessage
 
