@@ -92,7 +92,6 @@ const CompositeStyledButton = styled.button`
 const AlarmEnableButton: React.FC<{
     className?: string,
     children?: React.ReactNode,
-    onClick?: React.MouseEventHandler
 }> = ({ className, children}) => {
 
     const imgSrcArmed = "/assets/attackdog.jpg";
@@ -121,11 +120,11 @@ const AlarmEnableButton: React.FC<{
 
 
     return (<div style={{ width: "100%", }}>
-        <CompositeStyledButton className={`${className} ${isArmed ? 'buttonEnabled' : 'buttonDisabled'}`} onClick={(e)=>{e.currentTarget.blur(); handler(e);}}>
+        <CompositeStyledButton className={`${className} ${isArmed ? 'buttonEnabled' : 'buttonDisabled'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
             <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image><></>
                 <div>
                     {buttonText}
-                    <TapText>quick tap to toggle</TapText>
+		    {/*<TapText>quick tap to toggle</TapText>*/}
                 </div>
                 {children}
         </CompositeStyledButton>

@@ -11,12 +11,14 @@ from flask import Flask, jsonify
 from flask_socketio import SocketIO, emit
 from uuid import uuid4
 
+CORS = ["https://bobik.lan:5020", "https://192.168.2.100", "https://192.168.2.100:443", "https://192.168.2.100:5020", "https://192.168.2.100:5010", "http://192.168.2.100:3000", "https://bobik.lan","https://192.168.99.5"]
+
 # Create a queue for communication between main program and daemon thread
 webserver_message_queue = Queue()
 responseQueues = {}
 # Set up the Flask web API
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins=["https://bobik.lan:5020", "https://192.168.2.100", "https://192.168.2.100:443", "https://192.168.2.100:5020", "https://192.168.2.100:5010", "http://192.168.2.100:3000", "https://bobik.lan","https://192.168.99.5"], ping_timeout=11, ping_interval=5, async_mode="eventlet")
+socketio = SocketIO(app, cors_allowed_origins=CORS, ping_timeout=11, ping_interval=5, async_mode="eventlet")
 thread = None
 thread_lock = threading.Lock()
 new_client_exists = False
