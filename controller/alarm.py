@@ -7,10 +7,10 @@ import atexit
 import json
 import subprocess
 import os
-import debugpy
+#import debugpy
 from threading import Thread
 
-debug = False
+debug = False 
 LISTEN_PORT = 8080
 memberDevices = {} #map of {string hex id:{properties}}
 denonId = 0x77
@@ -132,8 +132,8 @@ with open(getThisDirAddress() + '/alarmProfiles.json', 'r') as file:
 
 
 #DEBUGGER debugpy
-debugpy.listen(("0.0.0.0", 5678))
-print("Waiting for debugger attach...")
+#debugpy.listen(("0.0.0.0", 5678))
+#print("Waiting for debugger attach...")
 
 #name of ARDUINO tty device
 #on mac: /dev/tty.usbserial-10
@@ -331,7 +331,7 @@ def possiblyAddMember(msg):
 
         if (hex(msg[0]) not in memberDevices) :
             print(f"Adding new device to members list {hex(msg[0])} at {readableTimestamp}")
-            addEvent({"event": "NEW_MEMBER", "trigger": hex(msg[0]), "time": readableTimestamp})
+            addEvent({"event": "NEW-MEMBER", "trigger": hex(msg[0]), "time": readableTimestamp})
             memberDevices[hex(msg[0])] = {
                 'id': hex(msg[0]),
                 'firstSeen': now,
@@ -658,7 +658,7 @@ def stopAlarm():
     global homeBaseId
 
     alarmed = False
-    addEvent({"event": "FINISHED_ALARM", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+    addEvent({"event": "FINISHED-ALARM", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
     everTriggeredWithinAlarmCycle = {}
     currentlyAlarmedDevices = {}
     updateCurrentAlarmReason()
@@ -781,22 +781,22 @@ def run(webserver_message_queue):
             backOnlineDevices = list(set(previouslyMissingDevices) - set(currentlyMissingDevices))
 
             for backOnlineDevice in backOnlineDevices:
-                addEvent({"event": "DEVICE-NO-LONGER-MISSING", "trigger": backOnlineDevice, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+                addEvent({"event": "MISSING-DEVICE-BACK-ONLINE", "trigger": backOnlineDevice, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
 
-            if (armed and len(newMissingDevices) > 0):
+            if (len(newMissingDevices) > 0):
                 updateCurrentAlarmReason()
                 print(f">>>>>>>>>>>>>>>>>>>> ADDING MISSING DEVICES {arrayToString(currentlyMissingDevices)} at {getReadableTime()}<<<<<<<<<<<<<<<<<<<")
                 shouldSetNewAlarm = False;
                 for missingDevice in newMissingDevices:
-                    if (not "missingDevicesThatTriggerAlarm" in alarmProfiles[currentAlarmProfile] or missingDevice in alarmProfiles[currentAlarmProfile]["missingDevicesThatTriggerAlarm"]):
+                    if (armed and not "missingDevicesThatTriggerAlarm" in alarmProfiles[currentAlarmProfile] or missingDevice in alarmProfiles[currentAlarmProfile]["missingDevicesThatTriggerAlarm"]):
                         shouldSetNewAlarm = True
 
                     if (shouldSetNewAlarm):
                         alarmed = True
                         lastAlarmTime = getTimeSec()
-                        addEvent({"event": "DEVICE-MISSING-ALARM", "trigger": f"missing {missingDevice}", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+                        addEvent({"event": "NEW-MISSING-DEVICE-ALARM", "trigger": f"missing {missingDevice}", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
                     else :
-                        addEvent({"event": "DEVICE-MISSING-NOALARM", "trigger": f"missing {missingDevice}", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+                        addEvent({"event": "NEW-MISSING-DEVICE-NO-ALARM", "trigger": f"missing {missingDevice}", "time": getReadableTimeFromTimestamp(getTime())})
             elif (
                 alarmed and
                 len(currentlyMissingDevices) > 0 and
