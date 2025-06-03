@@ -7,7 +7,7 @@ import atexit
 import json
 import subprocess
 import os
-#import debugpy
+import debugpy
 from threading import Thread
 
 debug = False 
@@ -132,8 +132,8 @@ with open(getThisDirAddress() + '/alarmProfiles.json', 'r') as file:
 
 
 #DEBUGGER debugpy
-#debugpy.listen(("0.0.0.0", 5678))
-#print("Waiting for debugger attach...")
+debugpy.listen(("0.0.0.0", 5678))
+print("Waiting for debugger attach...")
 
 #name of ARDUINO tty device
 #on mac: /dev/tty.usbserial-10
@@ -781,7 +781,7 @@ def run(webserver_message_queue):
             backOnlineDevices = list(set(previouslyMissingDevices) - set(currentlyMissingDevices))
 
             for backOnlineDevice in backOnlineDevices:
-                addEvent({"event": "MISSING-DEVICE-BACK-ONLINE", "trigger": backOnlineDevice, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
+                addEvent({"event": "MISSING-DEVICE-BACK-ONLINE", "trigger": backOnlineDevice, "time": getReadableTimeFromTimestamp(getTime())})
 
             if (len(newMissingDevices) > 0):
                 updateCurrentAlarmReason()

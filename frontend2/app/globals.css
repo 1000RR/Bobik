@@ -322,6 +322,13 @@ pre {
 
 }
 
+.device-id {
+	position: absolute;
+	scale: 0.5;
+	left: -8px;
+	bottom: -5px;
+}
+
 @media only screen and (min-device-width: 320px) and (max-device-width: 430px) and (-webkit-device-pixel-ratio: 2), 
 		only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-device-pixel-ratio: 3) {
 	.status_icon_container_layout {

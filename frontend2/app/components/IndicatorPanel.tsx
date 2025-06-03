@@ -103,6 +103,7 @@ const SensorsPanel: React.FC<{
                         ? <img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"}></img> 
                         : sensorElement.name}
                     <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(sensorElement.id)}/>
+		    <DeviceId MyId={sensorElement.id}/>
                 </div>
             ))}
         </Panel>
@@ -113,6 +114,12 @@ const RequiredIcon: React.FC<{
     required: boolean
 }> = ({ required }) => {
     return (required && <Image className="required-icon" src={"/assets/required.svg"} width={20} height={20} alt={""} title={"Required device. If this device goes missing when armed, an alarm will sound"}/>);
+};
+
+const DeviceId: React.FC<{
+    MyId: string
+}> = ({ MyId }) => {
+    return (<div className="device-id" >{MyId}</div>);
 };
 
 const AlarmsPanel: React.FC<{
@@ -163,7 +170,8 @@ const AlarmsPanel: React.FC<{
             <div key={index} id={alarmElement.id} className={(alarmElement.triggered ? " invertTransitions " : "") + " thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray" + (alarmElement.enabled ? " highlight_green " : "") + (alarmElement.missing ? " highlight_red " : "") + " dimmable"} >
                  {alarmElement.name}
                  <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(alarmElement.id)}/>
-             </div>
+	         <DeviceId MyId={alarmElement.id}/>
+	    </div>
         ))}
     </Panel>);
 };
