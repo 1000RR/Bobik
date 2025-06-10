@@ -113,7 +113,7 @@ const SensorsPanel: React.FC<{
 const RequiredIcon: React.FC<{
     required: boolean
 }> = ({ required }) => {
-    return (required && <Image className="required-icon" src={"/assets/required.svg"} width={20} height={20} alt={""} title={"Required device. If this device goes missing when armed, an alarm will sound"}/>);
+    return (required && <Image className="required-icon" src={"/assets/required.svg"} width={20} height={20} alt={""} title={"Required device. If this device goes missing when armed, an alarm will be triggered"}/>);
 };
 
 const DeviceId: React.FC<{
