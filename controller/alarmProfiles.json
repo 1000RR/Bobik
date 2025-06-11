@@ -10,7 +10,7 @@
     "index": 1,
     "name": "Away",
     "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
     "alarmOutputDevices": ["0x99", "0x15", "0x10", "0x77"],
     "playSound": "scaryalarm.mp3",
     "playSoundVolume": 45,
