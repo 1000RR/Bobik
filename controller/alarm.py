@@ -145,6 +145,10 @@ np.set_printoptions(formatter={'int':hex})
 
 #NEW DEVICES POWER FUNCTION
 
+def setDevicePower(deviceId):
+    intendedPowerState = armed and deviceId in getExplicitAlarmProfileTriggerDevices().union(alwaysKeepOnSet)
+    sendPowerCommand([deviceId], False, intendedPowerState) 
+
 def setDevicesPower():
     offDevices = []
     onDevices = []
@@ -158,19 +162,20 @@ def setDevicesPower():
         sendPowerCommand(offDevices, False, False)
         sendPowerCommand(onDevices, False, True)
 
+def getExplicitAlarmProfileTriggerDevices():
+    return set(alarmProfiles[currentAlarmProfile]['sensorsThatTriggerAlarm']) if 'sensorsThatTriggerAlarm' in alarmProfiles[currentAlarmProfile] else set(memberDevices)
+
 def getDevicesPowerStateLists(): #devices per current profile
-    oldProfilesSet = set(memberDevices)
-    newProfilesSet = set(alarmProfiles[currentAlarmProfile]['sensorsThatTriggerAlarm']) if 'sensorsThatTriggerAlarm' in alarmProfiles[currentAlarmProfile] else set(memberDevices)
+    oldProfileDeviceSet = set(memberDevices)
+    newProfileDeviceSet = getExplicitAlarmProfileTriggerDevices().union(alwaysKeepOnSet)
 
-    newProfilesSet = newProfilesSet.union(alwaysKeepOnSet)
-
-    offDevices = list(oldProfilesSet - newProfilesSet)
-    onDevices = list(newProfilesSet)
+    offDevices = list(oldProfileDeviceSet - newProfileDeviceSet)
+    onDevices = list(newProfileDeviceSet)
 
     return offDevices, onDevices
 
 
-def setCurrentAlarmProfile(profileNumber): #-1 means no profile set. All devices trigger. Alarms are broadcast to all devices.
+def setCurrentAlarmProfile(profileNumber, requestMethod): #-1 means no profile set. All devices trigger. Alarms are broadcast to all devices.
     global currentAlarmProfile
     global currentlyAlarmedDevices
     global alarmed
@@ -186,7 +191,7 @@ def setCurrentAlarmProfile(profileNumber): #-1 means no profile set. All devices
         addEvent({
             "event": "SET PROFILE : " + str(profileNumber) + " - " + getProfileName(profileNumber),
             "time": getReadableTimeFromTimestamp(getTimeSec()),
-            "method": "WEB API"
+            "method": requestMethod 
         })
     else:
         print(">>>> PROFILE NUMBER OUT OF RANGE [0," + str(len(alarmProfiles)-1) + "] : " + str(profileNumber))
@@ -326,26 +331,28 @@ def getReadableTimeFromTimestamp(timestamp):
 def possiblyAddMember(msg):
     global memberDevices
     now = getTimeSec()
-    if (msg[0] != homeBaseId):
+    senderId = msg[0]
+    if (senderId != homeBaseId):
         readableTimestamp = getReadableTime()
 
-        if (hex(msg[0]) not in memberDevices) :
-            print(f"Adding new device to members list {hex(msg[0])} at {readableTimestamp}")
-            addEvent({"event": "NEW-MEMBER", "trigger": hex(msg[0]), "time": readableTimestamp})
-            memberDevices[hex(msg[0])] = {
-                'id': hex(msg[0]),
+        if (hex(senderId) not in memberDevices) : #new device sending a signal
+            print(f"Adding new device to members list {hex(senderId)} at {readableTimestamp}")
+            addEvent({"event": "NEW-MEMBER", "trigger": hex(senderId), "time": readableTimestamp})
+            memberDevices[hex(senderId)] = {
+                'id': hex(senderId),
                 'firstSeen': now,
                 'firstSeenReadable': readableTimestamp,
                 'deviceType': msg[3],
                 'lastSeen': now,
                 'lastSeenReadable': readableTimestamp,
-                'friendlyName': getFriendlyDeviceName(msg[0])
+                'friendlyName': getFriendlyDeviceName(senderId)
             }
-        else :
-            memberDevices[hex(msg[0])]['lastSeen'] = now
-            memberDevices[hex(msg[0])]['lastSeenReadable'] = readableTimestamp
-            if (hex(msg[0]) in currentlyMissingDevices and debug):
-                print(f"Removing missing device {hex(msg[0])} at {getReadableTime()}.")
+            #setDevicePower(senderId)
+        else : #existing device sending a signal
+            memberDevices[hex(senderId)]['lastSeen'] = now
+            memberDevices[hex(senderId)]['lastSeenReadable'] = readableTimestamp
+            if (hex(senderId) in currentlyMissingDevices and debug):
+                print(f"Removing missing device {hex(senderId)} at {getReadableTime()}.")
 
 
 def playDenonThreadMain(currentlyAlarmedDevices, everAlarmedDuringAlarm, mp3AlarmDictionary):
@@ -510,7 +517,7 @@ def sendPowerCommand(devicesOverrideArray, shouldBroadcast, powerState): #two op
          print(f">>>> SENDING POWER {'ON' if powerState else 'OFF'} SIGNAL TO ALL {np.array(messageToSend)}")
     else: 
         for member in devicesToSendTo:
-            intMemberId = int(member, 16)
+            intMemberId = int(member, 16) if isinstance(member, str) else member
             messageToSend = [homeBaseId, intMemberId, 0x0F if powerState else 0x01, 0x01]
             sendMessage(messageToSend) #stand up power - 0x0F enabled / 0x01 disabled
             print(f">>>> SENDING POWER {'ON' if powerState else 'OFF'} SIGNAL {np.array(messageToSend)}")
@@ -708,14 +715,14 @@ def run(webserver_message_queue):
             message = webserver_message_queue.get()
             #print(f"GOT MESSAGE: {message}")
             if (message['request'] == "ENABLE-ALARM" and getArmedStatus() == False) :
-                toggleArmed(getTimeSec(), "WEB API")
+                toggleArmed(getTimeSec(), f"WEB API {message['ip']}")
             elif (message['request'] == "DISABLE-ALARM" and getArmedStatus() == True) :
-                toggleArmed(getTimeSec(), "WEB API")
+                toggleArmed(getTimeSec(), f"WEB API {message['ip']}")
             elif (message['request'] == "ALARM-STATUS") :
                 message['responseQueue'].put({"response": getStatusJsonString(), "uuid": message['uuid'] })
             elif (message['request'].startswith("SET-ALARM-PROFILE-")):
                 profileNumber = int(message['request'].split("SET-ALARM-PROFILE-",1)[1])
-                setCurrentAlarmProfile(profileNumber)
+                setCurrentAlarmProfile(profileNumber, f"WEB API {message['ip']}")
             elif (message['request'] == "GET-ALARM-PROFILES") :
                 message['responseQueue'].put({"response": getProfilesJsonString(), "uuid": message['uuid'] })
             elif (message['request'] == "FORCE-ALARM-SOUND-ON") :
@@ -782,6 +789,7 @@ def run(webserver_message_queue):
 
             for backOnlineDevice in backOnlineDevices:
                 addEvent({"event": "MISSING-DEVICE-BACK-ONLINE", "trigger": backOnlineDevice, "time": getReadableTimeFromTimestamp(getTime())})
+                setDevicePower(backOnlineDevice)
 
             if (len(newMissingDevices) > 0):
                 updateCurrentAlarmReason()

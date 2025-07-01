@@ -7,7 +7,7 @@ import json
 import os
 from queue import Queue
 import ssl
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit
 from uuid import uuid4
 
@@ -75,10 +75,10 @@ def main():
     @socketio.on('getPastEvents')
     def getPastEvents(message):
         global responseQueues
-
+        ip = request.remote_addr
         callUUID = generateUUID()
         responseQueues[callUUID] = Queue()
-        messageToSend = {"request":"GET-PAST-EVENTS", "uuid": callUUID, "responseQueue": responseQueues[callUUID]}
+        messageToSend = {"request":"GET-PAST-EVENTS", "uuid": callUUID, "responseQueue": responseQueues[callUUID], "ip": ip}
         webserver_message_queue.put(messageToSend)
         response = responseQueues[callUUID].get(True, 5)["response"]
         del responseQueues[callUUID]
@@ -91,57 +91,66 @@ def main():
     @socketio.on('arm')
     def arm(message):
         print('>>>>ARMING')
+        ip = request.remote_addr
         callUUID = generateUUID()
-        messageToSend = {"request":"ENABLE-ALARM", "uuid": callUUID}
+        messageToSend = {"request":"ENABLE-ALARM", "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on('disarm')
     def disarm(message):
         print('>>>DISARMING')
         callUUID = generateUUID()
-        messageToSend = {"request":"DISABLE-ALARM", "uuid": callUUID}
+        ip = request.remote_addr
+        messageToSend = {"request":"DISABLE-ALARM", "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on('alarmSoundOn')
     def arm(message):
         callUUID = generateUUID()
-        messageToSend = {"request":"FORCE-ALARM-SOUND-ON", "uuid": callUUID}
+        ip = request.remote_addr
+        messageToSend = {"request":"FORCE-ALARM-SOUND-ON", "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on('clearOldData')
     def arm(message):
         callUUID = generateUUID()
-        messageToSend = {"request":"CLEAR-OLD-DATA", "uuid": callUUID}
+        ip = request.remote_addr
+        messageToSend = {"request":"CLEAR-OLD-DATA", "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on('checkPhones')
     def arm(message):
         callUUID = generateUUID()
-        messageToSend = {"request":"ALERT-CHECK-PHONES", "uuid": callUUID}
+        ip = request.remote_addr
+        messageToSend = {"request":"ALERT-CHECK-PHONES", "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on('toggleGarageDoorState')
     def disarm(message):
         callUUID = generateUUID()
-        messageToSend = {"request":"TOGGLE-GARAGE-DOOR-STATE", "uuid": callUUID}
+        ip = request.remote_addr
+        messageToSend = {"request":"TOGGLE-GARAGE-DOOR-STATE", "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on('cansendrepeatedly')
     def cansendrepeatedly(message):
         callUUID = generateUUID()
-        messageToSend = {"request":"CAN-REPEATEDLY-SEND-" + message['message'], "uuid": callUUID}
+        ip = request.remote_addr
+        messageToSend = {"request":"CAN-REPEATEDLY-SEND-" + message['message'], "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on('cansendsingle')
     def cansendsingle(message):
         callUUID = generateUUID()
-        messageToSend = {"request":"CAN-SINGLE-SEND-" + message['message'], "uuid": callUUID}
+        ip = request.remote_addr
+        messageToSend = {"request":"CAN-SINGLE-SEND-" + message['message'], "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on('canstopsending')
     def canstopsending(message):
         callUUID = generateUUID()
-        messageToSend = {"request":"CAN-STOP-SENDING", "uuid": callUUID}
+        ip = request.remote_addr
+        messageToSend = {"request":"CAN-STOP-SENDING", "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on('getAlarmProfiles')
@@ -150,7 +159,8 @@ def main():
 
         callUUID = generateUUID()
         responseQueues[callUUID] = Queue()
-        messageToSend = {"request":"GET-ALARM-PROFILES", "uuid": callUUID, "responseQueue": responseQueues[callUUID] }
+        ip = request.remote_addr
+        messageToSend = {"request":"GET-ALARM-PROFILES", "uuid": callUUID, "responseQueue": responseQueues[callUUID], "ip": ip}
         webserver_message_queue.put(messageToSend)
         response = responseQueues[callUUID].get(True, 5)["response"]
         del responseQueues[callUUID]
@@ -159,7 +169,8 @@ def main():
     @socketio.on('setAlarmProfile')
     def setAlarmProfile(message):
         callUUID = generateUUID()
-        messageToSend = {"request":"SET-ALARM-PROFILE-" + str(message['message']), "uuid": callUUID}
+        ip = request.remote_addr
+        messageToSend = {"request":"SET-ALARM-PROFILE-" + str(message['message']), "uuid": callUUID, "ip": ip}
         webserver_message_queue.put(messageToSend)
 
     @socketio.on_error()
@@ -184,7 +195,7 @@ def main():
 
 def update_status_thread():
     last_status_str = 0
-    while True:    
+    while True:
         #print(f"before update last_client_count {last_client_count}")
         last_status_str = sendAlarmStatus(last_status_str)
         #print(f"updated last_client_count {last_client_count}")
@@ -204,7 +215,7 @@ def sendAlarmStatus (last_status_str):
 
     callUUID = generateUUID()
     responseQueues[callUUID] = Queue()
-    messageToSend = {"request":"ALARM-STATUS", "uuid": callUUID, "responseQueue": responseQueues[callUUID] }
+    messageToSend = {"request":"ALARM-STATUS", "uuid": callUUID, "responseQueue": responseQueues[callUUID], "ip": "not-parsed-intentionally"}
     webserver_message_queue.put(messageToSend)
    
     # TODO: the following code is for debugging a bug whereby after an Arm&Switch
