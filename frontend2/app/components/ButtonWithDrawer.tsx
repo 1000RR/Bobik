@@ -46,7 +46,7 @@ const ButtonPressStyle = css`
 	background-color:  #aaaaaa;
 	color: #3c3c3c;
 	border-color: #3c3c3c;
-	transition-duration: .4s;
+	transition-duration: 0s;
 	
 	&:focus {
 		background-color: #bbbbbb;

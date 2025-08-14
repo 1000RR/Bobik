@@ -147,7 +147,7 @@ pre {
 	filter: sepia(30%) hue-rotate(190deg) saturate(100);
 
 	@media (prefers-color-scheme: dark) {
-		filter: sepia(25%) hue-rotate(150deg) saturate(90) brightness(65%);
+		filter: sepia(30%) hue-rotate(160deg) saturate(40) brightness(60%);
 	}
 }
 
@@ -201,7 +201,7 @@ pre {
 		background-color: #fedd5b !important;
 		color: rgb(78, 78, 78) !important;
 	}
-}	
+}
 
 .alarm_button {
 	margin: 0px 0px 0px 0px !important;
