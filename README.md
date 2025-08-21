@@ -10,8 +10,9 @@
 #### should be resilient to power outages (for a given amount of time), disconnection of devices on the CAN bus is treated as a security event (alarm trigger) for those devices explicitly being monitored. With the frontend being the main control surface, the topology of network devices' uninterruptable power supply, and possibly WiFi access is critical.
 
 
-TODO:
-- hardware and software support for CANBUS-adjacent Vsource line voltage monitoring and threshold warning in UI / email.
+BACKLOG:
+- hardware and software support for CANBUS-adjacent Vsource line voltage monitoring and threshold warning in UI / email / alarm(s).
+- evaluate whether the web server and the arduino-facing alarm.py should run separately and use IPC. Hunch: GIL's lack of concurrency between 2 threads (server, alarm.py - polling) is crappy and will thrash with still a reasonable number of clients.
 - support for UPS status monitoring and state change warning in UI / email.
 - more past events log from memory to DB; DB should have a sweep job based on back date and/or number of events.
   - searching for events from UI.

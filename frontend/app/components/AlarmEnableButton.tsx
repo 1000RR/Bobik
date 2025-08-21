@@ -44,7 +44,7 @@ const ButtonTextStyle = css`
 const ButtonPressStyle = css`
     transition-duration: 0s;
 
-    &.buttonEnabled {
+    &.alarmStateOn {
         background-color: #539eff;
         border-color: #5eaeaf;
         &:focus {
@@ -52,28 +52,27 @@ const ButtonPressStyle = css`
             border-color: white;
             color: white;
         }
-        &:active {
+        /*&:active {
             background-color: #0099ff;
             filter: saturate(1.2);
             color: white;
-        }
-
+        }*/
         @media (prefers-color-scheme: dark) {
             filter: brightness(0.7);   
             color: white;
         }
     }
 
-    &.buttonDisabled {
+    &.alarmStateOff {
         background-color:  #d00000;
         &:focus {
             background-color: lightcoral;
             border-color: white;
         }
-        &:active {
+        /*&:active {
             background-color: #ff3300;
             filter: saturate(1.2);  
-        }
+        }*/
         @media (prefers-color-scheme: dark) {
             filter: brightness(0.7);
             color: white;
@@ -93,7 +92,6 @@ const AlarmEnableButton: React.FC<{
     className?: string,
     children?: React.ReactNode,
 }> = ({ className, children}) => {
-
     const imgSrcArmed = "/assets/attackdog.jpg";
     const imgSrcDisarmed = "/assets/dogue.jpg";
 
@@ -118,9 +116,8 @@ const AlarmEnableButton: React.FC<{
         return state.appState.status.alarmStatus === 'ALARM';
     });
 
-
     return (<div style={{ width: "100%", }}>
-        <CompositeStyledButton className={`${className} ${isArmed ? 'buttonEnabled' : 'buttonDisabled'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
+        <CompositeStyledButton className={`${className} ${isArmed ? 'alarmStateOn' : 'alarmStateOff'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
             <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image><></>
                 <div>
                     {buttonText}
