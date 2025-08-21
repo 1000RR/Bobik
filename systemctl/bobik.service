@@ -1,0 +1,18 @@
+[Unit]
+Description=Bobik Alarm
+After=multi-user.target
+
+[Service]
+User=uzun
+Group=uzun
+#ExecStartPre=/bin/sleep 3
+Restart=always
+#RestartSec=5s
+ExecStart=/usr/bin/python3 <ABSOLUTE_PATH>/server.py
+StandardOutput=append:/var/log/bobik.log
+StandardError=append:/var/log/bobik.error.log
+#RootDirectory=
+#WorkingDirectory=
+
+[Install]
+WantedBy=multi-user.target
