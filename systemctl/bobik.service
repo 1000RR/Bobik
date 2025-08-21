@@ -1,3 +1,6 @@
+#place into /lib/systemd/system/ and enable using:
+#	systemctl daemon-reload; systemctl enable bobik; systemctl start bobik
+
 [Unit]
 Description=Bobik Alarm
 After=multi-user.target
