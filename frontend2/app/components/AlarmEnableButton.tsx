@@ -42,7 +42,7 @@ const ButtonTextStyle = css`
 `;
 
 const ButtonPressStyle = css`
-    transition-duration: .4s;
+    transition-duration: 0s;
 
     &.buttonEnabled {
         background-color: #539eff;
