@@ -47,12 +47,12 @@ const ButtonPressStyle = css`
     &.alarmStateOn {
         background-color: #539eff;
         border-color: #5eaeaf;
-        &:focus {
+        /*&:focus {
             background-color: lightblue;
             border-color: white;
             color: white;
         }
-        /*&:active {
+        &:active {
             background-color: #0099ff;
             filter: saturate(1.2);
             color: white;
@@ -65,11 +65,11 @@ const ButtonPressStyle = css`
 
     &.alarmStateOff {
         background-color:  #d00000;
-        &:focus {
+        /*&:focus {
             background-color: lightcoral;
             border-color: white;
         }
-        /*&:active {
+        &:active {
             background-color: #ff3300;
             filter: saturate(1.2);  
         }*/
