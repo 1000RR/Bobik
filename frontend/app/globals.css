@@ -329,6 +329,14 @@ pre {
 	bottom: -5px;
 }
 
+.icon-label {
+	position: absolute;
+	scale: 0.7;
+	align-content: center;
+	top: 4px;
+	word-spacing: normal;
+}
+
 @media only screen and (min-device-width: 320px) and (max-device-width: 430px) and (-webkit-device-pixel-ratio: 2), 
 		only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-device-pixel-ratio: 3) {
 	.status_icon_container_layout {

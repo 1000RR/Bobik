@@ -1,9 +1,10 @@
 "use client";
-import React from "react";
+import { React, useRef }  from "react";
 import styled, {css} from "styled-components";
 import Panel from "@components/Panel"
 import { useSelector } from "react-redux";
 import { AlarmProfilesResponse, AppStateSlice, StatusResponse } from "./AppStateSlice";
+import { emitGarageDoorToggleEvent } from "@src/WebSocketService";
 import Image from "next/image";
 
 type DeviceDescriptor = {
@@ -70,6 +71,26 @@ const SensorsPanel: React.FC<{
         return state.appState.status.armStatus === 'ARMED';
     });
 
+    const clickCount = useRef(0);
+    const clickTimeoutId = useRef(null);
+
+    const garageDoorClickHandler = function(event) {
+        clickCount.current += 1;
+
+        if (clickTimeoutId.current) {
+          clearTimeout(clickTimeoutId.current);
+        }
+
+        if (clickCount.current === 4) {
+          emitGarageDoorToggleEvent();
+          clickCount.current = 0; // reset counter
+        } else {
+          clickTimeoutId.current = setTimeout(() => {
+            clickCount.current = 0;
+          }, 400);
+        }
+    };
+
     stateDeviceList?.forEach((device: string) => {
         let isSensorType = false;
         let isUnknownType = false;
@@ -100,7 +121,7 @@ const SensorsPanel: React.FC<{
             {deviceList.map((sensorElement, index) => (
                 <div key={index} id={sensorElement.id} className={(sensorElement.triggered ? " invertTransitions " : "") + " thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray" + (sensorElement.enabled && !sensorElement.missing ? " highlight_green " : "") + (sensorElement.missing ? " highlight_red " : "") + " dimmable"} >
                     {sensorElement.name.toLowerCase().indexOf("garage car door") > -1 
-                        ? <img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"}></img> 
+                        ? <><IconLabel label={'4x tap'}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} onClick={(e)=>{e.currentTarget.blur(); garageDoorClickHandler(e);}} ></img> </>
                         : sensorElement.name}
                     <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(sensorElement.id)}/>
 		    <DeviceId MyId={sensorElement.id}/>
@@ -120,6 +141,12 @@ const DeviceId: React.FC<{
     MyId: string
 }> = ({ MyId }) => {
     return (<div className="device-id" >{MyId}</div>);
+};
+
+const IconLabel: React.FC<{
+    label: string
+}> = ({ label }) => {
+    return (<div className="icon-label" >{label}</div>);
 };
 
 const AlarmsPanel: React.FC<{
