@@ -1,5 +1,5 @@
 "use client";
-import { React, useRef }  from "react";
+import React, { useRef } from "react";
 import styled, {css} from "styled-components";
 import Panel from "@components/Panel"
 import { useSelector } from "react-redux";
@@ -72,9 +72,9 @@ const SensorsPanel: React.FC<{
     });
 
     const clickCount = useRef(0);
-    const clickTimeoutId = useRef(null);
+    const clickTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const garageDoorClickHandler = function(event) {
+    const garageDoorClickHandler = function(event: React.MouseEvent<HTMLDivElement>) {
         clickCount.current += 1;
 
         if (clickTimeoutId.current) {
