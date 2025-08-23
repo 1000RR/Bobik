@@ -1,15 +1,16 @@
 import * as Comlink from 'comlink';
 import { io, Socket } from 'socket.io-client';
 
+/*eslint-disable @typescript-eslint/no-explicit-any*/
 export type ComWorkerAPI = {
 	setupWebSockets(
 		_eventNames: Array<string>,
-		_handlerFunction: (data: unknown) => void,
+		_handlerFunction: (data: any) => void,
 		_errorHandlerFunction: (data: Error) => void,
 		_connectHandlerFunction: () => void ): void;
 	emitEvent(_eventName: string, _data: object): void;
 };
-
+/*eslint-enable @typescript-eslint/no-explicit-any*/
 let socket: Socket | null = null;
 
 const api: ComWorkerAPI = {
