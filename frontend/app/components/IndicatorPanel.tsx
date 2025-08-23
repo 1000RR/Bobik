@@ -39,7 +39,6 @@ const PanelColorStyle = css`
     background-color: rgba(60,60,60, .3);
 `;
 
-
 const CompositePanelStyle = styled.div`
     ${PanelSizeStyle}
     ${PanelLayoutStyle}
@@ -135,7 +134,7 @@ const SensorsPanel: React.FC<{
                     const isntClickedGarageDoor = (isGarageDoor && !isButtonActivatedColor) || !isGarageDoor;
                     return <div key={index} id={sensorElement.id} onClick={isGarageDoor ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonActivatedColor && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
                                 {isGarageDoor 
-                                    ? <><IconLabel label={`tap ${garageButtonTapTimesThreshold}x`}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
+                                    ? <><IconLabel label={`quick tap ${garageButtonTapTimesThreshold}x`}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
                                     : sensorElement.name}
                                 <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(sensorElement.id)}/>
                                 <DeviceId MyId={sensorElement.id}/>
