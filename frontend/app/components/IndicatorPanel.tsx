@@ -16,6 +16,8 @@ type DeviceDescriptor = {
     triggered: boolean
 };
 
+const garageButtonTapTimesThreshold = 4;
+
 export const PanelSizeStyle = css`
     width: 100%;
     height: content;
@@ -75,7 +77,7 @@ const SensorsPanel: React.FC<{
     const clickCount = useRef(0);
     const clickTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
     const postClickTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const [isButtonClicked, setButtonClicked] = useState(false);
+    const [isButtonActivatedColor, setButtonActivatedColor] = useState(false);
 
     const garageDoorClickHandler = function(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         e.currentTarget.blur()
@@ -85,12 +87,12 @@ const SensorsPanel: React.FC<{
           clearTimeout(clickTimeoutId.current);
         }
 
-        if (clickCount.current === 4) {
+        if (clickCount.current === garageButtonTapTimesThreshold) {
           emitGarageDoorToggleEvent();
           clickCount.current = 0;
-          setButtonClicked(true);
+          setButtonActivatedColor(true);
           postClickTimeoutId.current = setTimeout(() => {
-            setButtonClicked(false);
+            setButtonActivatedColor(false);
           }, 1000);
 
         } else {
@@ -130,10 +132,10 @@ const SensorsPanel: React.FC<{
             {deviceList.map(
                 (sensorElement, index) => {
                     const isGarageDoor = sensorElement.name.toLowerCase().includes("garage car door");
-                    const isntClickedGarageDoor = (isGarageDoor && !isButtonClicked) || !isGarageDoor;
-                    return <div key={index} id={sensorElement.id} onClick={isGarageDoor ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonClicked && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
+                    const isntClickedGarageDoor = (isGarageDoor && !isButtonActivatedColor) || !isGarageDoor;
+                    return <div key={index} id={sensorElement.id} onClick={isGarageDoor ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonActivatedColor && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
                                 {isGarageDoor 
-                                    ? <><IconLabel label={'4x tap'}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
+                                    ? <><IconLabel label={`tap ${garageButtonTapTimesThreshold}x`}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
                                     : sensorElement.name}
                                 <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(sensorElement.id)}/>
                                 <DeviceId MyId={sensorElement.id}/>
