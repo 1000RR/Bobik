@@ -4,7 +4,7 @@ import Image from "next/image";
 import React from "react";
 import { useSelector } from "react-redux";
 import styled, {css} from "styled-components";
-import { emitDisarmEvent, emitArmEvent } from "@src/WebSocketService";
+//import { emitDisarmEvent, emitArmEvent } from "@src/WebSocketService";
 import { AppStateSlice } from "./AppStateSlice";
 
 const ButtonSizeStyle = css`
@@ -103,14 +103,14 @@ const AlarmEnableButton: React.FC<{
         return state.appState.status?.profile
     });
 
-    const handler:React.MouseEventHandler<HTMLButtonElement> = function(event) {
-        isArmed ? emitDisarmEvent() : emitArmEvent();
-    };
+    // const handler:React.MouseEventHandler<HTMLButtonElement> = function(event) {
+    //     isArmed ? emitDisarmEvent() : emitArmEvent();
+    // };
 
     const buttonText = isArmed ? `ARMED : ${profileName.toUpperCase()}` : "DISARMED";
-    const TapText = styled.div`
-        font-size: .75em;
-    `;
+    // const TapText = styled.div`
+    //     font-size: .75em;
+    // `;
 
     const alarmTriggered = useSelector(function (state: AppStateSlice) { 
         return state.appState.status.alarmStatus === 'ALARM';

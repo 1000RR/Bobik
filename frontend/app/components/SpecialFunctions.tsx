@@ -34,14 +34,14 @@ const CompositePanelStyle = styled.div`
     ${PanelColorStyle}
 `;
 
-const testAlarmsHandler : MouseEventHandler<HTMLButtonElement> = function(event) {
+const testAlarmsHandler : MouseEventHandler<HTMLButtonElement> = function() {
     emitTestAlarmEvent();
 };
 
-const getAttentionHandler : MouseEventHandler<HTMLButtonElement> = function(event) {
+const getAttentionHandler : MouseEventHandler<HTMLButtonElement> = function() {
     emitGetAttentionEvent();
 };
-const sendSingleCan : MouseEventHandler<HTMLButtonElement> = function(event) {
+const sendSingleCan : MouseEventHandler<HTMLButtonElement> = function() {
     const message = 
         (document?.getElementById('sender-field') as HTMLInputElement)?.value + ':' +
         (document?.getElementById('receiver-field') as HTMLInputElement)?.value + ':' +
@@ -49,7 +49,7 @@ const sendSingleCan : MouseEventHandler<HTMLButtonElement> = function(event) {
         (document?.getElementById('type-field') as HTMLInputElement)?.value;
     emitSendSpecialOnce(message);
 };
-const sendRepeatedlyCan : MouseEventHandler<HTMLButtonElement> = function(event) {
+const sendRepeatedlyCan : MouseEventHandler<HTMLButtonElement> = function() {
     const message = 
         (document?.getElementById('sender-field') as HTMLInputElement)?.value + ':' +
         (document?.getElementById('receiver-field') as HTMLInputElement)?.value + ':' +
@@ -57,14 +57,14 @@ const sendRepeatedlyCan : MouseEventHandler<HTMLButtonElement> = function(event)
         (document?.getElementById('type-field') as HTMLInputElement)?.value;
     emitSendSpecialRepeatedly(message);
 };
-const stopSendingCan : MouseEventHandler<HTMLButtonElement> = function(event) {
+const stopSendingCan : MouseEventHandler<HTMLButtonElement> = function() {
     emitStopSendingSpecial();
 };
 
 const SpecialFunctions: React.FC<{
     className?: string
 }> = ({ className }) => {
-    const clearDataHandler : MouseEventHandler<HTMLButtonElement> = function(event) {
+    const clearDataHandler : MouseEventHandler<HTMLButtonElement> = function() {
         dispatch(setPastEvents({ //clear past events in model immediately (UI will reflect this)
             pastEvents: []
         }));

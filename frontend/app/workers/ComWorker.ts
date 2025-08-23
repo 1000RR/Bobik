@@ -3,18 +3,18 @@ import { io, Socket } from 'socket.io-client';
 
 export type ComWorkerAPI = {
 	setupWebSockets(
-		eventNames: Array<string>,
-		handlerFunction: (data: any) => void,
-		errorHandlerFunction: (data: Error) => void,
-		connectHandlerFunction: () => void ): void;
-	emitEvent(eventName: string, data: object): void;
+		_eventNames: Array<string>,
+		_handlerFunction: (data: unknown) => void,
+		_errorHandlerFunction: (data: Error) => void,
+		_connectHandlerFunction: () => void ): void;
+	emitEvent(_eventName: string, _data: object): void;
 };
 
 let socket: Socket | null = null;
 
 const api: ComWorkerAPI = {
 	setupWebSockets(eventNames, handlerFunction, errorHandlerFunction, connectHandlerFunction): void {
-		socket = io('https://bobik.lan:8080');
+		socket = io('https://bobik.lan:8080'); //TODO: hard-coded URL should be configurable
 
 		socket.on('connect', function() {
 			console.warn('Connected to server');
@@ -41,8 +41,6 @@ const api: ComWorkerAPI = {
 	emitEvent(eventName, data): void {
 		socket?.emit(eventName, data);
 	}
-	// Add more functions as needed
 };
 
-// Expose the API to the main thread
 Comlink.expose(api);

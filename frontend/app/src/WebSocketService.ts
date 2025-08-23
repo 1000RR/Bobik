@@ -6,6 +6,7 @@ let comAPI: Comlink.Remote<ComWorkerAPI> | null = null;
 let lastClickTime: EpochTimeStamp = 0;
 const timeout: number = 2500;
 
+// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-explicit-any
 export const initializeWebSocket = (dispatch: (action: any) => void) => {
   const worker = new Worker(new URL("@workers/ComWorker.ts", import.meta.url));
   comAPI = Comlink.wrap(worker);
@@ -33,13 +34,14 @@ export const initializeWebSocket = (dispatch: (action: any) => void) => {
 	dispatch(setAlarmProfiles(message));
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handlerMappings: Record<string, (data: object) => void> = {
 	'postStatus': statusHandler,
 	'postPastEvents': pastEventsHandler,
 	'postAlarmProfiles': alarmProfilesHandler
   };
 
-  const socketIOErrorHandler = (error: Error): void => {
+  const socketIOErrorHandler = (): void => {
 	dispatch(setIsError(true));
 	dispatch(setIsConnected(false));
 	dispatch(setIsLoaded(false));

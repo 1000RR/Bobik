@@ -15,7 +15,7 @@ type AlarmProfileDescriptor = {
 const ArmButtonContainer: React.FC<{
     className?: string,
     isQuickSetAlarmMode?: boolean
-}> = ({ className = [], isQuickSetAlarmMode = false}) => {
+}> = ({ isQuickSetAlarmMode = false}) => {
 
     const alarmProfilesToDisplay = useSelector(function (state: AppStateSlice) { 
         return state.appState.status.quickSetAlarmProfiles;
@@ -75,7 +75,7 @@ const ArmButtonContainer: React.FC<{
 const ArmButtonList: React.FC<{
     className?: string,
     isQuickSetAlarmMode?: boolean
-}> = ({ className, isQuickSetAlarmMode }) => {
+}> = ({ isQuickSetAlarmMode }) => {
     return (
        <ArmButtonContainer isQuickSetAlarmMode={isQuickSetAlarmMode}></ArmButtonContainer>
     );

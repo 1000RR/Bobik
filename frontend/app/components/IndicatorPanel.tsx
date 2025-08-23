@@ -1,5 +1,6 @@
 "use client";
-import React, { useRef } from "react";
+/* eslint-disable @next/next/no-img-element */
+import React, { useRef, useState } from "react";
 import styled, {css} from "styled-components";
 import Panel from "@components/Panel"
 import { useSelector } from "react-redux";
@@ -73,8 +74,10 @@ const SensorsPanel: React.FC<{
 
     const clickCount = useRef(0);
     const clickTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const postClickTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [isButtonClicked, setButtonClicked] = useState(false);
 
-    const garageDoorClickHandler = function(event: React.MouseEvent<HTMLDivElement>) {
+    const garageDoorClickHandler = function() {
         clickCount.current += 1;
 
         if (clickTimeoutId.current) {
@@ -83,7 +86,12 @@ const SensorsPanel: React.FC<{
 
         if (clickCount.current === 4) {
           emitGarageDoorToggleEvent();
-          clickCount.current = 0; // reset counter
+          clickCount.current = 0;
+          setButtonClicked(true);
+          postClickTimeoutId.current = setTimeout(() => {
+            setButtonClicked(false);
+          }, 1000);
+
         } else {
           clickTimeoutId.current = setTimeout(() => {
             clickCount.current = 0;
@@ -118,15 +126,19 @@ const SensorsPanel: React.FC<{
         <Panel className={className}>
             <div style={{zIndex: -1, position: "absolute", top: 0, left: 5}}>{deviceList.length}</div>
             <div style={{zIndex: -1, position: "absolute", top: -2, right: 5}}>{`Selected profile: ${myAlarmProfile?.name}`}</div>
-            {deviceList.map((sensorElement, index) => (
-                <div key={index} id={sensorElement.id} className={(sensorElement.triggered ? " invertTransitions " : "") + " thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray" + (sensorElement.enabled && !sensorElement.missing ? " highlight_green " : "") + (sensorElement.missing ? " highlight_red " : "") + " dimmable"} >
-                    {sensorElement.name.toLowerCase().indexOf("garage car door") > -1 
-                        ? <><IconLabel label={'4x tap'}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} onClick={(e)=>{e.currentTarget.blur(); garageDoorClickHandler(e);}} ></img> </>
-                        : sensorElement.name}
-                    <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(sensorElement.id)}/>
-		    <DeviceId MyId={sensorElement.id}/>
-                </div>
-            ))}
+            {deviceList.map(
+                (sensorElement, index) => {
+                    const isGarageDoor = sensorElement.name.toLowerCase().includes("garage car door");
+                    return <div key={index} id={sensorElement.id} className={`${sensorElement.triggered ? " invertTransitions " : ""} ${isButtonClicked && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
+                                {isGarageDoor 
+                                    ? <><IconLabel label={'4x tap'}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} onClick={(e)=>{e.currentTarget.blur(); garageDoorClickHandler();}} alt=""></img> </>
+                                    : sensorElement.name}
+                                <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(sensorElement.id)}/>
+                                <DeviceId MyId={sensorElement.id}/>
+                            </div>
+                        
+                }
+            )}
         </Panel>
     );
 };
