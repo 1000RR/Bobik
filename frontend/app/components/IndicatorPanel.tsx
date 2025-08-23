@@ -77,7 +77,8 @@ const SensorsPanel: React.FC<{
     const postClickTimeoutId = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [isButtonClicked, setButtonClicked] = useState(false);
 
-    const garageDoorClickHandler = function() {
+    const garageDoorClickHandler = function(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        e.currentTarget.blur()
         clickCount.current += 1;
 
         if (clickTimeoutId.current) {
@@ -129,10 +130,10 @@ const SensorsPanel: React.FC<{
             {deviceList.map(
                 (sensorElement, index) => {
                     const isGarageDoor = sensorElement.name.toLowerCase().includes("garage car door");
-                    const isntClickedGarageDoor = !(isButtonClicked && isGarageDoor) || (!isButtonClicked && isGarageDoor);
-                    return <div key={index} id={sensorElement.id} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonClicked && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
+                    const isntClickedGarageDoor = (isGarageDoor && !isButtonClicked) || !isGarageDoor;
+                    return <div key={index} id={sensorElement.id} onClick={isGarageDoor ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonClicked && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
                                 {isGarageDoor 
-                                    ? <><IconLabel label={'4x tap'}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} onClick={(e)=>{e.currentTarget.blur(); garageDoorClickHandler();}} alt=""></img> </>
+                                    ? <><IconLabel label={'4x tap'}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
                                     : sensorElement.name}
                                 <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(sensorElement.id)}/>
                                 <DeviceId MyId={sensorElement.id}/>
