@@ -129,7 +129,8 @@ const SensorsPanel: React.FC<{
             {deviceList.map(
                 (sensorElement, index) => {
                     const isGarageDoor = sensorElement.name.toLowerCase().includes("garage car door");
-                    return <div key={index} id={sensorElement.id} className={`${sensorElement.triggered ? " invertTransitions " : ""} ${isButtonClicked && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
+                    const isntClickedGarageDoor = !(isButtonClicked && isGarageDoor) || (!isButtonClicked && isGarageDoor);
+                    return <div key={index} id={sensorElement.id} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonClicked && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
                                 {isGarageDoor 
                                     ? <><IconLabel label={'4x tap'}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} onClick={(e)=>{e.currentTarget.blur(); garageDoorClickHandler();}} alt=""></img> </>
                                     : sensorElement.name}
