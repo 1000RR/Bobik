@@ -33,7 +33,7 @@ self.addEventListener("fetch", (event) => {
         }
 
         // Cache successful responses
-        cache.put(event.request, networkResponse.clone());
+        if (event.method === 'GET') cache.put(event.request, networkResponse.clone());
         return networkResponse;
       } catch (error) {
         console.error("Fetch failed; returning cached resource if available:", error);
