@@ -69,14 +69,14 @@ const ButtonPressStyle = css`
 		}
 	}
 `;
-
-const CompositeStyledButton = styled.button`
-    ${ButtonSizeStyle}
+const CompositeStyledButton = styled.button.attrs({
+  className: "noselect"
+})`
+  ${ButtonSizeStyle}
     ${ButtonBorderStyle}
     ${ButtonLayoutStyle}
     ${ButtonPressStyle}
 `;
-
 
 const Button: React.FC<{
     className?: string,

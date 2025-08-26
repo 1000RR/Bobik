@@ -85,12 +85,14 @@ const ButtonPressStyle = css`
 	}
 `;
 
-const CompositeStyledButton = styled.button`
-	${ButtonSizeStyle}
-	${ButtonBorderStyle}
-	${ButtonLayoutStyle}
-	${ButtonPressStyle}
-	${ButtonTextStyle}
+const CompositeStyledButton = styled.button.attrs({
+  className: "noselect"
+})`
+  ${ButtonSizeStyle}
+  ${ButtonBorderStyle}
+  ${ButtonLayoutStyle}
+  ${ButtonPressStyle}
+  ${ButtonTextStyle}
 `;
 
 const DrawerSpacing = css`
