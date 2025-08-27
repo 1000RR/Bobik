@@ -1,6 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
 
+import subprocess
 import threading
 import alarm
 import json
@@ -10,6 +11,19 @@ import ssl
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit
 from uuid import uuid4
+
+thisDir = os.path.dirname(os.path.abspath(__file__))
+serverKeysDir = thisDir + "/server-keys"
+
+
+CERT_EXPIRY_DATE = subprocess.run(
+    [serverKeysDir + "/get-cert-expiry.sh"],       # path to your script
+    stdout=subprocess.PIPE,  # capture stdout
+    stderr=subprocess.PIPE,  # capture stderr (optional)
+    text=True                # decode to string (instead of bytes)
+).stdout.rstrip("\n")
+
+print("SSL CERT EXPIRY DATE: " + CERT_EXPIRY_DATE)
 
 CORS = ["https://bobik.lan:5020", "https://192.168.2.100", "https://192.168.2.100:443", "https://192.168.2.100:5020", "https://192.168.2.100:5010", "http://192.168.2.100:3000", "https://bobik.lan","https://192.168.99.5"]
 
@@ -23,8 +37,6 @@ thread = None
 thread_lock = threading.Lock()
 new_client_exists = False
 alarmQueueMessages = {}
-thisDir = os.path.dirname(os.path.abspath(__file__))
-serverKeysDir = thisDir + "/server-keys"
 print(thisDir)
 client_count = 0
 
@@ -228,10 +240,12 @@ def sendAlarmStatus (last_status_str):
     #     response = last_status_str
     response = responseQueues[callUUID].get(True, 5)["response"]
     del responseQueues[callUUID]
+    jsonData = json.loads(response)
+    jsonData["sslCertExpiry"] = CERT_EXPIRY_DATE 
 
     if (response != last_status_str or new_client_exists):
         print("Sending status to connected clients")
-        socketio.emit('postStatus', {'message': json.loads(response)})
+        socketio.emit('postStatus', {'message': jsonData})
         new_client_exists = False
 
     return response
