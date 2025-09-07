@@ -10,6 +10,7 @@ import ArmButtonList from "@components/ArmButtonList";
 import SpecialFunctions from "@components/SpecialFunctions";
 import TopPanelSpacer from "@components/TopPanelSpacer";
 import Button from "@components/Button";
+import MjpegImage from "@components/MjpegImage";
 import Image from "next/image";
 import { useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
@@ -92,7 +93,7 @@ const AppView: React.FC = () => {
 
                         <ButtonWithDrawer flexDirection="column" buttonText="Choose Alarm Profile"><ArmButtonList></ArmButtonList></ButtonWithDrawer>
                     </ButtonWithDrawer>
-                    <img id="securityVideo" src="https://bobik.lan/video/" alt="Security Camera Feed"/>
+                    <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}><MjpegImage src="https://bobik.lan/video/"></MjpegImage></ButtonWithDrawer>
                 </div> :
                 <div>
                     <UnavailableOverlay>{appState.isError && !appState.isConnected ? unavailableContent : loadingContent}</UnavailableOverlay>

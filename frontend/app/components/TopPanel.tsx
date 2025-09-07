@@ -39,7 +39,7 @@ const CompositeStyledPanel = styled.div`
 `;
 
 
-const TopPanel: React.FC<{className?: string}> = ({className}) => {
+const TopPanel: React.FC = ({}) => {
     const [shrink, setShrink] = useState(false);
 
     useEffect(() => {

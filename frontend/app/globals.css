@@ -80,13 +80,11 @@ pre {
 
 #securityVideo {
 	display: block;          /* <img>, <div>, etc. */
-	width: calc(100% - 20px);
-	margin: calc(var(--gap) / 2);           /* 10px on each side if gap=20px */
-	margin-left: auto;
-	margin-right: auto;
+	width: max(640px, calc(75vw - var(--gap)));
+	margin: calc(var(--gap) / 2) auto;           /* 10px on each side if gap=20px, centered */
 	height: auto;
 	object-fit: contain;
-	max-width: min(calc(100vw - var(--gap)), 640px);
+	max-width: calc(100vw - var(--gap));
 	max-height: calc(100vh - var(--gap));
 	box-sizing: border-box;  /* include padding/border inside that width */
 }

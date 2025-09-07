@@ -128,10 +128,11 @@ const ButtonWithDrawer: React.FC<{
 	justifyContent? : ('space-around' | 'space-between' | 'center' | 'flex-start' | 'flex-end'),
 	onClick?: React.MouseEventHandler,
 	containsScrollable?: boolean,
-	disableinternalspacing?: boolean
-}> = ({ flexDirection, className, children, buttonText, justifyContent, containsScrollable, disableinternalspacing}) => {
+	disableinternalspacing?: boolean,
+	isOpen?: boolean
+}> = ({ flexDirection, className, children, buttonText, justifyContent, containsScrollable, disableinternalspacing, isOpen=false}) => {
 	
-	const [isCollapsed, setIsCollapsed] = useState(true);
+	const [isCollapsed, setIsCollapsed] = useState(!isOpen);
 	const handler:React.MouseEventHandler<HTMLButtonElement> = function(event) {
 		event.currentTarget.blur();
 		setIsCollapsed(!isCollapsed);
