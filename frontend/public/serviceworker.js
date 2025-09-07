@@ -17,6 +17,12 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+  if (url.pathname === '/video/' ||
+    event.request.headers.get('accept')?.includes('multipart/x-mixed-replace')) {
+    return; // let the network handle it; don't respondWith()
+  }
+
   event.respondWith(
     caches.open("dynamic-cache").then(async (cache) => {
       try {

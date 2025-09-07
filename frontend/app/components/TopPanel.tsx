@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, {useState, useEffect} from "react";
 import styled, {css} from "styled-components";
 import AlarmEnableButton from "@components/AlarmEnableButton"
 
@@ -39,12 +39,22 @@ const CompositeStyledPanel = styled.div`
 `;
 
 
-const TopPanel: React.FC<{
-    className?: string
-}> = ({ className }) => {
+const TopPanel: React.FC<{className?: string}> = ({className}) => {
+    const [shrink, setShrink] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+        setShrink(window.scrollY > 10);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+
     return (
-        <CompositeStyledPanel className={className}>
-            <AlarmEnableButton className="button"></AlarmEnableButton>
+        <CompositeStyledPanel className={`topPanel ${shrink ? "shrink" : ""}`}>
+            <AlarmEnableButton className={`alarmButton ${shrink ? "shrink" : ""}`}></AlarmEnableButton>
         </CompositeStyledPanel>
     );
 };

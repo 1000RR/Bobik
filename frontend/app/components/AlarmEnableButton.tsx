@@ -42,8 +42,6 @@ const ButtonTextStyle = css`
 `;
 
 const ButtonPressStyle = css`
-    transition-duration: 0s;
-
     &.alarmStateOn {
         background-color: #539eff;
         border-color: #5eaeaf;

@@ -92,6 +92,7 @@ const AppView: React.FC = () => {
 
                         <ButtonWithDrawer flexDirection="column" buttonText="Choose Alarm Profile"><ArmButtonList></ArmButtonList></ButtonWithDrawer>
                     </ButtonWithDrawer>
+                    <img id="securityVideo" src="https://bobik.lan/video/" alt="Security Camera Feed"/>
                 </div> :
                 <div>
                     <UnavailableOverlay>{appState.isError && !appState.isConnected ? unavailableContent : loadingContent}</UnavailableOverlay>
