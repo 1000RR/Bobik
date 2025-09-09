@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { AppState, AppStateSlice } from "./AppStateSlice";
 import BuildId from "@components/BuildId";
+import ImageCacheLoader from "@components/ImageCacheLoader";
 
 const AppView: React.FC = () => {
     const appState: AppState = useSelector((state: AppStateSlice) => state.appState); //appState is the name of the slice
@@ -61,6 +62,25 @@ const AppView: React.FC = () => {
 
     return (
         <>
+            <ImageCacheLoader
+                urls={['/icon192.png',
+                        '/icon512.png',
+                        '/icon180.png',
+                        '/favicon.ico',
+                        '/assets/attackdog.jpg',
+                        '/assets/dogread.jpg',
+                        '/assets/dogsleep.jpg',
+                        '/assets/dogue.jpg',
+                        '/assets/favicon.png',
+                        '/assets/garage_closed.png',
+                        '/assets/garage_open.png',
+                        '/assets/required.svg']}
+                onReady={(map) => {
+                    // Files are already loaded & decoded at this point
+                    console.log("Images loaded:", map);
+                    // You could stash them in a global store, or ignore them
+                }}
+            />
             { serviceAvailable ? 
                 <div style={{overflowX: 'hidden'}} className={`background ${alarmTriggered ? " blinkingTransitions " : " "}`}>
                     <TopPanel></TopPanel>
