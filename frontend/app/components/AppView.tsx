@@ -15,6 +15,7 @@ import Image from "next/image";
 import { useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { AppState, AppStateSlice } from "./AppStateSlice";
+import BuildId from "@components/BuildId";
 
 const AppView: React.FC = () => {
     const appState: AppState = useSelector((state: AppStateSlice) => state.appState); //appState is the name of the slice
@@ -94,6 +95,7 @@ const AppView: React.FC = () => {
                         <ButtonWithDrawer flexDirection="column" buttonText="Choose Alarm Profile"><ArmButtonList></ArmButtonList></ButtonWithDrawer>
                     </ButtonWithDrawer>
                     <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}><MjpegImage src="https://bobik.lan/video/"></MjpegImage></ButtonWithDrawer>
+                    <BuildId></BuildId>
                 </div> :
                 <div>
                     <UnavailableOverlay>{appState.isError && !appState.isConnected ? unavailableContent : loadingContent}</UnavailableOverlay>

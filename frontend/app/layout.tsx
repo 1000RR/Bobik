@@ -21,6 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+      <link rel="manifest" href="/manifest.json" />
+      <link rel="apple-touch-icon" href="/icon180.png" type="image/png"/>
+      <link rel="icon" href="/icon192.png" type="image/png"/>
 		<meta
   name="viewport"
   content="width=device-width,
@@ -30,7 +33,6 @@ export default function RootLayout({
            user-scalable=no,
            viewport-fit=cover,
            shrink-to-fit=no"/>
-		<link rel="manifest" href="/manifest.json" />
       </head>
       <body
         className={`${futura.variable} antialiased`}

@@ -19,6 +19,13 @@
   -ms-user-select: none;     /* old IE */
 }
 
+.centered {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+}
+
 @media (prefers-color-scheme: dark) {
 	:root {
 		--background: rgb(36, 24, 53);

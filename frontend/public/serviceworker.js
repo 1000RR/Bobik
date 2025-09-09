@@ -1,9 +1,11 @@
-const CACHE_NAME = 'bobik-pwa-v1';
+const CACHE_NAME = 'bobik-pwa-v2';
 const urlsToCache = [
   '/',
-  'manifest.json',
-  'icon192.png',
-  'icon512.png',
+  '/index.html',
+  '/manifest.json',
+  '/icon192.png',
+  '/icon512.png',
+  '/icon180.png'
 ];
 
 self.addEventListener('install', event => {
@@ -16,40 +18,67 @@ self.addEventListener('install', event => {
   );
 });
 
-self.addEventListener("fetch", (event) => {
-  const url = new URL(event.request.url);
-  if (url.pathname === '/video/' ||
-    event.request.headers.get('accept')?.includes('multipart/x-mixed-replace')) {
-    return; // let the network handle it; don't respondWith()
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // 1) Streams: never touch caches; go straight to network.
+  if (
+    url.pathname === '/video/' ||
+    request.headers.get('accept')?.includes('multipart/x-mixed-replace') ||
+    (request.destination === 'image' && url.pathname.startsWith('/video/'))
+  ) {
+    return;
   }
 
-  event.respondWith(
-    caches.open("dynamic-cache").then(async (cache) => {
-      try {
-        // Try to fetch from network first
-        const networkResponse = await fetch(event.request);
+  // 2) Navigations (and auth page): always network, never cached.
+  if (url.pathname === '/passwordauth') {
+    event.respondWith(fetch(request, { cache: 'no-store', credentials: 'include' }));
+    return;
+  }
 
-        // If the response is an image and it fails, retry
-        if (
-          !networkResponse.ok &&
-          event.request.destination === "image"
-        ) {
-          console.warn(`Image fetch failed: ${event.request.url}, retrying...`);
-          return fetch(event.request, { cache: "reload" });
-        }
+  // 3) Everything else: network-first with safe cache fallback.
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    try {
+      const netRes = await fetch(request, { cache: 'no-store', credentials: 'include' });
 
-        // Cache successful responses
-        if (event.method === 'GET') cache.put(event.request, networkResponse.clone());
-        return networkResponse;
-      } catch (error) {
-        console.error("Fetch failed; returning cached resource if available:", error);
-
-        // Fallback to cache if available
-        return cache.match(event.request) || new Response("", { status: 404 });
+      // If image failed, retry once with cache:'reload'
+      if (!netRes.ok && request.destination === 'image') {
+        const retryRes = await fetch(request, { cache: 'reload', credentials: 'include' });
+        if (okToCache(request, retryRes)) await cache.put(request, retryRes.clone());
+        return retryRes;
       }
-    })
-  );
+
+      if (okToCache(request, netRes)) await cache.put(request, netRes.clone());
+      return netRes;
+    } catch (err) {
+      const cached = await cache.match(request);
+      if (cached) return cached;
+
+      // last-ditch retry for images
+      if (request.destination === 'image') {
+        try {
+          const retryRes = await fetch(request, { cache: 'reload', credentials: 'include' });
+          if (okToCache(request, retryRes)) await cache.put(request, retryRes.clone());
+          return retryRes;
+        } catch {}
+      }
+      return new Response('', { status: 400 });
+    }
+  })());
 });
+
+// Cache only safe, same-origin, non-redirect, 200 GET responses.
+function okToCache(request, response) {
+  return (
+    request.method === 'GET' &&
+    response &&
+    response.status === 200 &&
+    response.type === 'basic' &&   // same-origin (not opaque)
+    !response.redirected
+  );
+}
 
 self.addEventListener('activate', event => {
   caches.delete(CACHE_NAME);
