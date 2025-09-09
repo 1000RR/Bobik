@@ -12,5 +12,5 @@ export default function BuildId() {
       .catch(() => setId('unknown'));
   }, []);
 
-  return <span className='centered'>Build: {id ?? 'loading…'}</span>;
+  return <span className='centered'>{id ?? 'loading…'}</span>;
 }

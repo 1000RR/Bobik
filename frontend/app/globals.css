@@ -136,6 +136,10 @@ pre {
     border-color: darkgrey;
 }
 
+.roundedCorners {
+	border-radius: 5px;
+}
+
 .lowlight_gray {
     filter: opacity(50%);
 }
