@@ -71,7 +71,6 @@ const AppView: React.FC = () => {
                         '/assets/dogread.jpg',
                         '/assets/dogsleep.jpg',
                         '/assets/dogue.jpg',
-                        '/assets/favicon.png',
                         '/assets/garage_closed.png',
                         '/assets/garage_open.png',
                         '/assets/required.svg']}

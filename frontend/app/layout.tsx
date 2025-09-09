@@ -9,8 +9,10 @@ const futura = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Alarm Control Panel",
+  title: "Bobik Alarm Control Panel",
   description: "Control Panel for the Bobik alarm system",
+  icons: [{ rel: "icon", url: "/favicon.ico" }, { rel: "apple-touch-icon", url: "/icon192.png" }],
+  manifest: "/manifest.json"
 };
 
 export default function RootLayout({
@@ -21,18 +23,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-      <link rel="manifest" href="/manifest.json" />
-      <link rel="apple-touch-icon" href="/icon180.png" type="image/png"/>
-      <link rel="icon" href="/icon192.png" type="image/png"/>
-		<meta
-  name="viewport"
-  content="width=device-width,
-           initial-scale=1,
-           minimum-scale=1,
-           maximum-scale=1,
-           user-scalable=no,
-           viewport-fit=cover,
-           shrink-to-fit=no"/>
+        <meta
+          name="viewport"
+          content="width=device-width,
+            initial-scale=1,
+            minimum-scale=1,
+            maximum-scale=1,
+            user-scalable=no,
+            viewport-fit=cover,
+            shrink-to-fit=no"
+        />
       </head>
       <body
         className={`${futura.variable} antialiased`}
