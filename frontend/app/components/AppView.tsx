@@ -86,8 +86,8 @@ const AppView: React.FC = () => {
                     <TopPanelSpacer></TopPanelSpacer>
                     <IndicatorPanel></IndicatorPanel>
                     <ButtonWithDrawer flexDirection="column" buttonText="Alarm Control"><ArmButtonList isQuickSetAlarmMode={true}></ArmButtonList></ButtonWithDrawer>
-                    <ButtonWithDrawer flexDirection="row" buttonText="Garage Door"><GarageDoorButton margin="10px"></GarageDoorButton></ButtonWithDrawer>
                     <ButtonWithDrawer flexDirection="column" justifyContent="flex-start" buttonText="Advanced" disableinternalspacing={true}>
+                        <ButtonWithDrawer flexDirection="row" buttonText="Garage Door"><GarageDoorButton margin="10px"></GarageDoorButton></ButtonWithDrawer>
                         <ButtonWithDrawer flexDirection="column" buttonText="Special Functions"><SpecialFunctions></SpecialFunctions></ButtonWithDrawer>
                         <ButtonWithDrawer flexDirection="column" justifyContent="flex-start" buttonText="Status" containsScrollable>
                             <div style={{display: "flex", gap: 10}}>
@@ -110,8 +110,7 @@ const AppView: React.FC = () => {
                             </div>
                             <pre id="profilesContainer" className="dimmable">{JSON.stringify(appState.alarmProfiles, null, 2)}</pre>
                         </ButtonWithDrawer>
-
-                        <ButtonWithDrawer flexDirection="column" buttonText="Choose Alarm Profile"><ArmButtonList></ArmButtonList></ButtonWithDrawer>
+                        <ButtonWithDrawer flexDirection="column" buttonText="Extended Alarm Profiles List"><ArmButtonList></ArmButtonList></ButtonWithDrawer>
                     </ButtonWithDrawer>
                     <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}><MjpegImage src="https://bobik.lan/video/"></MjpegImage></ButtonWithDrawer>
                     <BuildId></BuildId>
