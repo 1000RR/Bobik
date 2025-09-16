@@ -59,19 +59,20 @@ self.addEventListener('fetch', (event) => {
   // 3) Everything else: network-first with safe cache fallback.
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
-    try {
+    try { // try gettin resource from network
       const netRes = await fetch(request, { cache: 'no-store', credentials: 'include' });
 
-      // // If image failed, retry once with cache:'reload'
-      // if (!netRes.ok && request.destination === 'image') {
-      //   const retryRes = await fetch(request, { cache: 'reload', credentials: 'include' });
-      //   if (okToCache(request, retryRes)) await cache.put(request, retryRes.clone());
-      //   return retryRes;
-      // }
+      // If image failed, retry once with cache:'reload'
+      if (!netRes.ok && request.destination === 'image') {
+        const retryRes = await fetch(request, { cache: 'reload', credentials: 'include' });
+        if (okToCache(request, retryRes)) await cache.put(request, retryRes.clone());
+        return retryRes;
+      }
 
+      // Cache if valid response
       if (okToCache(request, netRes)) await cache.put(request, netRes.clone());
       return netRes;
-    } catch (err) {
+    } catch (err) { // on any failure, try cache
       const cached = await cache.match(request);
       if (cached) return cached;
 

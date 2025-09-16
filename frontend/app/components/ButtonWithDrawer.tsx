@@ -120,6 +120,18 @@ const Drawer = styled.div<DrawerProps>`
 	${({ disableinternalspacing }) => !disableinternalspacing && DrawerSpacing}
 `;
 
+const ShrinkContainingDiv = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "iscollapsed",
+})<{ iscollapsed: boolean }>`
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: ${({iscollapsed}) => iscollapsed ? '0px' : 'auto'};
+	overflow: hidden;
+	width: 100%;
+`;
+
 const ButtonWithDrawer: React.FC<{
 	flexDirection: ('row' | 'column'),
 	className?: string,
@@ -129,8 +141,9 @@ const ButtonWithDrawer: React.FC<{
 	onClick?: React.MouseEventHandler,
 	containsScrollable?: boolean,
 	disableinternalspacing?: boolean,
-	isOpen?: boolean
-}> = ({ flexDirection, className, children, buttonText, justifyContent, containsScrollable, disableinternalspacing, isOpen=false}) => {
+	isOpen?: boolean,
+	keepChildrenInDomOnClose?: boolean
+}> = ({ flexDirection, className, children, buttonText, justifyContent, containsScrollable, disableinternalspacing, isOpen=false, keepChildrenInDomOnClose=false}) => {
 	
 	const [isCollapsed, setIsCollapsed] = useState(!isOpen);
 	const handler:React.MouseEventHandler<HTMLButtonElement> = function(event) {
@@ -144,7 +157,7 @@ const ButtonWithDrawer: React.FC<{
 			{buttonText}
 		</CompositeStyledButton>
 		<Drawer style={{flexDirection: flexDirection, display: isCollapsed ? 'none' : 'flex', justifyContent: justifyContent, maxHeight: containsScrollable ? 'calc(100vh - 150px)': '' }} disableinternalspacing={disableinternalspacing ? "true" : "false"}>
-			{!isCollapsed && children}
+			{!keepChildrenInDomOnClose ? (!isCollapsed && children) : (<ShrinkContainingDiv iscollapsed={isCollapsed}>{children}</ShrinkContainingDiv>)}
 		</Drawer>
 	</>
 	);

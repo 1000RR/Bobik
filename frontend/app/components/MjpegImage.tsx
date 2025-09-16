@@ -85,7 +85,7 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img
+    bustedSrc.length ? <img
       {...imgProps}
       className={"roundedCorners"}
       id={"securityVideo"}
@@ -93,7 +93,7 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
       onLoad={handleLoad}
       onError={handleError}
       alt=""
-    />
+    /> : <></>
   );
 };
 

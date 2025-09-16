@@ -12,15 +12,23 @@ import TopPanelSpacer from "@components/TopPanelSpacer";
 import Button from "@components/Button";
 import MjpegImage from "@components/MjpegImage";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { AppState, AppStateSlice } from "./AppStateSlice";
 import BuildId from "@components/BuildId";
 import ImageCacheLoader from "@components/ImageCacheLoader";
+import { UIControls, NotificationController } from "@components/UIControls";
 
 const AppView: React.FC = () => {
     const appState: AppState = useSelector((state: AppStateSlice) => state.appState); //appState is the name of the slice
     const dispatch = useDispatch();
+    const notifRef = useRef<NotificationController>(null);
+
+    const [anySensorTriggered, setAnySensorTriggered] = useState<string | false>(false);
+
+    useEffect(() => {
+        setAnySensorTriggered(appState.status.currentTriggeredDevices.length > 0 ? appState.status.currentTriggeredDevices.join(", ") : false);
+    }, [appState.status.currentTriggeredDevices]);
 
     useEffect(() => {
         const terminateWebSocket = initializeWebSocket(dispatch);
@@ -28,9 +36,10 @@ const AppView: React.FC = () => {
             terminateWebSocket();
         };
     }, [dispatch]);
-    
+
     const serviceAvailable = appState.isConnected && !appState.isError && appState.isLoaded;
     const alarmTriggered = appState.status.alarmStatus === 'ALARM';
+    
     const unavailableContent = <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             Service Unavailable
             <Image className="fadeoutImageRound" src={"/assets/dogsleep.jpg"} width="150" height="150" alt=""></Image>
@@ -38,7 +47,12 @@ const AppView: React.FC = () => {
     const loadingContent = <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
         Loading
         <Image className="fadeoutImageRound" src={"/assets/dogread.jpg"} width="150" height="150" alt=""></Image>
-    </div>;
+    </div>;   
+    
+    useEffect(() => {
+        if (anySensorTriggered) 
+            notifRef.current?.sendNotification(`Sensor(s) triggered: ${anySensorTriggered}`);
+    }, [anySensorTriggered]);
 
     const scrollToTop = (elName: string) => {
         const el = document.getElementById(elName);
@@ -86,6 +100,7 @@ const AppView: React.FC = () => {
                     <TopPanelSpacer></TopPanelSpacer>
                     <IndicatorPanel></IndicatorPanel>
                     <ButtonWithDrawer flexDirection="column" buttonText="Alarm Control"><ArmButtonList isQuickSetAlarmMode={true}></ArmButtonList></ButtonWithDrawer>
+                    <ButtonWithDrawer flexDirection="row" buttonText="UI & Alert Controls" keepChildrenInDomOnClose={true}><UIControls ref={notifRef}/></ButtonWithDrawer>
                     <ButtonWithDrawer flexDirection="column" justifyContent="flex-start" buttonText="Advanced" disableinternalspacing={true}>
                         <ButtonWithDrawer flexDirection="row" buttonText="Garage Door"><GarageDoorButton margin="10px"></GarageDoorButton></ButtonWithDrawer>
                         <ButtonWithDrawer flexDirection="column" buttonText="Special Functions"><SpecialFunctions></SpecialFunctions></ButtonWithDrawer>
