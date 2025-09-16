@@ -1,13 +1,11 @@
 #include <SPI.h>
 #include <mcp2515.h>
 
-const bool debugOutput = false;
-const long toneInterval = 50;	 // Interval between frequency changes (ms)
-const int localBuzzerPin = 3;	 // d3=3 has pwm
-const int loopIndexMax = 30000;	 // Loop index max for buzzer tone
-int loopIndex = 0;				 // Loop index for buzzer tone
+//config.h block goes here
+#include "config.h"
+
+int loopIndex = 0;	// Loop index for buzzer tone
 int loopDeviceIndex = 0;
-bool enableLocalBuzzer = true;
 bool localBuzzerSounding = false;
 long previousMillis = 0;				// Tracks the last tone update
 bool localBuzzerToneIncreasing = true;	// Direction of frequency sweep
@@ -61,44 +59,7 @@ String DeviceType[] = {
 	"momentary switch",	 // garage door opener
 };
 
-// initially don't enable too many/any devices that draw current, like PIRs - the inrush current could be too great
-Device devices[] = {
-	{
-		type : SENSOR,
-		myCanId : 0x31, /*garage side door*/
-		deviceType : 5,
-		ioPin : 5,
-		relayPin : -1,	 /* -1 = no relay; writing LOW to this turns relay ON on a sensor */
-		sensorVal : LOW, /* variable to store the sensor status (value) */
-		isAlarmed : false,
-		nextStateChangeTimestamp : 0,
-		isEnabled : true, /* false = off; true = on; has direct effect on relay state if relay present */
-		buzzerDirection : false
-	},
-	{
-		type : SENSOR,
-		myCanId : 0x50, /*front of house*/
-		deviceType : 5,
-		ioPin : 6,
-		relayPin : -1,	 /* -1 = no relay; writing LOW to this turns relay ON on a sensor */
-		sensorVal : LOW, /* variable to store the sensor status (value) */
-		isAlarmed : false,
-		nextStateChangeTimestamp : 0,
-		isEnabled : true, /* false = off; true = on; has direct effect on relay state if relay present */
-		buzzerDirection : false
-	},
-	{
-		type : SENSOR,
-		myCanId : 0x40, /*back door kitchen*/
-		deviceType : 5,
-		ioPin : 4,
-		relayPin : -1,	 /* -1 = no relay; writing LOW to this turns relay ON on a sensor */
-		sensorVal : LOW, /* variable to store the sensor status (value) */
-		isAlarmed : false,
-		nextStateChangeTimestamp : 0,
-		isEnabled : true, /* false = off; true = on; has direct effect on relay state if relay present */
-		buzzerDirection : false
-	}};
+#include "deviceconfig.h" /* devices[] array is defined in deviceconfig.h */
 
 const int numDevices = sizeof(devices) / sizeof(devices[0]); /* num connected devices */
 
