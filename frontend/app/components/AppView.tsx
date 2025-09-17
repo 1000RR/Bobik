@@ -60,12 +60,13 @@ const AppView: React.FC = () => {
 
     const serviceAvailable = appState.isConnected && !appState.isError && appState.isLoaded;
     const alarmTriggered = appState.status.alarmStatus === 'ALARM';
-    const unavailableContent = <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-            Service Unavailable
-            <Image className="fadeoutImageRound" src={"/assets/dogsleep.jpg"} width="150" height="150" alt=""></Image>
-        </div>;
-    const loadingContent = <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-        Loading
+
+    const unavailableContent = <div style={{display: "flex", flexDirection: "column", alignItems: "center", fontSize: "40px", textAlign: "center", fontWeight: "normal", fontFamily: "futura"}}>
+        Alarm Service Unavailable
+        <Image className="fadeoutImageRound" src={"/assets/dogsleep.jpg"} width="150" height="150" alt=""></Image>
+    </div>;
+    const loadingContent = <div style={{display: "flex", flexDirection: "column", alignItems: "center", fontSize: "40px", textAlign: "center", fontWeight: "normal", fontFamily: "futura"}}>
+        Loading Alarm
         <Image className="fadeoutImageRound" src={"/assets/dogread.jpg"} width="150" height="150" alt=""></Image>
     </div>;   
     
@@ -157,7 +158,12 @@ const AppView: React.FC = () => {
                     <BuildId></BuildId>
                 </div> :
                 <div>
-                    <UnavailableOverlay>{appState.isError && !appState.isConnected ? unavailableContent : loadingContent}</UnavailableOverlay>
+                    <UnavailableOverlay>
+                        {appState.isError && !appState.isConnected ? unavailableContent : loadingContent}
+                        <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}>
+                            <MjpegImage src="https://bobik.lan/video/"></MjpegImage>
+                        </ButtonWithDrawer>
+                    </UnavailableOverlay>
                 </div>
             }
         </>

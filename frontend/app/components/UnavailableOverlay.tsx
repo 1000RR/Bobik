@@ -11,17 +11,6 @@ export const SizePositionStyle = css`
 	z-index: 10;
 `;
 
-export const TextStyle = css`
-	text-align: left;
-	font-size: 40px;
-	font-weight: normal;
-	font-family: "futura";
-	color: white;
-	@media (prefers-color-scheme: dark) {
-		color: #a5a5a5
-	}
-`;
-
 const display = "flex";
 
 export const BorderStyle = css`
@@ -39,14 +28,12 @@ export const LayoutStyle = css`
 	display: ${display};
 	justify-content: center;
 	align-items: center;
-	gap: 40px;
 	flex-direction: column;
 	padding: 10px;
 `;
 
 const Overlay = styled.div`
 	${SizePositionStyle}
-	${TextStyle}
 	${LayoutStyle}
 	${BorderStyle}
 	background-color: rgba(55, 55, 55, .7);
