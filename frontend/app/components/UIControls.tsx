@@ -4,7 +4,7 @@ import React, {
   useImperativeHandle,
   useRef,
   useState,
-  forwardRef,
+  forwardRef
 } from "react";
 
 // --- WakeLock types ---
@@ -19,23 +19,18 @@ interface NavigatorWithWakeLock extends Navigator {
   };
 }
 
-// --- Exposed controller for notifications ---
 export interface NotificationController {
-  sendNotification: (message: string) => void;
+  sendNotification: (title: string, body: string, tag: string, renotify: boolean) => void;
 }
 
 // eslint-disable-next-line react/display-name
 export const UIControls = forwardRef<NotificationController>((_, ref) => {
-  // WakeLock state
   const [wakeLockSupported, setWakeLockSupported] = useState(false);
   const [wakeLockActive, setWakeLockActive] = useState(false);
   const wakeLockRef = useRef<WakeLockSentinelLike | null>(null);
-
-  // Notification state
   const [notifSupported, setNotifSupported] = useState(false);
-  const [notifEnabled, setNotifEnabled] = useState(true);
+  const [notifEnabled, setNotifEnabled] = useState(false);
 
-  // --- WakeLock ---
   useEffect(() => {
     setWakeLockSupported(Boolean((navigator as NavigatorWithWakeLock).wakeLock));
   }, []);
@@ -66,7 +61,6 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
     wakeLockActive ? releaseWakeLock() : acquireWakeLock();
   };
 
-  // Reacquire when visible again
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === "visible" && wakeLockRef.current?.released) {
@@ -77,16 +71,8 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, [acquireWakeLock]);
 
-  // --- Notifications ---
   useEffect(() => {
-    console.log(`Nofification in window ${"Notification" in window}`);
-   "Notification" in window && Notification.requestPermission().then(
-    (o)=>console.log("permission: " + o)
-   );
-   
-    "Notification" in window && Notification.requestPermission().then(
-      (permission) => permission /*=== "granted"*/ && setNotifSupported("Notification" in window) //TODO: currently not checking permission to send notifications
-    );
+    "Notification" in window && Notification.permission === "granted" && setNotifSupported(true);
   }, []);
 
   const enableNotifications = async () => {
@@ -97,18 +83,23 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
   const disableNotifications = () => setNotifEnabled(false);
 
   const toggleNotifications = () => {
-    notifEnabled ? disableNotifications() : enableNotifications();
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        permission === "granted" ? enableNotifications() : disableNotifications();
+      });
+    } else {
+      notifEnabled ? disableNotifications() : enableNotifications();
+    }
   };
 
-  // Expose sendNotification
   useImperativeHandle(ref, () => ({
-    sendNotification: (message: string) => {
+    sendNotification: (title: string, body: string, tag: string, renotify: boolean) => {
       if (!notifEnabled || Notification.permission !== "granted") return;
-      new Notification("Notification", { body: message });
+      //@ts-expect-error TS2345
+      new Notification(title, { body, tag, renotify});
     },
   }));
 
-  // --- Render ---
   return (
     <div
       style={{

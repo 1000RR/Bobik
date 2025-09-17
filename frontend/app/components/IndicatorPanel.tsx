@@ -7,8 +7,9 @@ import { useSelector } from "react-redux";
 import { AlarmProfilesResponse, AppStateSlice, StatusResponse } from "./AppStateSlice";
 import { emitGarageDoorToggleEvent } from "@src/WebSocketService";
 import Image from "next/image";
+import ParseUtils from "@src/ParseUtils";
 
-type DeviceDescriptor = {
+export type DeviceDescriptor = {
     id: string,
     name: string,
     enabled: boolean,
@@ -50,7 +51,7 @@ const SensorsPanel: React.FC<{
 }> = ({ className }) => {
     const deviceList:Array<DeviceDescriptor> = [];
 
-    const stateDeviceList = useSelector(function (state: AppStateSlice) { 
+    const stateDeviceList = useSelector(function (state: AppStateSlice) {
         return state.appState.status.memberDevicesReadable;
     }).slice(0).sort((a: string, b:string) => a.localeCompare(b));
     const garageOpen = useSelector(function (state: AppStateSlice) { 
@@ -111,8 +112,8 @@ const SensorsPanel: React.FC<{
             isUnknownType = true;
         
         if (isSensorType || isUnknownType) {
-            const name = device.substring(9, device.indexOf('| 0x')-1);
-            const id = device.substring(device.indexOf('| 0x')+2);
+            const name = ParseUtils.getDeviceNameFromDescriptor(device);
+            const id = ParseUtils.getDeviceIdFromDescriptor(device);
 
             deviceList.push({
                 name: `${name}${isUnknownType ? " " + id : ""}`,
@@ -169,7 +170,7 @@ const AlarmsPanel: React.FC<{
 }> = ({ className}) => {
     const deviceList:Array<DeviceDescriptor> = [];
 
-    const stateDeviceList = useSelector(function (state: AppStateSlice) { 
+    const stateDeviceList = useSelector(function (state: AppStateSlice) {
         return state.appState.status.memberDevicesReadable;
     }).slice(0).sort((a: string, b:string) => a.localeCompare(b))
 

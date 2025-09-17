@@ -18,6 +18,7 @@ import { AppState, AppStateSlice } from "./AppStateSlice";
 import BuildId from "@components/BuildId";
 import ImageCacheLoader from "@components/ImageCacheLoader";
 import { UIControls, NotificationController } from "@components/UIControls";
+import ParseUtils from "@src/ParseUtils";
 
 const AppView: React.FC = () => {
     const appState: AppState = useSelector((state: AppStateSlice) => state.appState); //appState is the name of the slice
@@ -26,8 +27,28 @@ const AppView: React.FC = () => {
 
     const [anySensorTriggered, setAnySensorTriggered] = useState<string | false>(false);
 
+    const deviceMap: Map<string, string> = new Map<string, string>();
+
+    useSelector(function (state: AppStateSlice) { 
+        const memberDeviceReadable = state.appState.status.memberDevicesReadable;
+        deviceMap.clear();
+        memberDeviceReadable.map((device: string) => {
+            const id = ParseUtils.getDeviceIdFromDescriptor(device);
+            const name = ParseUtils.getDeviceNameFromDescriptor(device);
+            deviceMap.set(id, name);
+        });
+    });
+
     useEffect(() => {
-        setAnySensorTriggered(appState.status.currentTriggeredDevices.length > 0 ? appState.status.currentTriggeredDevices.join(", ") : false);
+        setAnySensorTriggered(
+            appState.status.currentTriggeredDevices.length > 0 
+            ? appState.status.currentTriggeredDevices.reduce(
+                function (accumulator: string, currentValue: string, currentIndex: number) {
+                    const deviceName = deviceMap.get(currentValue) || currentValue;
+                    return accumulator + (currentIndex > 0 ? ", " : "") + deviceName;
+                },
+                '') 
+            : false);
     }, [appState.status.currentTriggeredDevices]);
 
     useEffect(() => {
@@ -39,7 +60,6 @@ const AppView: React.FC = () => {
 
     const serviceAvailable = appState.isConnected && !appState.isError && appState.isLoaded;
     const alarmTriggered = appState.status.alarmStatus === 'ALARM';
-    
     const unavailableContent = <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
             Service Unavailable
             <Image className="fadeoutImageRound" src={"/assets/dogsleep.jpg"} width="150" height="150" alt=""></Image>
@@ -50,8 +70,14 @@ const AppView: React.FC = () => {
     </div>;   
     
     useEffect(() => {
-        if (anySensorTriggered) 
-            notifRef.current?.sendNotification(`Sensor(s) triggered: ${anySensorTriggered}`);
+        if (anySensorTriggered) {
+            notifRef.current?.sendNotification(
+                `${ParseUtils.formatDate(new Date())}`,
+                `Triggered: ${anySensorTriggered}`,
+                'trigger',
+                true
+            );
+        }
     }, [anySensorTriggered]);
 
     const scrollToTop = (elName: string) => {
