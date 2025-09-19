@@ -127,8 +127,8 @@ const SensorsPanel: React.FC<{
 
     return (
         <Panel className={className}>
-            <div style={{zIndex: -1, position: "absolute", top: 0, left: 5}}>{deviceList.length}</div>
-            <div style={{zIndex: -1, position: "absolute", top: -2, right: 5}}>{`Selected profile: ${myAlarmProfile?.name}`}</div>
+            <div style={{zIndex: 1, position: "absolute", top: 0, left: 5}}>{`${deviceList.length} sensors`}</div>
+            <div style={{zIndex: 1, position: "absolute", top: -2, right: 5}}>{`Selected profile: ${myAlarmProfile?.name}`}</div>
             {deviceList.map(
                 (sensorElement, index) => {
                     const isGarageDoor = sensorElement.name.toLowerCase().includes("garage car door");
@@ -207,8 +207,8 @@ const AlarmsPanel: React.FC<{
     });
     
     return (<Panel className={className}>
-        <div style={{zIndex: -1, position: "absolute", top: 0, left: 5}}>{deviceList.length}</div>
-        <div style={{zIndex: -1, position: "absolute", top: -2, right: 5}}>{Number.isInteger(myAlarmProfile?.alarmTimeLengthSec) ? (myAlarmProfile?.alarmTimeLengthSec > 0 ? `Alarms occur for ${myAlarmProfile?.alarmTimeLengthSec} sec` : 'alarms will sound while triggered') : ''}</div>
+        <div style={{zIndex: 1, position: "absolute", top: 0, left: 5}}>{`${deviceList.length} alarms`}</div>
+        <div style={{zIndex: 1, position: "absolute", top: -2, right: 5}}>{Number.isInteger(myAlarmProfile?.alarmTimeLengthSec) ? (myAlarmProfile?.alarmTimeLengthSec > 0 ? `Alarms occur for ${myAlarmProfile?.alarmTimeLengthSec} sec` : 'alarms will sound while triggered') : ''}</div>
         {deviceList.map((alarmElement, index) => (
             <div key={index} id={alarmElement.id} className={(alarmElement.triggered ? " invertTransitions " : "") + " thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray" + (alarmElement.enabled ? " highlight_green " : "") + (alarmElement.missing ? " highlight_red " : "") + " dimmable noselect"} >
                  {alarmElement.name}
