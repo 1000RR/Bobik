@@ -25,14 +25,15 @@ homeBaseId = 0x14 #interdependent with deviceDictionary
 broadcastId = 0x00
 pastEvents = []
 alarmed = False
-alarmedDevicesInCurrentArmCycle = {}
+triggeredDevicesInCurrentArmCycle = {}
 missingDevicesInCurrentArmCycle = {}
 everTriggeredWithinAlarmCycle = {} #map of {string hex id:int alarmTimeSec}
-currentlyAlarmedDevices = {} #map of {string hex id:int alarmTimeSec}
+currentlyTriggeredDevices = {} #map of {string hex id:int alarmTimeSec}
 currentlyMissingDevices = []
 everMissingDevices = {}
 lastAlarmTime = 0
 armed = False #initial condition
+armSetTimeSec = 0 #movement detection devices tend to send an alarm signal shortly after being powered on. This is used to ignore such signals if they occur within a few seconds of arming.
 lastArmedTogglePressed = 0
 deviceAbsenceThresholdSec = 3 #seconds before a device is considered missing
 firstPowerCommandNeedsToBeSent = True
@@ -177,11 +178,11 @@ def getDevicesPowerStateLists(): #devices per current profile
 
 def setCurrentAlarmProfile(profileNumber, requestMethod): #-1 means no profile set. All devices trigger. Alarms are broadcast to all devices.
     global currentAlarmProfile
-    global currentlyAlarmedDevices
+    global currentlyTriggeredDevices
     global alarmed
 
     if (profileNumber >= -1 and profileNumber < len(alarmProfiles)):
-        currentlyAlarmedDevices = {}
+        currentlyTriggeredDevices = {}
         alarmed = False
         
         currentAlarmProfile = profileNumber
@@ -213,9 +214,10 @@ def toggleArmed(now, strActionOrigin):
     global memberDevices
     global deviceDictionary
     global everTriggeredWithinAlarmCycle
-    global alarmedDevicesInCurrentArmCycle
+    global triggeredDevicesInCurrentArmCycle
     global missingDevicesInCurrentArmCycle
-    global currentlyAlarmedDevices
+    global currentlyTriggeredDevices
+    global armSetTimeSec
     
     lastArmedTogglePressed = now
     if (armed == True):
@@ -224,13 +226,14 @@ def toggleArmed(now, strActionOrigin):
         armed = False #TODO: add logging of event and source
         alarmed = False #reset alarmed state
         everTriggeredWithinAlarmCycle = {}
-        currentlyAlarmedDevices = {}
-        alarmedDevicesInCurrentArmCycle = {}
+        currentlyTriggeredDevices = {}
+        triggeredDevicesInCurrentArmCycle = {}
         missingDevicesInCurrentArmCycle = {}
     else:
         print(f">>>>>>>>TURNING ON ALARM AT {getReadableTimeFromTimestamp(now)} PER {strActionOrigin}<<<<<<<<<")
         addEvent({"event": "ARMED", "time": getReadableTimeFromTimestamp(now), "actionOrigin": strActionOrigin})
         armed = True #TODO: add logging of event and source
+        armSetTimeSec = now
         alarmed = False #reset alarmed state
         everTriggeredWithinAlarmCycle = {}
     
@@ -284,7 +287,7 @@ def sendMessage(messageArray):
     lastSentMessageTimeMsec = getTimeMsec()
     if (messageArray[1] == denonId or messageArray[1] == 0x00):
         if (messageArray[2] == 0xBB and not (denonPlayThread and denonPlayThread.is_alive())):            
-            denonPlayThread = Thread(target = playDenonThreadMain, args = (currentlyAlarmedDevices, everTriggeredWithinAlarmCycle, mp3AlarmDictionary))
+            denonPlayThread = Thread(target = playDenonThreadMain, args = (currentlyTriggeredDevices, everTriggeredWithinAlarmCycle, mp3AlarmDictionary))
             denonPlayThread.start()
 
 
@@ -355,7 +358,7 @@ def possiblyAddMember(msg):
                 print(f"Removing missing device {hex(senderId)} at {getReadableTime()}.")
 
 
-def playDenonThreadMain(currentlyAlarmedDevices, everAlarmedDuringAlarm, mp3AlarmDictionary):
+def playDenonThreadMain(currentlyTriggeredDevices, everAlarmedDuringAlarm, mp3AlarmDictionary):
     cwd = getThisDirAddress()
     playCommandArray = ["/usr/bin/mpg123"]
     volume = "55" #default
@@ -366,7 +369,7 @@ def playDenonThreadMain(currentlyAlarmedDevices, everAlarmedDuringAlarm, mp3Alar
     #sound byte override
     #fall back to saying the sensors that are activated
 
-    playCommandArray, volume = determineStuffToPlay(playCommandArray, volume, everAlarmedDuringAlarm, currentlyAlarmedDevices)
+    playCommandArray, volume = determineStuffToPlay(playCommandArray, volume, everAlarmedDuringAlarm, currentlyTriggeredDevices)
     startPowerStatus, startChannelStatus, startVolume = getDenonInitialState(cwd)
     if (startPowerStatus == False and startChannelStatus == False and startVolume == False):
         return
@@ -375,17 +378,17 @@ def playDenonThreadMain(currentlyAlarmedDevices, everAlarmedDuringAlarm, mp3Alar
     setDenonOriginalState(startPowerStatus, startChannelStatus, startVolume, cwd)
 
 
-def determineStuffToPlay(playCommandArray, volume, everAlarmedDuringAlarm, currentlyAlarmedDevices):
+def determineStuffToPlay(playCommandArray, volume, everAlarmedDuringAlarm, currentlyTriggeredDevices):
     sound = ""
     #playCommandArray.append("./alert.mp3")
 
-    if (hex(testAlarmId) in currentlyAlarmedDevices):
+    if (hex(testAlarmId) in currentlyTriggeredDevices):
         sound = "thisisatest.mp3"
-        currentlyAlarmedDevices.pop(hex(testAlarmId));
-    elif (hex(checkPhonesId) in currentlyAlarmedDevices):
+        currentlyTriggeredDevices.pop(hex(testAlarmId));
+    elif (hex(checkPhonesId) in currentlyTriggeredDevices):
         sound = "checkyourphones.mp3"
         volume = "79"
-        currentlyAlarmedDevices.pop(hex(checkPhonesId));
+        currentlyTriggeredDevices.pop(hex(checkPhonesId));
     else:
         playCommandArray.append("./alert.mp3")
         soundByteOverride, volumeOverride = getCurrentProfileSoundByteData()
@@ -549,9 +552,9 @@ def handleMessage(msg):
     global armed
     global lastArmedTogglePressed
     global alarmReason
-    global currentlyAlarmedDevices
+    global currentlyTriggeredDevices
     global everTriggeredWithinAlarmCycle
-    global alarmedDevicesInCurrentArmCycle
+    global triggeredDevicesInCurrentArmCycle
     global currentAlarmProfile
     global canDebugMessage
     global shouldSendDebugRepeatedly
@@ -575,15 +578,15 @@ def handleMessage(msg):
         toggleArmed(now, "ARDUINO")
         return
 
-    #alarm message coming in from a device that isn't in the currentlyAlarmedDevices list
-    if ((msg[1]==homeBaseId or msg[1]==broadcastId) and msg[2]==0xAA and hex(msg[0]) not in currentlyAlarmedDevices) :
-        currentlyAlarmedDevices[hex(msg[0])] = now;
+    #alarm message coming in from a device that isn't in the currentlyTriggeredDevices list
+    if ((msg[1]==homeBaseId or msg[1]==broadcastId) and msg[2]==0xAA and hex(msg[0]) not in currentlyTriggeredDevices) :
+        currentlyTriggeredDevices[hex(msg[0])] = now;
         if (not "sensorsThatTriggerAlarm" in alarmProfiles[currentAlarmProfile] or ("sensorsThatTriggerAlarm" in alarmProfiles[currentAlarmProfile] and hex(msg[0]) in alarmProfiles[currentAlarmProfile]["sensorsThatTriggerAlarm"])): #either all alarms trigger (sensorsThatTriggerAlarm missing from profile) OR current device ID in sensorsThatTriggerAlarm
             print(f">>>>>>>>>>>>>>>>>RECEIVED TRIGGER SIGNAL FROM {hex(msg[0])} AT {getReadableTime()}<<<<<<<<<<<<<<<<<<")
-            if (armed): 
+            if (armed and (now - armSetTimeSec > 2)): #if armed, and not within the first 2 seconds of arming (to avoid false alarms from PIR/mwave sensors powering on)
                 alarmed = True
                 lastAlarmTime = now;
-                alarmedDevicesInCurrentArmCycle[hex(msg[0])] = now;
+                triggeredDevicesInCurrentArmCycle[hex(msg[0])] = now;
                 everTriggeredWithinAlarmCycle[hex(msg[0])] = now;
                 updateCurrentAlarmReason();
                 addEvent({"event": "TRIGGERED-ALARM", "trigger": alarmReason, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
@@ -595,10 +598,10 @@ def handleMessage(msg):
             addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
 
     #a no-alarm message is coming in from a device that is in the alarmed device list
-    elif ((msg[1]==homeBaseId or msg[1]==broadcastId) and msg[2]!=0xAA and hex(msg[0]) in currentlyAlarmedDevices):
-        print(f"DEVICE {hex(msg[0])} NO LONGER IN currentlyAlarmedDevices - MESSAGE TO REMOVE FROM OLED")
+    elif ((msg[1]==homeBaseId or msg[1]==broadcastId) and msg[2]!=0xAA and hex(msg[0]) in currentlyTriggeredDevices):
+        print(f"DEVICE {hex(msg[0])} NO LONGER IN currentlyTriggeredDevices - MESSAGE TO REMOVE FROM OLED")
         #home base's arduino should not show this device's ID as one that is currently alarmed
-        currentlyAlarmedDevices.pop(hex(msg[0]))
+        currentlyTriggeredDevices.pop(hex(msg[0]))
         addEvent({"event": "TRIGGER-STOPPED", "trigger": hex(msg[0]), "time": getReadableTimeFromTimestamp(now)})
         sendMessage([homeBaseId, 0xFF, 0xB0, msg[0]])
         updateCurrentAlarmReason();
@@ -606,14 +609,14 @@ def handleMessage(msg):
 
 def updateCurrentAlarmReason():
     global alarmReason
-    global currentlyAlarmedDevices
+    global currentlyTriggeredDevices
     global currentlyMissingDevices
 
     alarmReason = ""
     for missingId in currentlyMissingDevices:
         alarmReason += ("" if not alarmReason else " ") + "missing " + missingId
-    for alarmedId in currentlyAlarmedDevices:
-        alarmReason += ("" if not alarmReason else " ") + "tripped " + alarmedId
+    for triggeredId in currentlyTriggeredDevices:
+        alarmReason += ("" if not alarmReason else " ") + "tripped " + triggeredId
     #if (debug): print("Updated alarm reason to: " + alarmReason)
 
 
@@ -633,13 +636,13 @@ def getStatusJsonString():
     strAlarmedStatus = "ALARM" if alarmed else "NORMAL"
     outgoingMessage = '{"armStatus": "' + ("ARMED" if armed else "DISARMED") + '",'
     outgoingMessage += '"alarmStatus": "' + strAlarmedStatus + '",'
-    outgoingMessage += '"garageOpen": ' + ('true' if hex(garageDoorSensorId) in currentlyAlarmedDevices else 'false') + ','
+    outgoingMessage += '"garageOpen": ' + ('true' if hex(garageDoorSensorId) in currentlyTriggeredDevices else 'false') + ','
     outgoingMessage += '"profile": "' + alarmProfiles[currentAlarmProfile]["name"] + '",'
     outgoingMessage += '"profileNumber": "' + str(currentAlarmProfile) + '",'
-    outgoingMessage += '"currentTriggeredDevices": ' + str(list(currentlyAlarmedDevices.keys())).replace("'","\"") + ","
+    outgoingMessage += '"currentTriggeredDevices": ' + str(list(currentlyTriggeredDevices.keys())).replace("'","\"") + ","
     outgoingMessage += '"currentMissingDevices": ' + str(currentlyMissingDevices).replace("'","\"") + ','
     outgoingMessage += '"everTriggeredWithinAlarmCycle": ' + str(list(everTriggeredWithinAlarmCycle.keys())).replace("'","\"") + ","
-    outgoingMessage += '"everTriggeredWithinArmCycle": ' + str(list(alarmedDevicesInCurrentArmCycle.keys())).replace("'","\"") + ","
+    outgoingMessage += '"everTriggeredWithinArmCycle": ' + str(list(triggeredDevicesInCurrentArmCycle.keys())).replace("'","\"") + ","
     outgoingMessage += '"everMissingWithinArmCycle": ' + str(list(missingDevicesInCurrentArmCycle.keys())).replace("'","\"") + ","
     outgoingMessage += '"everMissingDevices": ' + str(list(everMissingDevices.keys())).replace("'","\"") + ","
     outgoingMessage += '"memberCount": ' + str(len(memberDevices)) + ','
@@ -661,13 +664,13 @@ def stopAlarm():
     global alarmed
     global lastAlarmTime
     global everTriggeredWithinAlarmCycle
-    global currentlyAlarmedDevices
+    global currentlyTriggeredDevices
     global homeBaseId
 
     alarmed = False
     addEvent({"event": "FINISHED-ALARM", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
     everTriggeredWithinAlarmCycle = {}
-    currentlyAlarmedDevices = {}
+    currentlyTriggeredDevices = {}
     updateCurrentAlarmReason()
     sendMessage([homeBaseId, 0xFF, 0xC0, 0x01])
 
@@ -675,7 +678,7 @@ def stopAlarm():
 def run(webserver_message_queue):
     global LISTEN_PORT
     global memberDevices
-    global currentlyAlarmedDevices
+    global currentlyTriggeredDevices
     global everTriggeredWithinAlarmCycle
     global homeBaseId
     global pastEvents
@@ -726,7 +729,7 @@ def run(webserver_message_queue):
             elif (message['request'] == "GET-ALARM-PROFILES") :
                 message['responseQueue'].put({"response": getProfilesJsonString(), "uuid": message['uuid'] })
             elif (message['request'] == "FORCE-ALARM-SOUND-ON") :
-                currentlyAlarmedDevices[hex(testAlarmId)] = getTimeSec();
+                currentlyTriggeredDevices[hex(testAlarmId)] = getTimeSec();
                 sendAlarmMessage(True, True)
                 time.sleep(.15)
                 sendAlarmMessage(False, False)
@@ -735,7 +738,7 @@ def run(webserver_message_queue):
             elif (message['request'] == "CLEAR-OLD-DATA") :
                 clearOldData()
             elif (message['request'] == "ALERT-CHECK-PHONES") :
-                currentlyAlarmedDevices[hex(checkPhonesId)] = getTimeSec();
+                currentlyTriggeredDevices[hex(checkPhonesId)] = getTimeSec();
                 saveProfile = currentAlarmProfile;
                 currentAlarmProfile = 0;
                 sendAlarmMessage(True, True)
@@ -814,7 +817,7 @@ def run(webserver_message_queue):
             ):
                 stopAlarm()
         #if currently alarmed and there are no missing or alarmed devices and it's been long enough that alarmTimeLengthSec has run out, DISABLE ALARM FLAG
-        if (alarmed and getCurrentProfileAlarmTime() > -1 and lastAlarmTime + getCurrentProfileAlarmTime() < getTimeSec() and len(currentlyMissingDevices) == 0 and len(currentlyAlarmedDevices) == 0):
+        if (alarmed and getCurrentProfileAlarmTime() > -1 and lastAlarmTime + getCurrentProfileAlarmTime() < getTimeSec() and len(currentlyMissingDevices) == 0 and len(currentlyTriggeredDevices) == 0):
             stopAlarm()
             updateCurrentAlarmReason()
 
@@ -855,14 +858,14 @@ def getProfileName(profileNumber):
 
 def clearOldData():
     global everTriggeredWithinAlarmCycle
-    global alarmedDevicesInCurrentArmCycle
+    global triggeredDevicesInCurrentArmCycle
     global missingDevicesInCurrentArmCycle
     global everMissingDevices
     global currentlyMissingDevices
     global pastEvents
 
     everTriggeredWithinAlarmCycle = {}
-    alarmedDevicesInCurrentArmCycle = {}
+    triggeredDevicesInCurrentArmCycle = {}
     missingDevicesInCurrentArmCycle = {}
     everMissingDevices = {}
     currentlyMissingDevices = []
@@ -874,12 +877,12 @@ def stopsendingcan():
     global canDebugMessage
     global shouldSendDebugRepeatedly
     global shouldSendDebugMessage
-    global currentlyAlarmedDevices
+    global currentlyTriggeredDevices
 
     canDebugMessage = []
     shouldSendDebugRepeatedly = False
     shouldSendDebugMessage = False
-    currentlyAlarmedDevices = {}
+    currentlyTriggeredDevices = {}
 
     print('STOPPING SENDING FAKE MESSAGE FROM UI')
     addEvent({
