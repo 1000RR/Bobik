@@ -242,20 +242,32 @@ def toggleArmed(now, strActionOrigin):
     print("Clearing member devices list")
     resetMemberDevices() #reset all members on the bus when turning on/off
 
+def getMemberDeviceDictionary(id, firstSeen, firstSeenReadable, deviceType, lastSeen, lastSeenReadable, friendlyName, lastArmedTimeSec):
+    return {
+        'id': id,
+        'firstSeen': firstSeen,
+        'firstSeenReadable': firstSeenReadable,
+        'deviceType': deviceType,
+        'lastSeen': lastSeen,
+        'lastSeenReadable': lastSeenReadable,
+        'friendlyName': lastArmedTimeSec,
+        'lastArmedTimeSec': lastArmedTimeSec
+    }
+
 
 def resetMemberDevices():
     global memberDevices
     memberDevices = {
-        hex(denonId): {
-            'id': hex(denonId),
-            'firstSeen': getTimeSec(),
-            'firstSeenReadable': getTimeSec(),
-            'deviceType': '0x10',
-            'lastSeen': getTimeSec(),
-            'lastSeenReadable': getTimeSec(),
-            'friendlyName': getFriendlyDeviceName(denonId),
-            'lastArmedTimeSec': -1
-        }
+        hex(denonId): getMemberDeviceDictionary(
+            id = hex(denonId),
+            firstSeen = getTimeSec(),
+            firstSeenReadable = getReadableTime(),
+            deviceType = '0x10',
+            lastSeen = getTimeSec(),
+            lastSeenReadable = getTimeSec(),
+            friendlyName = getFriendlyDeviceName(denonId),
+            lastArmedTimeSec = -1
+        )
     }
 
 
@@ -341,16 +353,17 @@ def possiblyAddMember(msg):
         if (hex(senderId) not in memberDevices) : #new device sending a signal
             print(f"Adding new device to members list {hex(senderId)} at {readableTimestamp}")
             addEvent({"event": "NEW-MEMBER", "trigger": hex(senderId), "time": readableTimestamp})
-            memberDevices[hex(senderId)] = {
-                'id': hex(senderId),
-                'firstSeen': now,
-                'firstSeenReadable': readableTimestamp,
-                'deviceType': msg[3],
-                'lastSeen': now,
-                'lastSeenReadable': readableTimestamp,
-                'friendlyName': getFriendlyDeviceName(senderId),
-                'lastArmedTimeSec': -1 if not (armed and isDeviceInActiveProfileTriggersList(hex(senderId))) else now+armPerDeviceTimeoutBeforeTriggeringAlarm
-            }
+            memberDevices[hex(senderId)] = getMemberDeviceDictionary(
+                id = hex(senderId),
+                firstSeen = now,
+                firstSeenReadable = readableTimestamp,
+                deviceType = msg[3],
+                lastSeen = now,
+                lastSeenReadable = readableTimestamp,
+                friendlyName = getFriendlyDeviceName(senderId),
+                lastArmedTimeSec = -1 if not (armed and isDeviceInActiveProfileTriggersList(hex(senderId))) else now+armPerDeviceTimeoutBeforeTriggeringAlarm
+            )
+           
             #setDevicePower(senderId)
         else : #existing device sending a signal
             memberDevices[hex(senderId)]['lastSeen'] = now
@@ -644,25 +657,27 @@ def getProfilesJsonString():
 
 
 def getStatusJsonString():
-    strAlarmedStatus = "ALARM" if alarmed else "NORMAL"
-    outgoingMessage = '{"armStatus": "' + ("ARMED" if armed else "DISARMED") + '",'
-    outgoingMessage += '"alarmStatus": "' + strAlarmedStatus + '",'
-    outgoingMessage += '"garageOpen": ' + ('true' if hex(garageDoorSensorId) in currentlyTriggeredDevices else 'false') + ','
-    outgoingMessage += '"profile": "' + alarmProfiles[currentAlarmProfile]["name"] + '",'
-    outgoingMessage += '"profileNumber": "' + str(currentAlarmProfile) + '",'
-    outgoingMessage += '"currentTriggeredDevices": ' + str(list(currentlyTriggeredDevices.keys())).replace("'","\"") + ","
-    outgoingMessage += '"currentMissingDevices": ' + str(currentlyMissingDevices).replace("'","\"") + ','
-    outgoingMessage += '"everTriggeredWithinAlarmCycle": ' + str(list(everTriggeredWithinAlarmCycle.keys())).replace("'","\"") + ","
-    outgoingMessage += '"everTriggeredWithinArmCycle": ' + str(list(triggeredDevicesInCurrentArmCycle.keys())).replace("'","\"") + ","
-    outgoingMessage += '"everMissingWithinArmCycle": ' + str(list(missingDevicesInCurrentArmCycle.keys())).replace("'","\"") + ","
-    outgoingMessage += '"everMissingDevices": ' + str(list(everMissingDevices.keys())).replace("'","\"") + ","
-    outgoingMessage += '"memberCount": ' + str(len(memberDevices)) + ','
-    outgoingMessage += '"memberDevices": ' + str(list(memberDevices.keys())).replace("'","\"") + ','
-    outgoingMessage += '"memberDevicesReadable": ' + str(getFriendlyDeviceNamesFromDeviceDictionary(list(memberDevices.keys()))).replace("'","\"") + ','
-    outgoingMessage += '"quickSetAlarmProfiles": ' + str(quickSetAlarmProfiles) + ','
-    outgoingMessage += '"profileDefinition": ' + json.dumps(alarmProfiles[currentAlarmProfile])
-    outgoingMessage += '}'
-    return outgoingMessage
+    outgoingMessageDict = {
+        "armStatus": "ARMED" if armed else "DISARMED",
+        "alarmStatus": "ALARM" if alarmed else "NORMAL",
+        "garageOpen": hex(garageDoorSensorId) in currentlyTriggeredDevices,
+        "profile": alarmProfiles[currentAlarmProfile]["name"],
+        "profileNumber": str(currentAlarmProfile),
+        "currentTriggeredDevices": list(currentlyTriggeredDevices.keys()),
+        "currentMissingDevices": list(currentlyMissingDevices),
+        "everTriggeredWithinAlarmCycle": list(everTriggeredWithinAlarmCycle.keys()),
+        "everTriggeredWithinArmCycle": list(triggeredDevicesInCurrentArmCycle.keys()),
+        "everMissingWithinArmCycle": list(missingDevicesInCurrentArmCycle.keys()),
+        "everMissingDevices": list(everMissingDevices.keys()),
+        "memberCount": len(memberDevices),
+        "memberDevices": list(memberDevices.keys()),
+        "memberDevicesReadable": getFriendlyDeviceNamesFromDeviceDictionary(
+            list(memberDevices.keys())
+        ),
+        "quickSetAlarmProfiles": quickSetAlarmProfiles,
+        "profileDefinition": alarmProfiles[currentAlarmProfile],
+    }
+    return json.dumps(outgoingMessageDict)
 
 
 def getPastEventsJsonString():
@@ -705,7 +720,7 @@ def run(webserver_message_queue):
     global lastCheckedMissingDevicesMsec
     global alarmProfiles
     global currentAlarmProfile
-    global alwaysKeepOnSet #TODO: this should not be a thing. All non-relay-gated devices should not respond in any way to power messages, and should always output their sensor status. Home base decides what to do with this.
+    global alwaysKeepOnSet #TODO: LEGACY - for unpowered devices that listen to on/off commands. In new iteration, only powered devices should listen to this. 
     global testAlarmId
     resetMemberDevices()
 
