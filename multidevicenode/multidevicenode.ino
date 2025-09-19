@@ -41,7 +41,7 @@ struct Device {
 	const int myCanId;				// config
 	const int deviceType;			// config. per DeviceType[]
 	const int ioPin;				// config. sensor: pin is connected to ground via resistor for a LOW signal (alarm at rest) or chain broken for a HIGH signal (alarm triggered) | alarm: LOW=off, should be connected to an analog pin for sweeping the buzzer.
-	const int relayPin;				// config. -1 for no relay
+	const int relayPin;				// config. -1 for no relay; NOTE: devices with a relay are considered powered, and are subject to "disable power" messages from home base; non-relay devices are always on
 	int sensorVal;					// state. for sensors only
 	bool isAlarmed;					// state. for alarms only
 	long nextStateChangeTimestamp;	// state. for momentary switches only - the hold time of the HIGH signal to the relay.
@@ -145,8 +145,8 @@ void setup() {
 void setSensorEnableState(int deviceNumber, bool newState) {
 	if (newState == true && devices[deviceNumber].isEnabled == false ||	 //if toggling from current state
 		newState == false && devices[deviceNumber].isEnabled == true) {
-		devices[deviceNumber].isEnabled = newState;
-		setDigitalPinIfExists(devices[deviceNumber].relayPin, newState ? LOW : HIGH);  // low = on
+		devices[deviceNumber].isEnabled = devices[deviceNumber].relayPin != -1 ? newState : true;  //only turn off if there's a relay to turn off (ie device is considered powered)
+		setDigitalPinIfExists(devices[deviceNumber].relayPin, newState ? LOW : HIGH);			   // low = on
 		if (debugOutput && devices[deviceNumber].relayPin != -1) {
 			Serial.println(String(">>>>>>>>>>>") + String(newState ? "EN" : "DIS") + String("ABLING RELAY>>>>>>>>>>>"));
 		}
