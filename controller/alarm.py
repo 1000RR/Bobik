@@ -60,14 +60,10 @@ with open(getThisDirAddress() + '/alarmProfiles.json', 'r') as file:
     alarmProfiles = json.loads(file.read())
 
 
-
-
 #serial message format: 
 #   {sender id hex}-{receiver id hex}-{message hex}-{devicetype hex}\n
 #when sending to 0xFF (home base arduino)
 #   {HOME_BASE_ID}-0xFF-{message hex}-{message 2 hex}\n
-
-
 
 
 #DEBUGGER debugpy
@@ -495,7 +491,6 @@ def arrayToString(array):
 
 
 def isDeviceInActiveProfileTriggersList(deviceId):
-    global currentAlarmProfile
     if ("sensorsThatTriggerAlarm" in alarmProfiles[currentAlarmProfile]):
         return deviceId in alarmProfiles[currentAlarmProfile]["sensorsThatTriggerAlarm"]
     return True #if no sensorsThatTriggerAlarm list, all devices trigger
@@ -568,8 +563,6 @@ def handleMessage(msg):
 
 def updateCurrentAlarmReason():
     global alarmReason
-    global currentlyTriggeredDevices
-    global currentlyMissingDevices
 
     alarmReason = ""
     for missingId in currentlyMissingDevices:
@@ -580,8 +573,6 @@ def updateCurrentAlarmReason():
 
 
 def getProfilesJsonString():
-    global alarmProfiles
-
     profilesJSON = ""
     for profile in alarmProfiles:
         profilesJSON += json.dumps(profile) + ","
@@ -626,7 +617,6 @@ def stopAlarm():
     global lastAlarmTime
     global everTriggeredWithinAlarmCycle
     global currentlyTriggeredDevices
-    global HOME_BASE_ID
 
     alarmed = False
     addEvent({"event": "FINISHED-ALARM", "time": getReadableTimeFromTimestamp(lastAlarmTime)})
@@ -637,7 +627,6 @@ def stopAlarm():
 
 
 def run(webserver_message_queue):
-    global LISTEN_PORT
     global memberDevices
     global currentlyTriggeredDevices
     global everTriggeredWithinAlarmCycle
@@ -652,7 +641,6 @@ def run(webserver_message_queue):
     global lastSentMessageTimeMsec
     global currentlyMissingDevices
     global lastCheckedMissingDevicesMsec
-    global alarmProfiles
     global currentAlarmProfile
     global alwaysKeepOnSet #TODO: LEGACY - for unpowered devices that listen to on/off commands. In new iteration, only powered devices should listen to this. 
 
