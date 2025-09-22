@@ -317,7 +317,7 @@ void loop() /* go through all devices: read incoming CAN message, send message f
 		if (devices[i].type == SENSOR) {
 			devices[i].sensorVal = digitalRead(devices[i].ioPin); /*LOW by default, no motion detected*/
 			if (debugSerialOutput) {
-				//Serial.println(String("Read SENSOR 0x") + String(devices[i].myCanId, HEX) + String (" at pin ") + String(devices[i].ioPin) + String(" with value: ") + String(devices[i].sensorVal));
+				Serial.println(String("Read SENSOR 0x") + String(devices[i].myCanId, HEX) + String (" at pin ") + String(devices[i].ioPin) + String(" with value: ") + String(devices[i].sensorVal));
 			}
 			if (enableLocalBuzzer) {
 				localBuzzerSounding = localBuzzerSounding || (devices[i].sensorVal == HIGH && devices[i].isEnabled == true);

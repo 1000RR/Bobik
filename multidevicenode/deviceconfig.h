@@ -6,7 +6,7 @@ Device devices[] = {
 		myCanId : 0x60, /*PIR*/
 		deviceType : 2,
 		ioPin : 6,
-		relayPin : 3,	 /* -1 = no relay; writing LOW to this pin (when defined) turns relay ON a sensor */
+		relayPin : 2,	 /* -1 = no relay; writing LOW to this pin (when defined) turns relay ON a sensor */
 		sensorVal : HIGH, /* variable to store the sensor status (value) - set to HIGH initial for sensors of BOSCH PIR type*/
 		isAlarmed : false,
 		nextStateChangeTimestamp : 0,
