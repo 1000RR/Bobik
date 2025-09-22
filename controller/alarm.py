@@ -26,12 +26,9 @@ everTriggered = {}
 currentlyTriggeredDevices = {} #map of {string hex id:int alarmTimeSec}
 currentlyMissingDevices = []
 everMissingDevices = {}
-
 denonPlayThread = 0
 lastSentMessageTimeMsec = 0
-
 lastAlarmTime = 0
-
 armSetTimeSec = 0 #movement detection devices tend to send an alarm signal shortly after being powered on. This is used to ignore such signals if they occur within a few seconds of arming.
 armTimeoutBeforeTriggeringAlarm = 2 #seconds
 armPerDeviceTimeoutBeforeTriggeringAlarm = 2 #seconds
@@ -300,7 +297,10 @@ def possiblyAddMember(msg):
                 lastArmedTimeSec = -1 if not (armed and isDeviceInActiveProfileTriggersList(hex(senderId))) else now+armPerDeviceTimeoutBeforeTriggeringAlarm
             )
            
-            #setDevicePower(senderId)
+            #if a new device is added while armed, set its power state according to the current profile
+            if (now - armSetTimeSec < armTimeoutBeforeTriggeringAlarm and armed and isDeviceInActiveProfileTriggersList(hex(senderId))):
+                setDevicePower(senderId)
+
         else : #existing device sending a signal
             memberDevices[hex(senderId)]['lastSeen'] = now
             memberDevices[hex(senderId)]['lastSeenReadable'] = readableTimestamp
@@ -500,6 +500,24 @@ def isDeviceInActiveProfileTriggersList(deviceId):
         return deviceId in alarmProfiles[currentAlarmProfile]["sensorsThatTriggerAlarm"]
     return True #if no sensorsThatTriggerAlarm list, all devices trigger
 
+
+def hasMissingDevicesThatTriggerAlarm():
+    if ("missingDevicesThatTriggerAlarm" in alarmProfiles[currentAlarmProfile]):
+        for missingDevice in currentlyMissingDevices:
+            if (missingDevice in alarmProfiles[currentAlarmProfile]["missingDevicesThatTriggerAlarm"]):
+                return True
+        return False
+    return True #if no missingDevicesThatTriggerAlarm list, all missing devices trigger
+
+
+def hasTriggeredDevicesThatTriggerAlarm():
+    if ("sensorsThatTriggerAlarm" in alarmProfiles[currentAlarmProfile]):
+        for triggeredDevice in currentlyTriggeredDevices:
+            if (triggeredDevice in alarmProfiles[currentAlarmProfile]["sensorsThatTriggerAlarm"]):
+                return True
+        return False
+    return True #if no sensorsThatTriggerAlarm list, all triggered devices trigger
+
 def handleMessage(msg):
     global alarmed
     global lastAlarmTime
@@ -554,14 +572,16 @@ def handleMessage(msg):
                 sendMessage([HOME_BASE_ID, BASE_STATION_ID, ALARMED_DEVICE_ID_COMMAND, senderId]) #send to the home base's arduino a non-forwardable message with the ID of the alarm-generating device to be added to the list
             else:
                 addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": hex(senderId), "time": getReadableTimeFromTimestamp(now)})
+                everTriggered[hex(senderId)] = now;
         else:
             addEvent({"event": "TRIGGERED-NO-ALARM", "trigger": hex(senderId), "time": getReadableTimeFromTimestamp(now)})
+            everTriggered[hex(senderId)] = now;
 
     #a no-alarm message is coming in from a device that is in the alarmed device list
     elif ((receiverId==HOME_BASE_ID or receiverId==BROADCAST_ID) and message!=ALARM_TRIGGERED_COMMAND and hex(senderId) in currentlyTriggeredDevices):
         print(f"DEVICE {hex(senderId)} NO LONGER IN currentlyTriggeredDevices - MESSAGE TO REMOVE FROM OLED")
         #home base's arduino should not show this device's ID as one that is currently alarmed
-        currentlyTriggeredDevices.pop(hex(senderId))
+        currentlyTriggeredDevices.pop(hex(senderId), None)
         addEvent({"event": "TRIGGER-STOPPED", "trigger": hex(senderId), "time": getReadableTimeFromTimestamp(now)})
         sendMessage([HOME_BASE_ID, BASE_STATION_ID, NO_LONGER_ALARMED_DEVICE_ID_COMMAND, senderId])
         updateCurrentAlarmReason();
@@ -750,8 +770,12 @@ def run(webserver_message_queue):
                 updateCurrentAlarmReason()
                 print(f">>>>>>>>>>>>>>>>>>>> ADDING MISSING DEVICES {arrayToString(currentlyMissingDevices)} at {getReadableTime()}<<<<<<<<<<<<<<<<<<<")
                 shouldSetNewAlarm = False;
-                for missingDevice in newMissingDevices:
-                    if (armed and not "missingDevicesThatTriggerAlarm" in alarmProfiles[currentAlarmProfile] or missingDevice in alarmProfiles[currentAlarmProfile]["missingDevicesThatTriggerAlarm"]):
+                for missingDevice in newMissingDevices: #each missingDevice is a hex string
+                    currentlyTriggeredDevices.pop(missingDevice, None) #if was triggered, remove from triggered list while adding to missing list
+                    if (armed
+                        and not "missingDevicesThatTriggerAlarm" in alarmProfiles[currentAlarmProfile] 
+                        or missingDevice in alarmProfiles[currentAlarmProfile]["missingDevicesThatTriggerAlarm"]
+                    ):
                         shouldSetNewAlarm = True
 
                     if (shouldSetNewAlarm):
@@ -768,8 +792,13 @@ def run(webserver_message_queue):
                 ) == 0
             ):
                 stopAlarm()
-        #if currently alarmed and there are no missing or alarmed devices and it's been long enough that alarmTimeLengthSec has run out, DISABLE ALARM FLAG
-        if (alarmed and getCurrentProfileAlarmTime() > -1 and lastAlarmTime + getCurrentProfileAlarmTime() < getTimeSec() and len(currentlyMissingDevices) == 0 and len(currentlyTriggeredDevices) == 0):
+        #if currently alarmed and there are no profile-matching missing or alarmed devices and it's been long enough that alarmTimeLengthSec has run out, DISABLE ALARM FLAG
+        if (alarmed
+            and getCurrentProfileAlarmTime() > -1
+            and lastAlarmTime + getCurrentProfileAlarmTime() < getTimeSec()
+            and not hasMissingDevicesThatTriggerAlarm()
+            and not hasTriggeredDevicesThatTriggerAlarm()
+        ):
             stopAlarm()
             updateCurrentAlarmReason()
 
