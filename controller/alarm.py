@@ -11,25 +11,27 @@ import debugpy
 from threading import Thread
 from alarmconstants import *
 
-
 debug = False 
 LISTEN_PORT = 8080
-memberDevices = {} #map of {string hex id:{properties}}
 
-exceptMissingDevices = {hex(DENON_ID): True}
-denonPlayThread = 0
-lastSentMessageTimeMsec = 0
-
-pastEvents = []
+armed = False #initial condition
 alarmed = False
+pastEvents = []
+memberDevices = {} #map of {string hex id:{properties}}
+exceptMissingDevices = {hex(DENON_ID): True}
 triggeredDevicesInCurrentArmCycle = {}
 missingDevicesInCurrentArmCycle = {}
 everTriggeredWithinAlarmCycle = {} #map of {string hex id:int alarmTimeSec}
+everTriggered = {}
 currentlyTriggeredDevices = {} #map of {string hex id:int alarmTimeSec}
 currentlyMissingDevices = []
 everMissingDevices = {}
+
+denonPlayThread = 0
+lastSentMessageTimeMsec = 0
+
 lastAlarmTime = 0
-armed = False #initial condition
+
 armSetTimeSec = 0 #movement detection devices tend to send an alarm signal shortly after being powered on. This is used to ignore such signals if they occur within a few seconds of arming.
 armTimeoutBeforeTriggeringAlarm = 2 #seconds
 armPerDeviceTimeoutBeforeTriggeringAlarm = 2 #seconds
@@ -78,11 +80,11 @@ ser = serial.Serial('/dev/ttyUSB0', baudrate=115200, parity=serial.PARITY_NONE, 
 print("Arduino: serial connection with PI established")
 np.set_printoptions(formatter={'int':hex})
 
-#NEW DEVICES POWER FUNCTION
 
 def setDevicePower(deviceId):
     intendedPowerState = armed and deviceId in getExplicitAlarmProfileTriggerDevices().union(alwaysKeepOnSet)
     sendPowerCommand([deviceId], False, intendedPowerState) 
+
 
 def setDevicesPower():
     offDevices = []
@@ -97,8 +99,10 @@ def setDevicesPower():
         sendPowerCommand(offDevices, False, False)
         sendPowerCommand(onDevices, False, True)
 
+
 def getExplicitAlarmProfileTriggerDevices():
     return set(alarmProfiles[currentAlarmProfile]['sensorsThatTriggerAlarm']) if 'sensorsThatTriggerAlarm' in alarmProfiles[currentAlarmProfile] else set(memberDevices)
+
 
 def getDevicesPowerStateLists(): #devices per current profile
     oldProfileDeviceSet = set(memberDevices)
@@ -174,6 +178,7 @@ def toggleArmed(now, strActionOrigin):
     sendArmedLedSignal() 
     print("Clearing member devices list")
     resetMemberDevices() #reset all members on the bus when turning on/off
+
 
 def getMemberDeviceDictEntry(id, firstSeen, firstSeenReadable, deviceType, lastSeen, lastSeenReadable, friendlyName, lastArmedTimeSec):
     return {
@@ -542,6 +547,7 @@ def handleMessage(msg):
                 lastAlarmTime = now;
                 triggeredDevicesInCurrentArmCycle[hex(senderId)] = now;
                 everTriggeredWithinAlarmCycle[hex(senderId)] = now;
+                everTriggered[hex(senderId)] = now;
                 updateCurrentAlarmReason();
                 addEvent({"event": "TRIGGERED-ALARM", "trigger": alarmReason, "time": getReadableTimeFromTimestamp(lastAlarmTime)})
                 print (f">>>>>currentAlarmProfile {currentAlarmProfile}")
@@ -591,6 +597,7 @@ def getStatusJsonString():
         "profileNumber": str(currentAlarmProfile),
         "currentTriggeredDevices": list(currentlyTriggeredDevices.keys()),
         "currentMissingDevices": list(currentlyMissingDevices),
+        "everTriggered": list(everTriggered.keys()),
         "everTriggeredWithinAlarmCycle": list(everTriggeredWithinAlarmCycle.keys()),
         "everTriggeredWithinArmCycle": list(triggeredDevicesInCurrentArmCycle.keys()),
         "everMissingWithinArmCycle": list(missingDevicesInCurrentArmCycle.keys()),
@@ -796,6 +803,7 @@ def getProfileName(profileNumber):
 
 
 def clearOldData():
+    global everTriggered
     global everTriggeredWithinAlarmCycle
     global triggeredDevicesInCurrentArmCycle
     global missingDevicesInCurrentArmCycle
@@ -804,6 +812,7 @@ def clearOldData():
     global pastEvents
 
     everTriggeredWithinAlarmCycle = {}
+    everTriggered = {}
     triggeredDevicesInCurrentArmCycle = {}
     missingDevicesInCurrentArmCycle = {}
     everMissingDevices = {}
