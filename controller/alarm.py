@@ -158,11 +158,8 @@ def setCurrentAlarmProfile(
         currentAlarmProfile = profileNumber
         currentlyTriggeredDevices = {}
         stopAlarm()
-        
+
         setDevicesPower()
-        sendMessage(
-            [HOME_BASE_ID, BASE_STATION_ID, ALARM_DISABLE_COMMAND, DEVICE_TYPE_HOMEBASE]
-        )  # turn off all alarms as part of this change
         print(
             "SETTING ALARM PROFILE "
             + str(profileNumber)
@@ -643,7 +640,7 @@ def sendPowerCommand(devicesOverrideArray, shouldBroadcast, powerState):  # two 
                 f">>>> SENDING POWER {'ON' if powerState else 'OFF'} SIGNAL {np.array(messageToSend)}"
             )
             time.sleep(
-                0.07
+                FLOAT_DELAY_BETWEEN_POWER_ON_COMMANDS_SEC
             )  # in seconds represented as double - to not have a voltage drop from multiple relay-gated PIR/mwave devices powering on (and charging capacitor) simultaneously
 
 
@@ -655,7 +652,7 @@ def exitSteps():
     )  # reset all devices (broadcast)
     print("BROADCASTING ALL-SENSOR-DEVICES-OFF SIGNAL")
     sendMessage(
-        [HOME_BASE_ID, BROADCAST_ID, SENSOR_POWER_ON_COMMAND, DEVICE_TYPE_HOMEBASE]
+        [HOME_BASE_ID, BROADCAST_ID, SENSOR_POWER_OFF_COMMAND, DEVICE_TYPE_HOMEBASE]
     )  # all devices off (broadcast)
     print("\nPAST EVENTS LIST FOLLOWS:")
     for line in pastEvents:
@@ -885,13 +882,12 @@ def stopAlarm():
     sendMessage(
         [HOME_BASE_ID, BASE_STATION_ID, STOP_ALARM_COMMAND, DEVICE_TYPE_HOMEBASE]
     )
-    sendMessage(
+    sendMessage( #turn off existing alarms blaring, not sensors
         [HOME_BASE_ID, BROADCAST_ID, ALARM_DISABLE_COMMAND, DEVICE_TYPE_HOMEBASE]
     )
 
 
 def run(webserver_message_queue):
-    global memberDevices
     global currentlyTriggeredDevices
     global everTriggeredWithinAlarmCycle
     global pastEvents
@@ -923,7 +919,7 @@ def run(webserver_message_queue):
     ser.flushInput()  # this clears the input buffer, and should not be done routinely during the receiving loop - leads to dropped messages and thus missing devices
     sendMessage(
         [HOME_BASE_ID, BROADCAST_ID, ALARM_DISABLE_COMMAND, DEVICE_TYPE_HOMEBASE]
-    )  # reset all devices (broadcast)
+    )  # turn off all alarms (broadcast)
     sendArmedLedSignal()
     firstTurnedOnTimestamp = getTimeSec()
 
@@ -952,7 +948,7 @@ def run(webserver_message_queue):
             elif message["request"] == "FORCE-ALARM-SOUND-ON":
                 currentlyTriggeredDevices[hex(TEST_ALARM_ID)] = getTimeSec()
                 sendAlarmMessage(True, True)
-                time.sleep(0.15)
+                time.sleep(FLOAT_ALARM_TEST_LENGTH_TIME_SEC) #how long to chirp for
                 sendAlarmMessage(False, False)
             elif message["request"] == "TOGGLE-GARAGE-DOOR-STATE":
                 sendMessage(
@@ -970,7 +966,7 @@ def run(webserver_message_queue):
                 saveProfile = currentAlarmProfile
                 currentAlarmProfile = 0
                 sendAlarmMessage(True, True)
-                time.sleep(0.1)
+                time.sleep(0.1) #in seconds as float
                 sendAlarmMessage(False, False)
                 currentAlarmProfile = saveProfile
             elif message["request"].startswith("CAN-REPEATEDLY-SEND-"):
