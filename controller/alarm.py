@@ -681,7 +681,7 @@ def hasMissingDevicesThatTriggerAlarm():
             ):
                 return True
         return False
-    return len(currentlyMissingDevices) > 0 # if no missingDevicesThatTriggerAlarm list, all missing devices trigger
+    return False  # if no missingDevicesThatTriggerAlarm list, no missing devices trigger
     
 
 
@@ -824,7 +824,8 @@ def handleMessage(msg):
             ]
         )
 
-
+#missingDevicesThatTriggerAlarm is optional and additive - if not present, no missing devices trigger the alarm
+#sensorsThatTriggerAlarm is optional - if not present, all devices trigger the alarm
 def getProfilesJsonString():
     profilesJSON = ""
     for profile in alarmProfiles:
