@@ -11,6 +11,11 @@ import debugpy
 from threading import Thread
 from alarmconstants import *
 
+# DEBUGGER debugpy
+debugpy.listen(("0.0.0.0", 5678))
+print("Waiting for debugger attach...")
+debugpy.trace_this_thread(True)
+
 debug = False
 LISTEN_PORT = 8080
 
@@ -37,7 +42,6 @@ deviceAbsenceThresholdSec = 3  # seconds before a device is considered missing
 firstPowerCommandNeedsToBeSent = True
 timeAllottedToBuildOutMembersSec = 2
 initWaitSeconds = 5
-alarmReason = ""
 sendTimeoutMsec = 500
 lastCheckedMissingDevicesMsec = 0
 checkForMissingDevicesEveryMsec = 1500
@@ -77,9 +81,7 @@ with open(getThisDirAddress() + "/alarmProfiles.json", "r") as file:
 #   {HOME_BASE_ID}-0xFF-{message hex}-{message 2 hex}\n
 
 
-# DEBUGGER debugpy
-debugpy.listen(("0.0.0.0", 5678))
-print("Waiting for debugger attach...")
+
 
 # name of ARDUINO tty device
 # on mac: /dev/tty.usbserial-10
@@ -95,12 +97,16 @@ ser = serial.Serial(
 print("Arduino: serial connection with PI established")
 np.set_printoptions(formatter={"int": hex})
 
-
+#deviceId: hex str OR int
 def setDevicePower(deviceId):
+    if isinstance(deviceId, int):
+        deviceId = hex(deviceId);
+
     intendedPowerState = (
         armed
-        and deviceId in getExplicitAlarmProfileTriggerDevices().union(alwaysKeepOnSet)
+        and deviceId in getExplicitAlarmProfileTriggerDevices().union(alwaysKeepOnSet) #TODO: race condition possible -> if not all devices yet added to member list, you're screwed
     )
+     # devicesOverrideArray, shouldBroadcast, powerState
     sendPowerCommand([deviceId], False, intendedPowerState)
 
 
@@ -116,8 +122,11 @@ def setDevicesPower():
         sendPowerCommand(list(alwaysKeepOnSet), False, True)
     else:
         offDevices, onDevices = getDevicesPowerStateLists()
-        sendPowerCommand(offDevices, False, False)
-        sendPowerCommand(onDevices, False, True)
+        
+        if (len(offDevices) > 0):
+            sendPowerCommand(offDevices, False, False)
+        if (len(onDevices) > 0):
+            sendPowerCommand(onDevices, False, True)
 
 
 def getExplicitAlarmProfileTriggerDevices():
@@ -146,10 +155,10 @@ def setCurrentAlarmProfile(
     global alarmed
 
     if profileNumber >= -1 and profileNumber < len(alarmProfiles):
-        currentlyTriggeredDevices = {}
-        alarmed = False
-
         currentAlarmProfile = profileNumber
+        currentlyTriggeredDevices = {}
+        stopAlarm()
+        
         setDevicesPower()
         sendMessage(
             [HOME_BASE_ID, BASE_STATION_ID, ALARM_DISABLE_COMMAND, DEVICE_TYPE_HOMEBASE]
@@ -211,9 +220,7 @@ def toggleArmed(now, strActionOrigin):
             }
         )
         armed = False
-        alarmed = False  # reset alarmed state
-        everTriggeredWithinAlarmCycle = {}
-        currentlyTriggeredDevices = {}
+        stopAlarm() # reset alarmed state
         triggeredDevicesInCurrentArmCycle = {}
         missingDevicesInCurrentArmCycle = {}
     else:
@@ -228,12 +235,13 @@ def toggleArmed(now, strActionOrigin):
             }
         )
         armed = True
-        armSetTimeSec = now
-        alarmed = False  # reset alarmed state
-        everTriggeredWithinAlarmCycle = {}
+        armSetTimeSec = now + 5 #overshoots first so that any new messages being handled are not considered within the arm timeout period
+        stopAlarm()
 
     # turn on or off devices depending on armed state
     setDevicesPower()
+    if (armed): #this is intentionally done after setting all the devices' power state, so that an alarm is considered on only after all power messages are sent
+        armSetTimeSec = now
     sendArmedLedSignal()
     print("Clearing member devices list")
     resetMemberDevices()  # reset all members on the bus when turning on/off
@@ -328,7 +336,7 @@ def getCurrentProfileSoundByteData():
     playSound = ""
 
     for index, profile in enumerate(alarmProfiles):
-        print(">>>>>> PROFILE INDEX " + str(index))
+        #print(">>>>>> PROFILE INDEX " + str(index))
         if index != currentAlarmProfile:
             continue
         if "playSound" in profile and profile["playSound"]:
@@ -398,8 +406,7 @@ def possiblyAddMember(msg):
 
             # if a new device is added while armed, set its power state according to the current profile
             if (
-                now - armSetTimeSec < armTimeoutBeforeTriggeringAlarm
-                and armed
+                armed
                 and isDeviceInActiveProfileTriggersList(hex(senderId))
             ):
                 setDevicePower(senderId)
@@ -593,8 +600,8 @@ def sendArmedLedSignal():
 
 
 # by default, sends to all members of current profile, unless overridden with at most 1 of the first 2 params
+# devicesOverrideArray: list of hex strings, not ints
 def sendPowerCommand(devicesOverrideArray, shouldBroadcast, powerState):  # two op
-
     devicesToSendTo = (
         devicesOverrideArray
         if devicesOverrideArray
@@ -677,9 +684,8 @@ def hasMissingDevicesThatTriggerAlarm():
             ):
                 return True
         return False
-    return (
-        True  # if no missingDevicesThatTriggerAlarm list, all missing devices trigger
-    )
+    return len(currentlyMissingDevices) > 0 # if no missingDevicesThatTriggerAlarm list, all missing devices trigger
+    
 
 
 def hasTriggeredDevicesThatTriggerAlarm():
@@ -691,7 +697,7 @@ def hasTriggeredDevicesThatTriggerAlarm():
             ):
                 return True
         return False
-    return True  # if no sensorsThatTriggerAlarm list, all triggered devices trigger
+    return len(currentlyTriggeredDevices) > 0  # if no sensorsThatTriggerAlarm list, all triggered devices trigger
 
 
 def handleMessage(msg):
@@ -699,7 +705,6 @@ def handleMessage(msg):
     global lastAlarmTime
     global armed
     global lastArmedTogglePressed
-    global alarmReason
     global currentlyTriggeredDevices
     global everTriggeredWithinAlarmCycle
     global triggeredDevicesInCurrentArmCycle
@@ -744,7 +749,7 @@ def handleMessage(msg):
         and message == ALARM_TRIGGERED_COMMAND
         and hex(senderId) not in currentlyTriggeredDevices
     ):
-        currentlyTriggeredDevices[hex(senderId)] = now
+        
         if isDeviceInActiveProfileTriggersList(hex(senderId)):
             print(
                 f">>>>>>>>>>>>>>>>>RECEIVED TRIGGER SIGNAL FROM {hex(senderId)} AT {getReadableTime()}<<<<<<<<<<<<<<<<<<"
@@ -757,16 +762,16 @@ def handleMessage(msg):
                     >= armPerDeviceTimeoutBeforeTriggeringAlarm
                 )
             ):  # if armed, and not within arm timeout period AND not within per-device arm timeout period
+                currentlyTriggeredDevices[hex(senderId)] = now
                 alarmed = True
                 lastAlarmTime = now
                 triggeredDevicesInCurrentArmCycle[hex(senderId)] = now
                 everTriggeredWithinAlarmCycle[hex(senderId)] = now
                 everTriggered[hex(senderId)] = now
-                updateCurrentAlarmReason()
                 addEvent(
                     {
                         "event": "TRIGGERED-ALARM",
-                        "trigger": alarmReason,
+                        "trigger": hex(senderId),
                         "time": getReadableTimeFromTimestamp(lastAlarmTime),
                     }
                 )
@@ -774,7 +779,8 @@ def handleMessage(msg):
                 sendMessage(
                     [HOME_BASE_ID, BASE_STATION_ID, ALARMED_DEVICE_ID_COMMAND, senderId]
                 )  # send to the home base's arduino a non-forwardable message with the ID of the alarm-generating device to be added to the list
-            else:
+            elif not armed:
+                currentlyTriggeredDevices[hex(senderId)] = now
                 addEvent(
                     {
                         "event": "TRIGGERED-NO-ALARM",
@@ -784,6 +790,7 @@ def handleMessage(msg):
                 )
                 everTriggered[hex(senderId)] = now
         else:
+            currentlyTriggeredDevices[hex(senderId)] = now
             addEvent(
                 {
                     "event": "TRIGGERED-NO-ALARM",
@@ -819,18 +826,6 @@ def handleMessage(msg):
                 senderId,
             ]
         )
-        updateCurrentAlarmReason()
-
-
-def updateCurrentAlarmReason():
-    global alarmReason
-
-    alarmReason = ""
-    for missingId in currentlyMissingDevices:
-        alarmReason += ("" if not alarmReason else " ") + "missing " + missingId
-    for triggeredId in currentlyTriggeredDevices:
-        alarmReason += ("" if not alarmReason else " ") + "tripped " + triggeredId
-    # if (debug): print("Updated alarm reason to: " + alarmReason)
 
 
 def getProfilesJsonString():
@@ -880,15 +875,18 @@ def stopAlarm():
     global everTriggeredWithinAlarmCycle
     global currentlyTriggeredDevices
 
+    if (alarmed):
+        addEvent(
+            {"event": "FINISHED-ALARM", "time": getReadableTimeFromTimestamp(lastAlarmTime)}
+        )
     alarmed = False
-    addEvent(
-        {"event": "FINISHED-ALARM", "time": getReadableTimeFromTimestamp(lastAlarmTime)}
-    )
     everTriggeredWithinAlarmCycle = {}
     currentlyTriggeredDevices = {}
-    updateCurrentAlarmReason()
     sendMessage(
         [HOME_BASE_ID, BASE_STATION_ID, STOP_ALARM_COMMAND, DEVICE_TYPE_HOMEBASE]
+    )
+    sendMessage(
+        [HOME_BASE_ID, BROADCAST_ID, ALARM_DISABLE_COMMAND, DEVICE_TYPE_HOMEBASE]
     )
 
 
@@ -1038,7 +1036,7 @@ def run(webserver_message_queue):
                 set(previouslyMissingDevices) - set(currentlyMissingDevices)
             )
 
-            for backOnlineDevice in backOnlineDevices:
+            for backOnlineDevice in backOnlineDevices: #hex string
                 addEvent(
                     {
                         "event": "MISSING-DEVICE-BACK-ONLINE",
@@ -1049,29 +1047,21 @@ def run(webserver_message_queue):
                 setDevicePower(backOnlineDevice)
 
             if len(newMissingDevices) > 0:
-                updateCurrentAlarmReason()
                 print(
                     f">>>>>>>>>>>>>>>>>>>> ADDING MISSING DEVICES {arrayToString(currentlyMissingDevices)} at {getReadableTime()}<<<<<<<<<<<<<<<<<<<"
                 )
-                shouldSetNewAlarm = False
+                
                 for (
                     missingDevice
                 ) in newMissingDevices:  # each missingDevice is a hex string
                     currentlyTriggeredDevices.pop(
                         missingDevice, None
                     )  # if was triggered, remove from triggered list while adding to missing list
+                    
                     if (
                         armed
-                        and not "missingDevicesThatTriggerAlarm"
-                        in alarmProfiles[currentAlarmProfile]
-                        or missingDevice
-                        in alarmProfiles[currentAlarmProfile][
-                            "missingDevicesThatTriggerAlarm"
-                        ]
+                        and hasMissingDevicesThatTriggerAlarm()
                     ):
-                        shouldSetNewAlarm = True
-
-                    if shouldSetNewAlarm:
                         alarmed = True
                         lastAlarmTime = getTimeSec()
                         addEvent(
@@ -1111,10 +1101,6 @@ def run(webserver_message_queue):
             and not hasTriggeredDevicesThatTriggerAlarm()
         ):
             stopAlarm()
-            updateCurrentAlarmReason()
-
-        else:
-            updateCurrentAlarmReason()
 
         # possibly send a message (if it's been sendTimeoutMsec)
         if getTimeMsec() > (lastSentMessageTimeMsec + sendTimeoutMsec):
