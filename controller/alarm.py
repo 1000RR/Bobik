@@ -12,9 +12,9 @@ from threading import Thread
 from alarmconstants import *
 
 # DEBUGGER debugpy
-debugpy.listen(("0.0.0.0", 5678))
-print("Waiting for debugger attach...")
-debugpy.trace_this_thread(True)
+# debugpy.listen(("0.0.0.0", 5678))
+# print("Waiting for debugger attach...")
+# debugpy.trace_this_thread(True)
 
 debug = False
 LISTEN_PORT = 8080
