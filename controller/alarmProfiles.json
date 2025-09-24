@@ -2,14 +2,14 @@
     {
     "index": 0,
     "name": "Night",
-    "sensorsThatTriggerAlarm": [ "0x31", "0x30", "0x40", "0x50"],
+    "sensorsThatTriggerAlarm": [ "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
     "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
     "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
     "alarmTimeLengthSec": 10
 }, {
     "index": 1,
     "name": "Away",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
     "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
     "alarmOutputDevices": ["0x99", "0x15", "0x10", "0x77"],
     "playSound": "scaryalarm.mp3",
@@ -132,7 +132,7 @@
 }, {
     "index": 19,
     "name": "Away - Scary Loud Denon",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
     "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
     "alarmOutputDevices": ["0x99", "0x77", "0x10", "0x15"],
     "playSound": "scaryalarm.mp3",
@@ -166,5 +166,12 @@
     "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
     "alarmOutputDevices": ["0x77"],
     "alarmTimeLengthSec": 1
+}, {
+    "index": 24,
+    "name": "Test Silent 10s | 60/61/62 Multidevice Node",
+    "sensorsThatTriggerAlarm": ["0x60", "0x61", "0x62"],
+    "missingDevicesThatTriggerAlarm": [],
+    "alarmOutputDevices": ["0x51"],
+    "alarmTimeLengthSec": 10
 }
 ]
