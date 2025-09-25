@@ -299,15 +299,25 @@ pre {
 .smallbutton {
     border-radius: 15px !important;
     height: 50px !important;
-    width: 100px !important;
+    width: 98px !important;
     transition-duration: 0 !important;
     font-size: 16px !important;
     word-wrap: break-word !important;
 }
 
+.mediumbutton {
+    border-radius: 15px !important;
+    height: 150px !important;
+	min-width: 175px !important;
+	width: calc(100%/3 - 10px) !important;
+    transition-duration: 0 !important;
+    font-size: 1.5em !important;
+    word-wrap: break-word !important;
+}
+
 .garage_door_opener_button_color {
 	background-color: #39644E !important;
-    border-color: #bbbbbb !important;
+    border-color: #070606 !important;
     color: #bbbbbb !important;
     
     &:focus {
@@ -426,5 +436,14 @@ img {
 
 	pre {
 		font-size: 14px !important;
+	}
+
+	.mediumbutton {
+		border-radius: 15px !important;
+		height: 100px !important;
+		min-width: 90px !important;
+		transition-duration: 0 !important;
+		font-size: 1em !important;
+		word-wrap: break-word !important;
 	}
 }
