@@ -6,7 +6,7 @@ import IndicatorPanel from "@components/IndicatorPanel";
 import ButtonWithDrawer from "@components/ButtonWithDrawer";
 import GarageDoorButton from "@/app/components/GarageDoorButton";
 import UnavailableOverlay from "@components/UnavailableOverlay";
-import ArmButtonList from "@components/ArmButtonList";
+import ArmButtonList, { ArmButtonMode } from "@components/ArmButtonList";
 import SpecialFunctions from "@components/SpecialFunctions";
 import TopPanelSpacer from "@components/TopPanelSpacer";
 import Button from "@components/Button";
@@ -126,7 +126,7 @@ const AppView: React.FC = () => {
                     <TopPanel></TopPanel>
                     <TopPanelSpacer></TopPanelSpacer>
                     <IndicatorPanel></IndicatorPanel>
-                    <ButtonWithDrawer flexDirection="column" buttonText="Alarm Control"><ArmButtonList isQuickSetAlarmMode={true}></ArmButtonList></ButtonWithDrawer>
+                    <ButtonWithDrawer flexDirection="column" buttonText="Alarm Control"><ArmButtonList buttonMode={ArmButtonMode.SWITCH_AND_ENABLE_QUICKLIST}></ArmButtonList></ButtonWithDrawer>
                     <ButtonWithDrawer flexDirection="row" buttonText="UI & Alert Controls" keepChildrenInDomOnClose={true}><UIControls ref={notifRef}/></ButtonWithDrawer>
                     <ButtonWithDrawer flexDirection="column" justifyContent="flex-start" buttonText="Advanced" disableinternalspacing={true}>
                         <ButtonWithDrawer flexDirection="row" buttonText="Garage Door"><GarageDoorButton margin="10px"></GarageDoorButton></ButtonWithDrawer>
@@ -152,7 +152,7 @@ const AppView: React.FC = () => {
                             </div>
                             <pre id="profilesContainer" className="dimmable">{JSON.stringify(appState.alarmProfiles, null, 2)}</pre>
                         </ButtonWithDrawer>
-                        <ButtonWithDrawer flexDirection="column" buttonText="Extended Alarm Profiles List"><ArmButtonList></ArmButtonList></ButtonWithDrawer>
+                        <ButtonWithDrawer flexDirection="column" buttonText="Extended Alarm Profiles List"><ArmButtonList buttonMode={ArmButtonMode.SWITCH_AND_ENABLE}></ArmButtonList></ButtonWithDrawer>
                     </ButtonWithDrawer>
                     <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}><MjpegImage src="https://bobik.lan/video/"></MjpegImage></ButtonWithDrawer>
                     <BuildId></BuildId>

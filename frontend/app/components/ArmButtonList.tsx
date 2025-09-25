@@ -12,10 +12,16 @@ type AlarmProfileDescriptor = {
     enabled: boolean
 };
 
+export enum ArmButtonMode {
+    SWITCH,
+    SWITCH_AND_ENABLE,
+    SWITCH_AND_ENABLE_QUICKLIST
+}
+
 const ArmButtonContainer: React.FC<{
     className?: string,
-    isQuickSetAlarmMode?: boolean
-}> = ({ isQuickSetAlarmMode = false}) => {
+    buttonMode?: ArmButtonMode
+}> = ({ buttonMode = ArmButtonMode.SWITCH }) => {
 
     const alarmProfilesToDisplay = useSelector(function (state: AppStateSlice) { 
         return state.appState.status.quickSetAlarmProfiles;
@@ -29,13 +35,13 @@ const ArmButtonContainer: React.FC<{
     const alarmArmed = useSelector(function (state: AppStateSlice) { 
         return state.appState.status.armStatus === 'ARMED';
     });
-    const generatedAlarmProfileList:Array<AlarmProfileDescriptor> = isQuickSetAlarmMode ?[{
+    const generatedAlarmProfileList:Array<AlarmProfileDescriptor> = [ArmButtonMode.SWITCH_AND_ENABLE_QUICKLIST, ArmButtonMode.SWITCH_AND_ENABLE].includes(buttonMode) ? [{
         name: "⏻ Disarm",
         id: -1,
         enabled: !alarmArmed
     }] : [];
 
-    if (isQuickSetAlarmMode) { //traverse special profiles in order
+    if (buttonMode == ArmButtonMode.SWITCH_AND_ENABLE_QUICKLIST) { //traverse special profiles in order
         alarmProfilesToDisplay?.forEach((index: number) => {
             generatedAlarmProfileList.push({
                 name: (`🔒 Arm ${alarmProfiles[index].name}`),
@@ -46,7 +52,7 @@ const ArmButtonContainer: React.FC<{
     } else {
         alarmProfiles?.forEach((alarmProfile: AlarmProfile, index: number) => {
             generatedAlarmProfileList.push({
-                name: (`${index}: ${alarmProfile.name}`),
+                name: (`${[ArmButtonMode.SWITCH_AND_ENABLE].includes(buttonMode) && '🔒 Arm '}${index}: ${alarmProfile.name}`),
                 id: index,
                 enabled: selectedProfileNumber === index
             });
@@ -56,7 +62,7 @@ const ArmButtonContainer: React.FC<{
     const clickHandler:React.MouseEventHandler<HTMLButtonElement> = function(event) {
         const profileId =  Number.parseInt(event.currentTarget.id); //-1 is disable button manually added
         profileId === -1 ?  emitDisarmEvent() : (
-            isQuickSetAlarmMode ? emitArmAndChangeProfileEvent(profileId, alarmArmed) : emitChangeProfileEvent(profileId)
+            [ArmButtonMode.SWITCH_AND_ENABLE_QUICKLIST, ArmButtonMode.SWITCH_AND_ENABLE].includes(buttonMode) ? emitArmAndChangeProfileEvent(profileId, alarmArmed) : emitChangeProfileEvent(profileId)
         );
     };
 
@@ -74,10 +80,10 @@ const ArmButtonContainer: React.FC<{
 
 const ArmButtonList: React.FC<{
     className?: string,
-    isQuickSetAlarmMode?: boolean
-}> = ({ isQuickSetAlarmMode }) => {
+    buttonMode?: ArmButtonMode
+}> = ({ buttonMode = ArmButtonMode.SWITCH }) => {
     return (
-       <ArmButtonContainer isQuickSetAlarmMode={isQuickSetAlarmMode}></ArmButtonContainer>
+       <ArmButtonContainer buttonMode={buttonMode}></ArmButtonContainer>
     );
 };
 
