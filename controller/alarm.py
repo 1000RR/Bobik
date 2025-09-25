@@ -59,6 +59,7 @@ alwaysKeepOnSet = {
 avrSoundChannel = "SAT/CBL"
 quickSetAlarmProfiles = [
     0,
+    26,
     1,
     3,
     15,

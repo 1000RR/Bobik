@@ -173,5 +173,19 @@
     "missingDevicesThatTriggerAlarm": [],
     "alarmOutputDevices": ["0x51"],
     "alarmTimeLengthSec": 10
+}, {
+    "index": 25,
+    "name": "Night silent 8s | All except kitchen movement",
+    "sensorsThatTriggerAlarm": ["0x80", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
+    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
+    "alarmOutputDevices": ["0x51"],
+    "alarmTimeLengthSec": 8
+}, {
+    "index": 26,
+    "name": "Night Extended 8s | All except kitchen movement",
+    "sensorsThatTriggerAlarm": ["0x80", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
+    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
+    "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
+    "alarmTimeLengthSec": 8
 }
 ]
