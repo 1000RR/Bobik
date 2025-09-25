@@ -81,6 +81,14 @@ const AppView: React.FC = () => {
         }
     }, [anySensorTriggered]);
 
+    useEffect(() => {
+        if (alarmTriggered) {
+            notifRef.current?.playAlarmSound();
+        } else {
+            notifRef.current?.stopAlarmSound();
+        }
+    }, [alarmTriggered]);
+
     const scrollToTop = (elName: string) => {
         const el = document.getElementById(elName);
         if (el) {

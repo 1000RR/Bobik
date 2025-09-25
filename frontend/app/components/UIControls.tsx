@@ -6,6 +6,8 @@ import React, {
   useState,
   forwardRef
 } from "react";
+import AlarmAudio, { AlarmAudioRef } from "@components/AlarmAudio";
+
 
 // --- WakeLock types ---
 type WakeLockType = "screen";
@@ -21,6 +23,8 @@ interface NavigatorWithWakeLock extends Navigator {
 
 export interface NotificationController {
   sendNotification: (title: string, body: string, tag: string, renotify: boolean) => void;
+  playAlarmSound: () => void;
+  stopAlarmSound: () => void;
 }
 
 // eslint-disable-next-line react/display-name
@@ -30,6 +34,9 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
   const wakeLockRef = useRef<WakeLockSentinelLike | null>(null);
   const [notifSupported, setNotifSupported] = useState(false);
   const [notifEnabled, setNotifEnabled] = useState(false);
+  const [beepOnAlarmEnabled, setBeepOnAlarmEnabled] = useState(false);
+
+  const alarmRef = useRef<AlarmAudioRef>(null);
 
   useEffect(() => {
     setWakeLockSupported(Boolean((navigator as NavigatorWithWakeLock).wakeLock));
@@ -92,12 +99,30 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
     }
   };
 
+  const toggleBeepOnAlarm = async () => {
+    beepOnAlarmEnabled && alarmRef.current?.stop();
+    beepOnAlarmEnabled ? setBeepOnAlarmEnabled(false) : setBeepOnAlarmEnabled(true);
+    try {
+      await alarmRef.current?.unlock();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useImperativeHandle(ref, () => ({
     sendNotification: (title: string, body: string, tag: string, renotify: boolean) => {
       if (!notifEnabled || Notification.permission !== "granted") return;
       //@ts-expect-error TS2345
       new Notification(title, { body, tag, renotify});
     },
+    playAlarmSound: () => {
+      if (beepOnAlarmEnabled) {
+        alarmRef.current?.play();
+      }
+    },
+    stopAlarmSound: () => {
+      alarmRef.current?.stop();
+    }
   }));
 
   return (
@@ -135,6 +160,18 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
           <div className="ios-knob" />
         </div>
       </label>
+
+      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <span>Beep on alarm</span>
+        <div
+          className={`ios-switch ${beepOnAlarmEnabled ? "checked" : ""}`}
+          onClick={() => toggleBeepOnAlarm()}
+        >
+          <div className="ios-knob" />
+        </div>
+      </label>
+
+      <AlarmAudio srcDataUri={'/alarm-beep-short.mp3'} ref={alarmRef} loop={true} volume={1.0} />
 
       <style>{`
         .ios-switch {
