@@ -158,7 +158,7 @@ def setCurrentAlarmProfile(
     if profileNumber >= -1 and profileNumber < len(alarmProfiles):
         currentAlarmProfile = profileNumber
         currentlyTriggeredDevices = {}
-        stopAlarm()
+        stopAlarm(trigger = "alarm profile changed to " + str(profileNumber) + " via " + requestMethod)
 
         setDevicesPower()
         print(
@@ -174,7 +174,7 @@ def setCurrentAlarmProfile(
                 + " - "
                 + getProfileName(profileNumber),
                 "time": getReadableTimeFromTimestamp(getTimeSec()),
-                "method": requestMethod,
+                "trigger": requestMethod,
             }
         )
     else:
@@ -188,7 +188,7 @@ def setCurrentAlarmProfile(
 
 def addEvent(event):
     global pastEvents
-    pastEvents.append(event)
+    pastEvents.append(event);
 
 
 def getArmedStatus():
@@ -214,11 +214,11 @@ def toggleArmed(now, strActionOrigin):
             {
                 "event": "DISARMED",
                 "time": getReadableTimeFromTimestamp(now),
-                "actionOrigin": strActionOrigin,
+                "trigger": strActionOrigin,
             }
         )
         armed = False
-        stopAlarm() # reset alarmed state
+        stopAlarm(trigger = "Disarming via " + strActionOrigin) # reset alarmed state
         triggeredDevicesInCurrentArmCycle = {}
         missingDevicesInCurrentArmCycle = {}
     else:
@@ -229,12 +229,12 @@ def toggleArmed(now, strActionOrigin):
             {
                 "event": "ARMED",
                 "time": getReadableTimeFromTimestamp(now),
-                "actionOrigin": strActionOrigin,
+                "trigger": strActionOrigin,
             }
         )
         armed = True
         armSetTimeSec = now + 5 #overshoots first so that any new messages being handled are not considered within the arm timeout period
-        stopAlarm()
+        stopAlarm(trigger = "Arming via " + strActionOrigin) # reset alarmed state
 
     # turn on or off devices depending on armed state
     setDevicesPower()
@@ -380,7 +380,7 @@ def possiblyAddMember(msg):
             )
             addEvent(
                 {
-                    "event": "NEW-MEMBER",
+                    "event": "NEW MEMBER",
                     "trigger": hex(senderId),
                     "time": readableTimestamp,
                 }
@@ -768,7 +768,7 @@ def handleMessage(msg):
                 everTriggered[hex(senderId)] = now
                 addEvent(
                     {
-                        "event": "TRIGGERED-ALARM",
+                        "event": "SENSOR TRIGGERED WITH ALARM",
                         "trigger": hex(senderId),
                         "time": getReadableTimeFromTimestamp(lastAlarmTime),
                     }
@@ -781,7 +781,7 @@ def handleMessage(msg):
                 currentlyTriggeredDevices[hex(senderId)] = now
                 addEvent(
                     {
-                        "event": "TRIGGERED-NO-ALARM",
+                        "event": "SENSOR TRIGGERED WITH NO ALARM",
                         "trigger": hex(senderId),
                         "time": getReadableTimeFromTimestamp(now),
                     }
@@ -791,7 +791,7 @@ def handleMessage(msg):
             currentlyTriggeredDevices[hex(senderId)] = now
             addEvent(
                 {
-                    "event": "TRIGGERED-NO-ALARM",
+                    "event": "SENSOR TRIGGERED WITH NO ALARM",
                     "trigger": hex(senderId),
                     "time": getReadableTimeFromTimestamp(now),
                 }
@@ -811,7 +811,7 @@ def handleMessage(msg):
         currentlyTriggeredDevices.pop(hex(senderId), None)
         addEvent(
             {
-                "event": "TRIGGER-STOPPED",
+                "event": "SENSOR TRIGGER STOPPED",
                 "trigger": hex(senderId),
                 "time": getReadableTimeFromTimestamp(now),
             }
@@ -868,7 +868,7 @@ def getPastEventsJsonString():
     return outgoingMessage
 
 
-def stopAlarm():
+def stopAlarm(trigger = "unspecified"):
     global alarmed
     global lastAlarmTime
     global everTriggeredWithinAlarmCycle
@@ -876,7 +876,7 @@ def stopAlarm():
 
     if (alarmed):
         addEvent(
-            {"event": "FINISHED-ALARM", "time": getReadableTimeFromTimestamp(lastAlarmTime)}
+            {"event": "FINISHED ALARM", "time": getReadableTimeFromTimestamp(lastAlarmTime), "trigger": trigger}
         )
     alarmed = False
     everTriggeredWithinAlarmCycle = {}
@@ -1037,7 +1037,7 @@ def run(webserver_message_queue):
             for backOnlineDevice in backOnlineDevices: #hex string
                 addEvent(
                     {
-                        "event": "MISSING-DEVICE-BACK-ONLINE",
+                        "event": "MISSING DEVICE IS BACK ONLINE",
                         "trigger": backOnlineDevice,
                         "time": getReadableTimeFromTimestamp(getTime()),
                     }
@@ -1064,7 +1064,7 @@ def run(webserver_message_queue):
                         lastAlarmTime = getTimeSec()
                         addEvent(
                             {
-                                "event": "NEW-MISSING-DEVICE-ALARM",
+                                "event": "NEW MISSING DEVICE, ALARM",
                                 "trigger": f"missing {missingDevice}",
                                 "time": getReadableTimeFromTimestamp(lastAlarmTime),
                             }
@@ -1072,7 +1072,7 @@ def run(webserver_message_queue):
                     else:
                         addEvent(
                             {
-                                "event": "NEW-MISSING-DEVICE-NO-ALARM",
+                                "event": "NEW MISSING DEVICE, NO ALARM",
                                 "trigger": f"missing {missingDevice}",
                                 "time": getReadableTimeFromTimestamp(getTime()),
                             }
@@ -1089,7 +1089,7 @@ def run(webserver_message_queue):
                 )
                 == 0
             ):
-                stopAlarm()
+                stopAlarm(trigger = "all missing devices back online")
         # if currently alarmed and there are no profile-matching missing or alarmed devices and it's been long enough that alarmTimeLengthSec has run out, DISABLE ALARM FLAG
         if (
             alarmed
@@ -1098,7 +1098,7 @@ def run(webserver_message_queue):
             and not hasMissingDevicesThatTriggerAlarm()
             and not hasTriggeredDevicesThatTriggerAlarm()
         ):
-            stopAlarm()
+            stopAlarm(trigger = "alarm time elapsed and no more triggered or missing devices")
 
         # possibly send a message (if it's been sendTimeoutMsec)
         if getTimeMsec() > (lastSentMessageTimeMsec + sendTimeoutMsec):
@@ -1194,7 +1194,7 @@ def stopsendingcan():
         {
             "event": "STOPPING SENDING DEBUG CAN MESSAGE FROM UI",
             "time": getReadableTimeFromTimestamp(getTimeSec()),
-            "method": "WEB API",
+            "trigger": "WEB API",
         }
     )
 
@@ -1226,7 +1226,7 @@ def sendcan(message, repeatedly):
                     + " FROM UI"
                     + (" REPEATEDLY" if repeatedly else ""),
                     "time": getReadableTimeFromTimestamp(getTimeSec()),
-                    "method": "WEB API",
+                    "trigger": "WEB API",
                 }
             )
             canDebugMessage = arrCanDebugMessage
