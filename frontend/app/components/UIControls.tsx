@@ -6,8 +6,20 @@ import React, {
   useState,
   forwardRef
 } from "react";
+import styled from "styled-components";
 import AlarmAudio, { AlarmAudioRef } from "@components/AlarmAudio";
 
+const Container = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-flow: row wrap;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+  padding: 1rem;
+  width: 100%;
+`;
 
 // --- WakeLock types ---
 type WakeLockType = "screen";
@@ -35,6 +47,7 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
   const [notifSupported, setNotifSupported] = useState(false);
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [beepOnAlarmEnabled, setBeepOnAlarmEnabled] = useState(false);
+  const [loudAlarmEnabled, setLoudAlarmEnabled] = useState(false); 
 
   const alarmRef = useRef<AlarmAudioRef>(null);
 
@@ -109,6 +122,13 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
     }
   };
 
+  const toggleLoudAlarm = () => {
+    if (!beepOnAlarmEnabled)
+      return;
+    alarmRef.current?.stop();
+    setLoudAlarmEnabled(!loudAlarmEnabled);
+  };
+
   useImperativeHandle(ref, () => ({
     sendNotification: (title: string, body: string, tag: string, renotify: boolean) => {
       if (!notifEnabled || Notification.permission !== "granted") return;
@@ -126,18 +146,9 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
   }));
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        gap: "2rem",
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: "sans-serif",
-        padding: "1rem",
-      }}
-    >
-      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+    <>
+    <Container>
+      <label className="toggleSwitch" style={{ display: "flex", alignItems: "center", gap: "0.5rem",  flexDirection: "column" }}>
         <span>Inhibit Screen Sleep</span>
         <div
           className={`ios-switch ${wakeLockActive ? "checked" : ""} ${
@@ -149,7 +160,7 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
         </div>
       </label>
 
-      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <label className="toggleSwitch" style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexDirection: "column" }}>
         <span>Notifications</span>
         <div
           className={`ios-switch ${notifEnabled ? "checked" : ""} ${
@@ -161,8 +172,8 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
         </div>
       </label>
 
-      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <span>Beep on alarm</span>
+      <label className="toggleSwitch" style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexDirection: "column" }}>
+        <span>Sound on alarm</span>
         <div
           className={`ios-switch ${beepOnAlarmEnabled ? "checked" : ""}`}
           onClick={() => toggleBeepOnAlarm()}
@@ -171,40 +182,18 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
         </div>
       </label>
 
-      <AlarmAudio srcDataUri={'/alarm-beep-short.mp3'} ref={alarmRef} loop={true} volume={1.0} />
+      <label className="toggleSwitch" style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexDirection: "column" }}>
+        <span>Soft beep / Loud sound</span>
+        <div
+          className={`ios-switch ${loudAlarmEnabled ? "checked" : ""} ${beepOnAlarmEnabled ? "" : "disabled"}`}
+          onClick={() => toggleLoudAlarm()}
+        >
+          <div className="ios-knob knob-equal-choices" />
+        </div>
+      </label>
+    </Container>
 
-      <style>{`
-        .ios-switch {
-          position: relative;
-          width: 50px;
-          height: 28px;
-          border-radius: 14px;
-          background: #ccc;
-          transition: background 0.2s;
-          cursor: pointer;
-        }
-        .ios-switch.checked {
-          background: #34c759; /* iOS green */
-        }
-        .ios-switch.disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .ios-knob {
-          position: absolute;
-          top: 2px;
-          left: 2px;
-          width: 24px;
-          height: 24px;
-          background: #fff;
-          border-radius: 50%;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-          transition: left 0.2s;
-        }
-        .ios-switch.checked .ios-knob {
-          left: 24px;
-        }
-      `}</style>
-    </div>
+      <AlarmAudio srcDataUri={loudAlarmEnabled ? '/alarm-loud.mp3' : '/alarm-beep-short.mp3'} ref={alarmRef} loop={true} volume={1.0} />
+    </>
   );
 });

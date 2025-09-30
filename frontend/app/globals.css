@@ -404,6 +404,41 @@ img {
   user-select: none;
 }
 
+ .ios-switch {
+	position: relative;
+	width: 50px;
+	height: 28px;
+	border-radius: 14px;
+	background: #ccc;
+	transition: background 0.2s;
+	cursor: pointer;
+}
+
+.ios-switch.checked {
+	background: #34c759; /* iOS green */
+}
+
+.ios-switch.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.ios-knob {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 24px;
+	height: 24px;
+	background: #fff;
+	border-radius: 50%;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+	transition: left 0.2s;
+}
+
+.ios-switch.checked .ios-knob {
+	left: 24px;
+}
+
 @media only screen and (min-device-width: 320px) and (max-device-width: 430px) and (-webkit-device-pixel-ratio: 2), 
 		only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-device-pixel-ratio: 3) {
 	.status_icon_container_layout {

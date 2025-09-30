@@ -51,7 +51,6 @@ const CompositeStyledPanel = styled.div`
     ${PanelBorderStyle}
 `;
 
-
 const Panel: React.FC<{
     className?: string,
     children?: React.ReactNode,

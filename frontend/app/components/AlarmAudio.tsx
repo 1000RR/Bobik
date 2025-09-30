@@ -105,7 +105,7 @@ const AlarmAudio = forwardRef<AlarmAudioRef, AlarmAudioProps>(function AlarmAudi
     play,
     stop,
     setLoop,
-    isUnlocked: () => unlocked,
+    isUnlocked: () => unlocked
   }));
 
   // No visible UI—pure “audio service” component
