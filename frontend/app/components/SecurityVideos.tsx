@@ -6,7 +6,7 @@ const SecurityVideos: React.FC<{
     className?: string
 }> = ({ className }) => {
     return (
-        <Panel padding={"0 10px 0 10px"} gap={0} rowGap={0} alignItems={"center"} flexDirection={"row"} className={className}>
+        <Panel padding={"0 10px 0 10px"} gap={"0px"} rowGap={"0px"} alignItems={"center"} flexDirection={"row"} className={className}>
             <MjpegImage src="https://bobik.lan/video/"></MjpegImage>
         </Panel>
     );

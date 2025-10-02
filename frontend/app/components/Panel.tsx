@@ -18,7 +18,12 @@ export type CSSAlignItems =
 | 'unset';
 
 export type CSSPosition = 
-    "absolute" | "relative" | "fixed" | "sticky";
+    | "absolute" | "relative" | "fixed" | "sticky";
+
+export type CSSJustifyContent =
+    | "flex-start" | "flex-end" | "center" | "space-between"
+    | "space-around" | "space-evenly" | "start" | "end"
+    | "left" | "right" | "normal";
 
 export const PanelSizeStyle = css`
     width: 100%;
@@ -63,7 +68,7 @@ const Panel: React.FC<{
     margin?: string,
     padding?: string
     hideBackground?: boolean,
-    justifyContent?: string,
+    justifyContent?: CSSJustifyContent,
     zIndex?: number,
     position?: CSSPosition,
     width?: string,

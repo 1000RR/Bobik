@@ -70,7 +70,7 @@ const SpecialFunctions: React.FC<{
                 <input type="text" id="type-field" className="dimmable input-field" name="type" defaultValue="0x00" required />
                 <span className="input-hint" style={{position: "absolute", right: 7}}>TYPE</span>
             </div>
-            <Panel justifyContent={"center"} padding="10px" hideBackground={true} className={className}>
+            <Panel justifyContent={"space-between"} padding="10px" hideBackground={true} className={className}>
                 <Button id="can-send-single" className="smallbutton gray dimmable" onClick={sendSingleCan}>send 1x</Button>
                 <Button id="can-send-repeatedly" className="smallbutton gray dimmable" onClick={sendRepeatedlyCan}>send Nx</Button>
                 <Button id="can-stop-send" className="smallbutton gray dimmable" onClick={stopSendingCan}>stop</Button>
