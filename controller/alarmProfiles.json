@@ -17,11 +17,11 @@
     "alarmTimeLengthSec": 30
 }, {
     "index": 2,
-    "name": "Visual Test - Perimeter",
+    "name": "Visual Test 15s | Perimeter",
     "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x50", "0x40"],
     "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
     "alarmOutputDevices": ["0x51"],
-    "alarmTimeLengthSec": 10
+    "alarmTimeLengthSec": 15
 }, {
     "index": 3,
     "name": "Office - Perimeter",
@@ -49,17 +49,17 @@
     "alarmTimeLengthSec": 5
 }, {
     "index": 7,
-    "name": "Visual Test - All Sensors",
+    "name": "Visual Test 15s | All Sensors",
     "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
     "alarmOutputDevices": ["0x51"],
-    "alarmTimeLengthSec": 10
+    "alarmTimeLengthSec": 15
 }, {
     "index": 8,
-    "name": "Visual Alarm 10s | Garage Sensors",
+    "name": "Visual Alarm 15s | Garage Sensors",
     "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x80"],
     "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x80"],
     "alarmOutputDevices": ["0x51"],
-    "alarmTimeLengthSec": 10
+    "alarmTimeLengthSec": 15
 }, {
     "index": 9,
     "name": "Test - Denon Alarm 10s | All Sensors",
@@ -104,7 +104,7 @@
     "alarmTimeLengthSec": 10
 }, {
     "index": 15,
-    "name": "Office - All Sensors",
+    "name": "Office 10s | All Sensors",
     "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x75", "0x80", "0x40", "0x50"],
     "alarmOutputDevices": ["0x99"],
     "alarmTimeLengthSec": 10
@@ -175,7 +175,7 @@
     "alarmTimeLengthSec": 10
 }, {
     "index": 25,
-    "name": "Night  extended silent 8s",
+    "name": "Night extended silent 8s",
     "sensorsThatTriggerAlarm": ["0x80", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
     "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
     "alarmOutputDevices": ["0x51"],
