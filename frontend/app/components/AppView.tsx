@@ -29,6 +29,8 @@ const AppView: React.FC = () => {
 
     const deviceMap: Map<string, string> = new Map<string, string>();
 
+    const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
+
     useSelector(function (state: AppStateSlice) { 
         const memberDeviceReadable = state.appState.status.memberDevicesReadable;
         deviceMap.clear();
@@ -111,7 +113,7 @@ const AppView: React.FC = () => {
 
     return (
         <>
-            <ImageCacheLoader
+            {isFirstLoad ? <ImageCacheLoader
                 urls={['/icon192.png',
                         '/icon512.png',
                         '/icon180.png',
@@ -125,10 +127,11 @@ const AppView: React.FC = () => {
                         '/assets/required.svg']}
                 onReady={(map) => {
                     // Files are already loaded & decoded at this point
-                    console.log("Images loaded:", map);
+                    console.log("Assets preloaded:", map);
                     // You could stash them in a global store, or ignore them
+                    setIsFirstLoad(false);
                 }}
-            />
+            /> : <></>}
             { serviceAvailable ? 
                 <div style={{overflowX: 'hidden'}} className={`background ${alarmTriggered ? " blinkingTransitions " : " "}`}>
                     <TopPanel></TopPanel>
