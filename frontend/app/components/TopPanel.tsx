@@ -31,13 +31,11 @@ const PanelColorStyle = css`
     background-color: rgba(60,60,60, .7);
 `;
 
-
 const CompositeStyledPanel = styled.div`
     ${PanelSizeStyle}
     ${PanelLayoutStyle}
     ${PanelColorStyle}
 `;
-
 
 const TopPanel: React.FC = ({}) => {
     const [shrink, setShrink] = useState(false);
@@ -50,7 +48,6 @@ const TopPanel: React.FC = ({}) => {
     window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
-
 
     return (
         <CompositeStyledPanel className={`topPanel ${shrink ? "shrink" : ""}`}>

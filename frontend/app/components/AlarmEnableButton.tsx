@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import styled, {css} from "styled-components";
 //import { emitDisarmEvent, emitArmEvent } from "@src/WebSocketService";
 import { AppStateSlice } from "./AppStateSlice";
+import Clock from "@components/Clock";
 
 const ButtonSizeStyle = css`
     width: 100%;
@@ -119,6 +120,7 @@ const AlarmEnableButton: React.FC<{
     return (<div style={{ width: "100%", }}>
         <CompositeStyledButton className={`${className} ${isArmed ? 'alarmStateOn' : 'alarmStateOff'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
             <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image><></>
+                <Clock></Clock>
                 <div>
                     {buttonText}
 		    {/*<TapText>quick tap to toggle</TapText>*/}

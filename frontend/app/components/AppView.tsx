@@ -9,8 +9,8 @@ import UnavailableOverlay from "@components/UnavailableOverlay";
 import ArmButtonList, { ArmButtonMode } from "@components/ArmButtonList";
 import SpecialFunctions from "@components/SpecialFunctions";
 import TopPanelSpacer from "@components/TopPanelSpacer";
+import SecurityVideos from "@components/SecurityVideos";
 import Button from "@components/Button";
-import MjpegImage from "@components/MjpegImage";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
@@ -135,10 +135,13 @@ const AppView: React.FC = () => {
                     <TopPanelSpacer></TopPanelSpacer>
                     <IndicatorPanel></IndicatorPanel>
                     <ButtonWithDrawer flexDirection="column" buttonText="Alarm Control"><ArmButtonList buttonMode={ArmButtonMode.SWITCH_AND_ENABLE_QUICKLIST}></ArmButtonList></ButtonWithDrawer>
-                    <ButtonWithDrawer flexDirection="row" buttonText="UI & Alert Controls" keepChildrenInDomOnClose={true}><UIControls ref={notifRef}/></ButtonWithDrawer>
+                    <ButtonWithDrawer flexDirection="row" buttonText="UI & Alert Controls" keepChildrenInDomOnClose={true}>
+                        <UIControls ref={notifRef}/>
+                        {/* keep at top level - must always be rendered as local alarm depends on elements being in DOM */}
+                    </ButtonWithDrawer>
                     <ButtonWithDrawer flexDirection="column" justifyContent="flex-start" buttonText="Advanced" disableinternalspacing={true}>
-                        <ButtonWithDrawer flexDirection="row" buttonText="Garage Door"><GarageDoorButton margin="10px"></GarageDoorButton></ButtonWithDrawer>
                         <ButtonWithDrawer flexDirection="column" buttonText="Special Functions"><SpecialFunctions></SpecialFunctions></ButtonWithDrawer>
+                        <ButtonWithDrawer flexDirection="column" buttonText="Extended Alarm Profiles List"><ArmButtonList buttonMode={ArmButtonMode.SWITCH_AND_ENABLE}></ArmButtonList></ButtonWithDrawer>
                         <ButtonWithDrawer flexDirection="column" justifyContent="flex-start" buttonText="Status" containsScrollable>
                             <div style={{display: "flex", gap: 10}}>
                                 <Button onClick={() => {scrollToBottom("statusContainer")}} className="scrollToBottomBtn scroll-btn">Bottom</Button>
@@ -160,16 +163,16 @@ const AppView: React.FC = () => {
                             </div>
                             <pre id="profilesContainer" className="dimmable">{JSON.stringify(appState.alarmProfiles, null, 2)}</pre>
                         </ButtonWithDrawer>
-                        <ButtonWithDrawer flexDirection="column" buttonText="Extended Alarm Profiles List"><ArmButtonList buttonMode={ArmButtonMode.SWITCH_AND_ENABLE}></ArmButtonList></ButtonWithDrawer>
+                        <ButtonWithDrawer flexDirection="row" buttonText="Garage Door"><GarageDoorButton margin="10px"></GarageDoorButton></ButtonWithDrawer>
                     </ButtonWithDrawer>
-                    <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}><MjpegImage src="https://bobik.lan/video/"></MjpegImage></ButtonWithDrawer>
+                    <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}><SecurityVideos></SecurityVideos></ButtonWithDrawer>
                     <BuildId></BuildId>
                 </div> :
                 <div>
                     <UnavailableOverlay>
                         {appState.isError && !appState.isConnected ? unavailableContent : loadingContent}
                         <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}>
-                            <MjpegImage src="https://bobik.lan/video/"></MjpegImage>
+                            <SecurityVideos></SecurityVideos>
                         </ButtonWithDrawer>
                     </UnavailableOverlay>
                 </div>
