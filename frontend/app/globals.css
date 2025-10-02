@@ -299,9 +299,9 @@ pre {
 .smallbutton {
     border-radius: 15px !important;
     height: 50px !important;
-    width: 98px !important;
+    width: calc(100%/3 - 10px) !important;
     transition-duration: 0 !important;
-    font-size: 16px !important;
+    font-size: 18px !important;
     word-wrap: break-word !important;
 }
 
