@@ -22,6 +22,8 @@ LISTEN_PORT = 8080
 armed = False  # initial condition
 alarmed = False
 pastEvents = []
+prev_pastEvents = [];
+prev_status = {};
 memberDevices = {}  # map of {string hex id:{properties}}
 exceptMissingDevices = {hex(DENON_ID): True}
 triggeredDevicesInCurrentArmCycle = {}
@@ -708,8 +710,6 @@ def handleMessage(msg):
     global triggeredDevicesInCurrentArmCycle
     global currentAlarmProfile
     global canDebugMessage
-    global shouldSendDebugRepeatedly
-    global shouldSendDebugMessage
 
     senderId = msg[0]
     receiverId = msg[1]
@@ -723,13 +723,6 @@ def handleMessage(msg):
 
     possiblyAddMember(msg)
     now = getTimeSec()
-
-    # if we are faking output from a certain device, ignore all messages from that device and replace with
-    if shouldSendDebugMessage and senderId == canDebugMessage[0]:
-        msg = canDebugMessage
-        if not shouldSendDebugRepeatedly:
-            shouldSendDebugMessage = False
-            canDebugMessage = []
 
     # for some messages - handle special cases intended for this unit from arduino, and return; if not, drop down to handle general case logic block
     if (
@@ -892,9 +885,12 @@ def stopAlarm(trigger = "unspecified"):
 def run(webserver_message_queue):
     global currentlyTriggeredDevices
     global everTriggeredWithinAlarmCycle
-    global pastEvents
+    global prev_pastEvents
     global alarmed
     global lastAlarmTime
+    global shouldSendDebugMessage
+    global shouldSendDebugRepeatedly
+    global canDebugMessage
     global armed
     global lastArmedTogglePressed
     global deviceAbsenceThresholdSec
@@ -936,7 +932,7 @@ def run(webserver_message_queue):
                 toggleArmed(getTimeSec(), f"WEB API {message['ip']}")
             elif message["request"] == "ALARM-STATUS":
                 message["responseQueue"].put(
-                    {"response": getStatusJsonString(), "uuid": message["uuid"]}
+                    {"response": getStatusJsonString(), "web_request_id": message["web_request_id"]}
                 )
             elif message["request"].startswith("SET-ALARM-PROFILE-"):
                 profileNumber = int(
@@ -944,8 +940,9 @@ def run(webserver_message_queue):
                 )
                 setCurrentAlarmProfile(profileNumber, f"WEB API {message['ip']}")
             elif message["request"] == "GET-ALARM-PROFILES":
+                prev_pastEvents = getProfilesJsonString()
                 message["responseQueue"].put(
-                    {"response": getProfilesJsonString(), "uuid": message["uuid"]}
+                    {"response": getProfilesJsonString(), "web_request_id": message["web_request_id"]}
                 )
             elif message["request"] == "FORCE-ALARM-SOUND-ON":
                 currentlyTriggeredDevices[hex(TEST_ALARM_ID)] = getTimeSec()
@@ -979,7 +976,7 @@ def run(webserver_message_queue):
                 stopsendingcan()
             elif message["request"] == "GET-PAST-EVENTS":
                 message["responseQueue"].put(
-                    {"response": getPastEventsJsonString(), "uuid": message["uuid"]}
+                    {"response": getPastEventsJsonString(), "web_request_id": message["web_request_id"]}
                 )
 
         if not line:
@@ -1018,6 +1015,13 @@ def run(webserver_message_queue):
         # print("GETTING", np.array(msg)) #DEBUG: uncomment
 
         handleMessage(msg)
+
+         # if there is a ui-driven debug message to send, send it now
+        if shouldSendDebugMessage:
+            handleMessage(canDebugMessage)
+            if not shouldSendDebugRepeatedly:
+                shouldSendDebugMessage = False
+                canDebugMessage = []
 
         if (
             lastCheckedMissingDevicesMsec + checkForMissingDevicesEveryMsec
@@ -1214,15 +1218,16 @@ def sendcan(message, repeatedly):
             else:
                 arrCanDebugMessage[index] = int(i, 16)
         if messageConforms:
+            hexedMessage = "[" + ", ".join([hex(n) for n in arrCanDebugMessage]) + "]"
             print(
                 "SENDING FAKE MESSAGE FROM UI "
-                + ", ".join([hex(n) for n in arrCanDebugMessage])
+                + hexedMessage
                 + (" REPEATEDLY " if repeatedly else "")
             )
             addEvent(
                 {
                     "event": "STARTING SENDING DEBUG CAN MESSAGE "
-                    + str(arrCanDebugMessage)
+                    + hexedMessage
                     + " FROM UI"
                     + (" REPEATEDLY" if repeatedly else ""),
                     "time": getReadableTimeFromTimestamp(getTimeSec()),

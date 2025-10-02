@@ -10,27 +10,20 @@ const timeout: number = 2500;
 export const initializeWebSocket = (dispatch: (action: any) => void) => {
   const worker = new Worker(new URL("@workers/ComWorker.ts", import.meta.url));
   comAPI = Comlink.wrap(worker);
-  let firstLoad = true;
-
-  let getPastEventsTimeout: undefined | NodeJS.Timeout = undefined;
 
   const statusHandler = (message: object): void => {
+	console.log("Received status update");
 	dispatch(setStatus(message));
-	
-	if (getPastEventsTimeout) { clearTimeout(getPastEventsTimeout); }
-	getPastEventsTimeout = setTimeout(() => {
-		dispatch(setIsLoaded(true));
-		comAPI?.emitEvent('getPastEvents', { message: undefined });
-	  if (getPastEventsTimeout) clearTimeout(getPastEventsTimeout);
-	  firstLoad = false;
-	}, firstLoad ? 1 : 3000);
+	dispatch(setIsLoaded(true));
   };
 
   const pastEventsHandler = (message: object): void => {
+	console.log("Received past events update");
 	dispatch(setPastEvents(message));
   };
 
   const alarmProfilesHandler = (message: object): void => {
+	console.log("Received alarm profiles update");
 	dispatch(setAlarmProfiles(message));
   };
 

@@ -17,6 +17,9 @@ export type CSSAlignItems =
 | 'initial'
 | 'unset';
 
+export type CSSPosition = 
+    "absolute" | "relative" | "fixed" | "sticky";
+
 export const PanelSizeStyle = css`
     width: 100%;
     height: content;
@@ -25,7 +28,6 @@ export const PanelSizeStyle = css`
 
 export const PanelLayoutStyle = css`
     display: flex;
-    justify-content: center;
     align-items: center;
     justify-content: space-evenly;
     gap: 10px;
@@ -40,14 +42,14 @@ export const PanelBorderStyle = css`
     border-radius: 5px;
 `;
 
-const PanelColorStyle = css`
+const PanelBackgroundColorStyle = css`
     background-color: rgba(60,60,60, .5);
 `;
 
-const CompositeStyledPanel = styled.div`
+const CompositeStyledPanel = styled.div<{hideBackground?: boolean}>`
     ${PanelSizeStyle}
     ${PanelLayoutStyle}
-    ${PanelColorStyle}
+    ${({ hideBackground }) => hideBackground ? '' : PanelBackgroundColorStyle}
     ${PanelBorderStyle}
 `;
 
@@ -55,15 +57,22 @@ const Panel: React.FC<{
     className?: string,
     children?: React.ReactNode,
     flexDirection?: 'row' | 'column',
-    gap?: number,
-    rowGap?: number,
+    gap?: string,
+    rowGap?: string,
     alignItems?: CSSAlignItems,
     margin?: string,
     padding?: string
-}> = ({ className, children, flexDirection, gap, rowGap, alignItems, margin, padding }) => {
+    hideBackground?: boolean,
+    justifyContent?: string,
+    zIndex?: number,
+    position?: CSSPosition,
+    width?: string,
+    height?: string,
+    minHeight?: string
+}> = ({ className, children, flexDirection, gap, rowGap, alignItems, margin, padding, hideBackground, justifyContent, zIndex, position, width, height, minHeight }) => {
     
     return (
-        <CompositeStyledPanel className={className} style={{flexDirection:flexDirection, gap:gap, rowGap: rowGap, alignItems: alignItems, margin: margin, padding: padding}}>
+        <CompositeStyledPanel hideBackground={hideBackground} className={className} style={{flexDirection:flexDirection, gap:gap, rowGap: rowGap, alignItems: alignItems, margin: margin, padding: padding, justifyContent: justifyContent, zIndex: zIndex, position: position, width: width, height: height, minHeight: minHeight}}>
            {children}
         </CompositeStyledPanel>
     );

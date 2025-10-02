@@ -16,7 +16,7 @@ const ButtonSizeStyle = css`
     @media only screen and (min-device-width: 320px) and (max-device-width: 430px) and (-webkit-device-pixel-ratio: 2), 
        only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-device-pixel-ratio: 3)
     {
-       width: calc(100vw - 20px);
+       
        height: 100px;
        font-size: 1.5em;
     }
@@ -92,7 +92,8 @@ const CompositeStyledButton = styled.button.attrs({
 const AlarmEnableButton: React.FC<{
     className?: string,
     children?: React.ReactNode,
-}> = ({ className, children}) => {
+    showIcon?: boolean
+}> = ({ className, children, showIcon}) => {
     const imgSrcArmed = "/assets/attackdog.jpg";
     const imgSrcDisarmed = "/assets/dogue.jpg";
 
@@ -119,7 +120,7 @@ const AlarmEnableButton: React.FC<{
 
     return (<div style={{ width: "100%", }}>
         <CompositeStyledButton className={`${className} ${isArmed ? 'alarmStateOn' : 'alarmStateOff'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
-            <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image><></>
+            {showIcon ? <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image> : <></>}
                 <Clock></Clock>
                 <div>
                     {buttonText}

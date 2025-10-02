@@ -1,7 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import React, { useRef, useState } from "react";
-import styled, {css} from "styled-components";
 import Panel from "@components/Panel"
 import { useSelector } from "react-redux";
 import { AlarmProfilesResponse, AppStateSlice, StatusResponse } from "./AppStateSlice";
@@ -18,33 +17,6 @@ export type DeviceDescriptor = {
 };
 
 const garageButtonTapTimesThreshold = 4;
-
-export const PanelSizeStyle = css`
-    width: 100%;
-    height: content;
-`;
-
-export const PanelLayoutStyle = css`
-    display: flex;
-    justify-content: center;
-    align-items: start;
-    justify-content: space-between;
-    gap: 10px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 10px 10px 10px 10px;
-    border-radius: 5px;
-`;
-
-const PanelColorStyle = css`
-    background-color: rgba(60,60,60, .3);
-`;
-
-const CompositePanelStyle = styled.div`
-    ${PanelSizeStyle}
-    ${PanelLayoutStyle}
-    ${PanelColorStyle}
-`;
 
 const SensorsPanel: React.FC<{
     className?: string
@@ -223,10 +195,10 @@ const IndicatorPanel: React.FC<{
     className?: string
 }> = ({ className}) => {
     return (
-        <CompositePanelStyle className={className}>
+        <Panel padding="10px 10px 0px 10px" gap="10px" rowGap="10px" hideBackground={true} className={className}>
              <SensorsPanel></SensorsPanel>
              <AlarmsPanel></AlarmsPanel>
-        </CompositePanelStyle>
+        </Panel>
     );
 };
 
