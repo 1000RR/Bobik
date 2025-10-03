@@ -49,7 +49,7 @@ const PowerIndicator: React.FC<PowerIndicatorProps> = ({
           r={dotRadius}
           fill={effectiveDotColor}
         />
-        <animateTransform
+        {secondsPerRotation > 0 ? <animateTransform
           attributeName="transform"
           attributeType="XML"
           type="rotate"
@@ -57,7 +57,7 @@ const PowerIndicator: React.FC<PowerIndicatorProps> = ({
           to={`360 ${cx} ${cy}`}
           dur={`${secondsPerRotation}s`}
           repeatCount="indefinite"
-        />
+        /> : null}
       </g>
     </svg>
   );
