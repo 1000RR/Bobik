@@ -121,7 +121,7 @@ const AlarmEnableButton: React.FC<{
 
     return (<div className={"line_height_reduced"} style={{ width: "100%" }}>
         <CompositeStyledButton className={`${className} ${isArmed ? 'alarmStateOn' : 'alarmStateOff'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
-            {showIcon ? <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image> : <PowerIndicator secondsPerRotation={isArmed ? 1.25 : 0} color={isArmed ? "cyan" : "maroon"}></PowerIndicator>}
+            {showIcon ? <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image> : <PowerIndicator secondsPerRotation={isArmed ? 1 : 0} color={isArmed ? "cyan" : "maroon"} dotColor={isArmed ? "#215dbe" : "red"}></PowerIndicator>}
                 <Clock></Clock>
                 <div className={"alarm-profile"}>
                     {buttonText}

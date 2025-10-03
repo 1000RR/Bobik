@@ -15,7 +15,6 @@ from uuid import uuid4
 thisDir = os.path.dirname(os.path.abspath(__file__))
 serverKeysDir = thisDir + "/server-keys"
 
-
 CERT_EXPIRY_DATE = subprocess.run(
     [serverKeysDir + "/get-cert-expiry.sh"],       # path to your script
     stdout=subprocess.PIPE,  # capture stdout
@@ -23,9 +22,11 @@ CERT_EXPIRY_DATE = subprocess.run(
     text=True                # decode to string (instead of bytes)
 ).stdout.rstrip("\n")
 
-print("SSL CERT EXPIRY DATE: " + CERT_EXPIRY_DATE)
+print("SSL CERT EXPIRY DATE: " + CERT_EXPIRY_DATE)    
 
-CORS = ["https://bobik.lan:5020", "https://192.168.2.100", "https://192.168.2.100:443", "https://192.168.2.100:5020", "https://192.168.2.100:5010", "http://192.168.2.100:3000", "http://192.168.2.103:3000", "http://192.168.2.104:3000", "https://bobik.lan","https://192.168.99.5"]
+# Load CORS-approved endpoints allowed to request from server
+with open(thisDir + "/CORSconfig.json", "r") as file:
+    CORS = json.loads(file.read())
 
 # Create a queue for communication between main program and daemon thread
 webserver_message_queue = Queue()

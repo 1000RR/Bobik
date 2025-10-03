@@ -1,5 +1,4 @@
 import React from "react";
-import ParseUtils from "@src/ColorUtils";
 
 interface PowerIndicatorProps {
   color?: string;       // main circle color (gradient)
@@ -14,7 +13,7 @@ const PowerIndicator: React.FC<PowerIndicatorProps> = ({
   color = "#999999",        // main circle (default medium grey)
   size = 40,
   dotColor,                 // orbiting dot
-  dotRadius = 5,
+  dotRadius = 7,
   secondsPerRotation = 1,
   rimInset = 3,
 }) => {
@@ -23,7 +22,7 @@ const PowerIndicator: React.FC<PowerIndicatorProps> = ({
   const orbitR = Math.max(0, r - rimInset - dotRadius);
 
   // Fallback dot color if none provided
-  const effectiveDotColor = dotColor ?? ParseUtils.getOffColor(color);
+  const effectiveDotColor = dotColor ?? "#000000";
 
   return (
     <svg
