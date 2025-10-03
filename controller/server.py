@@ -25,7 +25,7 @@ CERT_EXPIRY_DATE = subprocess.run(
 
 print("SSL CERT EXPIRY DATE: " + CERT_EXPIRY_DATE)
 
-CORS = ["https://bobik.lan:5020", "https://192.168.2.100", "https://192.168.2.100:443", "https://192.168.2.100:5020", "https://192.168.2.100:5010", "http://192.168.2.100:3000", "https://bobik.lan","https://192.168.99.5"]
+CORS = ["https://bobik.lan:5020", "https://192.168.2.100", "https://192.168.2.100:443", "https://192.168.2.100:5020", "https://192.168.2.100:5010", "http://192.168.2.100:3000", "http://192.168.2.103:3000", "http://192.168.2.104:3000", "https://bobik.lan","https://192.168.99.5"]
 
 # Create a queue for communication between main program and daemon thread
 webserver_message_queue = Queue()
