@@ -7,7 +7,7 @@ const SecurityVideos: React.FC<{
     className?: string
 }> = ({ className }) => {
     return (
-        <Panel padding={"0 10px 0 10px"} gap={"0px"} rowGap={"0px"} alignItems={"center"} flexDirection={"row"} className={className}>
+        <Panel hideBackground={true} padding={"0"} gap={"0px"} rowGap={"0px"} alignItems={"center"} flexDirection={"row"} className={className}>
             <>
             {
                 Config.VIDEO_URLS.map((url) => (
