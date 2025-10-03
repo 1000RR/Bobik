@@ -39,6 +39,9 @@ const SensorsPanel: React.FC<{
     const missingDevices = useSelector(function (state: AppStateSlice) { 
         return state.appState.status.currentMissingDevices;
     });
+    const triggeredDevicesWithinArmCycle = useSelector(function (state: AppStateSlice) {
+        return state.appState.status.everTriggeredWithinArmCycle;
+    });
     const triggeredDevices = useSelector(function (state: AppStateSlice) { 
         return state.appState.status.currentTriggeredDevices;
     });
@@ -105,7 +108,8 @@ const SensorsPanel: React.FC<{
                 (sensorElement, index) => {
                     const isGarageDoor = sensorElement.name.toLowerCase().includes("garage car door");
                     const isntClickedGarageDoor = (isGarageDoor && !isButtonActivatedColor) || !isGarageDoor;
-                    return <div key={index} id={sensorElement.id} onClick={isGarageDoor ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonActivatedColor && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray noselect ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
+                    const hasAlarmedWithinArmPeriod = triggeredDevicesWithinArmCycle.includes(sensorElement.id);
+                    return <div key={index} id={sensorElement.id} onClick={isGarageDoor ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonActivatedColor && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray noselect ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${hasAlarmedWithinArmPeriod && !sensorElement.triggered ? " has_activated_during_alarm " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
                                 {isGarageDoor 
                                     ? <><IconLabel label={`quick tap ${garageButtonTapTimesThreshold}x`}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
                                     : sensorElement.name}

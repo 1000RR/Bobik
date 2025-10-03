@@ -168,6 +168,12 @@ pre {
     filter: brightness(70%) sepia(100%) saturate(7500%) hue-rotate(0) contrast(100%);
 }
 
+.has_activated_during_alarm {
+    background-color: rgb(128, 102, 0) !important;
+	filter: brightness(70%) sepia(100%) saturate(750%) hue-rotate(0) contrast(100%);
+	border: 5px solid !important;
+}
+
 .alarm_button_disabled {
 	background-color: rgba(4, 113, 205, 1) !important;
 	border-color: rgba(0, 208, 255, 1) !important;
