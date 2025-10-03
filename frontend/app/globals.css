@@ -165,13 +165,12 @@ pre {
 }
 
 .highlight_red {
-    filter: brightness(70%) sepia(100%) saturate(7500%) hue-rotate(0) contrast(100%);
+	filter: brightness(20%) sepia(100%) saturate(3000%) hue-rotate(0) contrast(100%);
 }
 
 .has_activated_during_alarm {
-    background-color: rgb(128, 102, 0) !important;
-	filter: brightness(70%) sepia(100%) saturate(750%) hue-rotate(0) contrast(100%);
-	border: 5px solid !important;
+	filter: brightness(80%) sepia(100%) saturate(800%) hue-rotate(0) contrast(100%);
+	border: 1px solid !important;
 }
 
 .alarm_button_disabled {
