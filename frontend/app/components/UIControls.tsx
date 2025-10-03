@@ -6,20 +6,8 @@ import React, {
   useState,
   forwardRef
 } from "react";
-import styled from "styled-components";
 import AlarmAudio, { AlarmAudioRef } from "@components/AlarmAudio";
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: row;
-  flex-flow: row wrap;
-  gap: 2rem;
-  align-items: center;
-  justify-content: center;
-  font-family: sans-serif;
-  padding: 1rem;
-  width: 100%;
-`;
+import Panel from "@components/Panel";
 
 // --- WakeLock types ---
 type WakeLockType = "screen";
@@ -147,7 +135,7 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
 
   return (
     <>
-    <Container>
+    <Panel>
       <label className="toggleSwitch" style={{ display: "flex", alignItems: "center", gap: "0.5rem",  flexDirection: "column" }}>
         <span>Inhibit Screen Sleep</span>
         <div
@@ -185,13 +173,13 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
       <label className="toggleSwitch" style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexDirection: "column" }}>
         <span>Soft beep / Loud sound</span>
         <div
-          className={`ios-switch ${loudAlarmEnabled ? "checked" : ""} ${beepOnAlarmEnabled ? "" : "disabled"}`}
+          className={`ios-switch off-yellow ${loudAlarmEnabled ? "checked-red checked" : ""} ${beepOnAlarmEnabled ? "" : "disabled"}`}
           onClick={() => toggleLoudAlarm()}
         >
           <div className="ios-knob knob-equal-choices" />
         </div>
       </label>
-    </Container>
+    </Panel>
 
       <AlarmAudio srcDataUri={loudAlarmEnabled ? '/alarm-loud.mp3' : '/alarm-beep-short.mp3'} ref={alarmRef} loop={true} volume={1.0} />
     </>

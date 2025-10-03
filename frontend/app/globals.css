@@ -108,7 +108,7 @@ pre {
 }
 
 .topPanel {
-	transition: 0.3s;
+	transition-duration: 0.3s;
 }
 
 .topPanel.shrink {
@@ -116,7 +116,7 @@ pre {
 }
 
 .alarmButton {
-	transition: 0.3s;
+	transition-duration: 0.3s;
 }
 
 .alarmButton.shrink {
@@ -297,6 +297,8 @@ pre {
 .input-field {
 	background-color:#797979;
 	color: white;
+	border-radius: 5px;
+	padding-left: 5px;
 }
 
 .input-hint {
@@ -422,6 +424,9 @@ img {
 }
 
  .ios-switch {
+	@media (prefers-color-scheme: dark) {
+		filter: brightness(80%);
+	}
 	position: relative;
 	width: 50px;
 	height: 28px;
@@ -431,8 +436,16 @@ img {
 	cursor: pointer;
 }
 
+ .ios-switch.off-yellow {
+	background: #ffcc00fc; /* iOS yellow */
+ }
+
 .ios-switch.checked {
-	background: #34c759; /* iOS green */
+	background: #07e43ffc; /* iOS green */
+}
+
+.ios-switch.checked-red {
+	background: #ff0000fc; /* iOS green */
 }
 
 .ios-switch.disabled {
@@ -446,7 +459,7 @@ img {
 	left: 2px;
 	width: 24px;
 	height: 24px;
-	background: #fff;
+	background: #ffffff;
 	border-radius: 50%;
 	box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 	transition: left 0.2s;
@@ -463,20 +476,10 @@ img {
 @media only screen and (min-device-width: 320px) and (max-device-width: 430px) and (-webkit-device-pixel-ratio: 2), 
 		only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-device-pixel-ratio: 3) {
 	.status_icon_container_layout {
-		display: flex;
-		justify-content: center; /* Horizontal alignment */
-		align-items: center;    /* Vertical alignment */
-		font-family: "futura";
 		font-size: 16px !important;
-		color: white;
-		overflow-wrap: normal;
-		white-space: normal;
-		width: inherit;
-		text-align: center;
 		min-height: 10px;
 		height: 10px;
 		line-height: 1.3;
-		position: relative;
 	}
 
 	.icon {
@@ -495,12 +498,9 @@ img {
 	}
 
 	.mediumbutton {
-		border-radius: 15px !important;
 		height: 100px !important;
 		min-width: 90px !important;
-		transition-duration: 0 !important;
 		font-size: 1em !important;
-		word-wrap: break-word !important;
 	}
 
 	.alarm-profile {
@@ -513,5 +513,13 @@ img {
 
 	.line_height_reduced {
 		line-height: 1em !important;
+	}
+
+	.topPanel {
+		transition-duration: 0s !important;
+	}
+
+	.alarm_button {
+		transition-duration: 0s !important;
 	}
 }

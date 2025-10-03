@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-vars */
 "use client";
 import React from "react";
-import styled, {css} from "styled-components";
 import { emitGarageDoorToggleEvent } from "@src/WebSocketService";
 import Button from "./Button";
 

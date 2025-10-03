@@ -100,11 +100,10 @@ const DrawerSpacing = css`
 	padding: 10px;
 `;
 
-interface DrawerProps {
-	disableinternalspacing?: string;
-}
 
-const Drawer = styled.div<DrawerProps>`
+const Drawer = styled.div<{
+	disableinternalspacing?: boolean
+}>`
 	width: calc(100% - 20px);
 	background-color: rgba(55, 55, 55, .4);
 	margin: 0px 10px 5px 10px;
@@ -116,7 +115,6 @@ const Drawer = styled.div<DrawerProps>`
 	overflow-x: hidden;
 	height: auto;
 	
-	//eslint-disable-next-line
 	${({ disableinternalspacing }) => !disableinternalspacing && DrawerSpacing}
 `;
 
@@ -143,7 +141,7 @@ const ButtonWithDrawer: React.FC<{
 	disableinternalspacing?: boolean,
 	isOpen?: boolean,
 	keepChildrenInDomOnClose?: boolean
-}> = ({ flexDirection, className, children, buttonText, justifyContent, containsScrollable, disableinternalspacing, isOpen=false, keepChildrenInDomOnClose=false}) => {
+}> = ({ flexDirection, className, children, buttonText, justifyContent, containsScrollable, disableinternalspacing = false, isOpen = false, keepChildrenInDomOnClose=false}) => {
 	
 	const [isCollapsed, setIsCollapsed] = useState(!isOpen);
 	const handler:React.MouseEventHandler<HTMLButtonElement> = function(event) {
@@ -156,7 +154,7 @@ const ButtonWithDrawer: React.FC<{
 		<CompositeStyledButton className={`${className} ${isCollapsed ? '' : 'button-enabled'}`} onClick={handler}>
 			{buttonText}
 		</CompositeStyledButton>
-		<Drawer style={{flexDirection: flexDirection, display: isCollapsed ? 'none' : 'flex', justifyContent: justifyContent, maxHeight: containsScrollable ? 'calc(100vh - 150px)': '' }} disableinternalspacing={disableinternalspacing ? "true" : "false"}>
+		<Drawer style={{flexDirection: flexDirection, display: isCollapsed ? 'none' : 'flex', justifyContent: justifyContent, maxHeight: containsScrollable ? 'calc(100vh - 150px)': '' }} disableinternalspacing={disableinternalspacing}>
 			{!keepChildrenInDomOnClose ? (!isCollapsed && children) : (<ShrinkContainingDiv iscollapsed={isCollapsed}>{children}</ShrinkContainingDiv>)}
 		</Drawer>
 	</>

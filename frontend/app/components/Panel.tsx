@@ -3,19 +3,9 @@ import React from "react";
 import styled, {css} from "styled-components";
 
 export type CSSAlignItems =
-| 'flex-start'
-| 'flex-end'
-| 'center'
-| 'baseline'
-| 'stretch'
-| 'start'
-| 'end'
-| 'self-start'
-| 'self-end'
-| 'normal'
-| 'inherit'
-| 'initial'
-| 'unset';
+    | 'flex-start' | 'flex-end' | 'center' | 'baseline'
+    | 'stretch' | 'start' | 'end' | 'self-start' | 'self-end'
+    | 'normal' | 'inherit' | 'initial' | 'unset';
 
 export type CSSPosition = 
     | "absolute" | "relative" | "fixed" | "sticky";

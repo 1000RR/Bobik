@@ -1,5 +1,6 @@
 import * as Comlink from 'comlink';
 import { io, Socket } from 'socket.io-client';
+import Config from '@src/Config';
 
 /*eslint-disable @typescript-eslint/no-explicit-any*/
 export type ComWorkerAPI = {
@@ -15,7 +16,7 @@ let socket: Socket | null = null;
 
 const api: ComWorkerAPI = {
 	setupWebSockets(eventNames, handlerFunction, errorHandlerFunction, connectHandlerFunction): void {
-		socket = io('https://bobik.lan:8080'); //TODO: hard-coded URL should be configurable
+		socket = io(Config.API_URL);
 
 		socket.on('connect', function() {
 			console.warn('Connected to server');

@@ -7,6 +7,7 @@ import styled, {css} from "styled-components";
 //import { emitDisarmEvent, emitArmEvent } from "@src/WebSocketService";
 import { AppStateSlice } from "./AppStateSlice";
 import Clock from "@components/Clock";
+import PowerIndicator from "@components/PowerIndicator";
 
 const ButtonSizeStyle = css`
     width: 100%;
@@ -44,7 +45,7 @@ const ButtonTextStyle = css`
 
 const ButtonPressStyle = css`
     &.alarmStateOn {
-        background-color: #539eff;
+        background-color: #215dbe;
         border-color: #5eaeaf;
         /*&:focus {
             background-color: lightblue;
@@ -120,7 +121,7 @@ const AlarmEnableButton: React.FC<{
 
     return (<div className={"line_height_reduced"} style={{ width: "100%" }}>
         <CompositeStyledButton className={`${className} ${isArmed ? 'alarmStateOn' : 'alarmStateOff'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
-            {showIcon ? <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image> : <></>}
+            {showIcon ? <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image> : <PowerIndicator secondsPerRotation={isArmed ? undefined : 0} color={isArmed ? "cyan" : "maroon"}></PowerIndicator>}
                 <Clock></Clock>
                 <div className={"alarm-profile"}>
                     {buttonText}

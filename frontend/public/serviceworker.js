@@ -72,6 +72,7 @@ self.addEventListener('fetch', (event) => {
       // Cache if valid response
       if (okToCache(request, netRes)) await cache.put(request, netRes.clone());
       return netRes;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) { // on any failure, try cache
       const cached = await cache.match(request);
       if (cached) return cached;
@@ -100,6 +101,7 @@ function okToCache(request, response) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 self.addEventListener('activate', event => {
   caches.delete(CACHE_NAME);
 });
