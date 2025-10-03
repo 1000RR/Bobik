@@ -118,11 +118,11 @@ const AlarmEnableButton: React.FC<{
         return state.appState.status.alarmStatus === 'ALARM';
     });
 
-    return (<div style={{ width: "100%", }}>
+    return (<div className={"line_height_reduced"} style={{ width: "100%" }}>
         <CompositeStyledButton className={`${className} ${isArmed ? 'alarmStateOn' : 'alarmStateOff'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
             {showIcon ? <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image> : <></>}
                 <Clock></Clock>
-                <div>
+                <div className={"alarm-profile"}>
                     {buttonText}
 		    {/*<TapText>quick tap to toggle</TapText>*/}
                 </div>

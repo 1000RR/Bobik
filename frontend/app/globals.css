@@ -120,7 +120,7 @@ pre {
 }
 
 .alarmButton.shrink {
-	height: 30px;
+	height: 50px;
 }
 
 .icon {
@@ -394,6 +394,16 @@ pre {
 	bottom: -5px;
 }
 
+.alarm-profile {
+	font-size: .8em;
+}
+
+.no_select {
+	user-select: none;
+	-webkit-user-select: none; /* Safari */
+	-ms-user-select: none;     /* old IE */
+}
+
 .icon-label {
 	position: absolute;
 	scale: 0.75;
@@ -445,6 +455,10 @@ img {
 	left: 24px;
 }
 
+.clock {
+	font-size: 1em;
+}
+
 @media only screen and (min-device-width: 320px) and (max-device-width: 430px) and (-webkit-device-pixel-ratio: 2), 
 		only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-device-pixel-ratio: 3) {
 	.status_icon_container_layout {
@@ -486,5 +500,17 @@ img {
 		transition-duration: 0 !important;
 		font-size: 1em !important;
 		word-wrap: break-word !important;
+	}
+
+	.alarm-profile {
+		font-size: .65em !important;
+	}
+
+	.clock {
+		font-size: .65em !important;
+	}
+
+	.line_height_reduced {
+		line-height: 1em !important;
 	}
 }

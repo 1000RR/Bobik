@@ -26,7 +26,7 @@ const Clock: React.FC = () => {
   }, []);
 
   return (
-    <div>
+    <div className={"clock"}>
       {now.toLocaleString("en-US", {
         month: "numeric",   // "1" … "12"
         day: "numeric",     // "1" … "31"
