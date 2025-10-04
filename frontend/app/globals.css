@@ -90,9 +90,20 @@ pre {
 	position: relative;
 	height: auto;
 	object-fit: contain;
-	width: max(min(calc(100vw - 2*var(--gap)),  1920px), 1000px);
 	max-width: calc(100vw - 2*var(--gap));
 	box-sizing: border-box;  /* include padding/border inside that width */
+}
+
+#securityVideo.large {
+	width: max(min(calc(100vw - 2*var(--gap)),  1920px), 1000px);
+}
+
+#securityVideo.medium {
+	width: max(min(calc(100vw - 2*var(--gap)),  1000px), 1000px);
+}
+
+#securityVideo.small {
+	width: max(min(calc(100vw - 2*var(--gap)),  640px), 640px);
 }
 
 .fadeoutImageRound {

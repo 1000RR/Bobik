@@ -24,6 +24,7 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
   const backoffRef = useRef<number>(initialBackoff);
   const timerRef = useRef<number | null>(null);
   const mountedRef = useRef<boolean>(false);
+  const myRef = useRef<HTMLImageElement>(null);
 
   const bust = useCallback(() => {
     const sep = src.includes("#") ? "&" : "#";
@@ -63,6 +64,16 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
     restartWithBackoff();
   }, [restartWithBackoff]);
 
+  const handleClick = useCallback(() => {
+    if (myRef.current?.classList.contains('large')) {
+      myRef.current.classList.replace('large', 'medium');
+    } else if (myRef.current?.classList.contains('medium')) {
+      myRef.current.classList.replace('medium', 'small');
+    } else {
+      myRef.current?.classList.replace('small', 'large');
+    }
+  }, [myRef]);
+
   useEffect(() => {
     mountedRef.current = true;
     bust(); // kick off
@@ -85,12 +96,13 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    bustedSrc.length ? <img
+    bustedSrc.length ? <img ref={myRef}
       {...imgProps}
-      className={"roundedCorners"}
+      className={"roundedCorners large"}
       id={"securityVideo"}
       src={bustedSrc}
       onLoad={handleLoad}
+      onClick={handleClick}
       onError={handleError}
       alt=""
     /> : <></>
