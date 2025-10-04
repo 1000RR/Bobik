@@ -483,6 +483,32 @@ img {
 	font-size: 1em;
 }
 
+.video {
+	position: relative;
+	top: 0;
+	left: 0;
+}
+
+.video-overlay {
+	z-index: 1;
+	color: red;
+	position: absolute;
+	top: calc(50% - .4em);
+	left: calc(50% - .4em);
+	font: 700 8em sans-serif;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.flash {
+	animation: video-overlay-fade 1s ease-out forwards;
+}
+
+@keyframes video-overlay-fade {
+	0%   { opacity: .5; }
+	100% { opacity: 0; }
+}
+
 @media only screen and (min-device-width: 320px) and (max-device-width: 430px) and (-webkit-device-pixel-ratio: 2), 
 		only screen and (min-device-width: 375px) and (max-device-width: 812px) and (-webkit-device-pixel-ratio: 3) {
 	.status_icon_container_layout {

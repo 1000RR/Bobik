@@ -24,7 +24,8 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
   const backoffRef = useRef<number>(initialBackoff);
   const timerRef = useRef<number | null>(null);
   const mountedRef = useRef<boolean>(false);
-  const myRef = useRef<HTMLImageElement>(null);
+  const [videoSize, setVideoSize] = useState<string>("large");
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const bust = useCallback(() => {
     const sep = src.includes("#") ? "&" : "#";
@@ -65,14 +66,20 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
   }, [restartWithBackoff]);
 
   const handleClick = useCallback(() => {
-    if (myRef.current?.classList.contains('large')) {
-      myRef.current.classList.replace('large', 'medium');
-    } else if (myRef.current?.classList.contains('medium')) {
-      myRef.current.classList.replace('medium', 'small');
+    if (videoSize == 'large') {
+      setVideoSize('medium');
+    } else if (videoSize == 'medium') {
+      setVideoSize('small');
     } else {
-      myRef.current?.classList.replace('small', 'large');
+      setVideoSize('large');
     }
-  }, [myRef]);
+
+    
+    if (overlayRef?.current?.classList.contains('flash')) {
+      overlayRef?.current.classList.remove('flash')
+      setTimeout(()=> overlayRef?.current?.classList.add('flash'), 50);
+    }
+  }, [videoSize, overlayRef]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -96,16 +103,26 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    bustedSrc.length ? <img ref={myRef}
-      {...imgProps}
-      className={"roundedCorners large"}
-      id={"securityVideo"}
-      src={bustedSrc}
-      onLoad={handleLoad}
-      onClick={handleClick}
-      onError={handleError}
-      alt=""
-    /> : <></>
+    bustedSrc.length ? 
+    <div style={{width: "fit-content", height: "fit-content", position: "relative"}}>
+      <div
+        ref={overlayRef}
+        className="video-overlay flash">{videoSize[0].toUpperCase()}
+      </div>
+      <img
+          {...imgProps}
+          className={`video roundedCorners ${videoSize}`}
+          id={"securityVideo"}
+          src={bustedSrc}
+          onLoad={handleLoad}
+          onError={handleError}
+          onClick={handleClick}
+          alt=""
+      />
+      <style>{`
+        
+      `}</style>
+    </div> : <></>
   );
 };
 
