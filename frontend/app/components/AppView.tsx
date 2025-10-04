@@ -174,7 +174,7 @@ const AppView: React.FC = () => {
                 <div>
                     <UnavailableOverlay>
                         {appState.isError && !appState.isConnected ? unavailableContent : loadingContent}
-                        <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}>
+                        <ButtonWithDrawer disableinternalspacing={true} flexDirection="row" buttonText="Security Video Stream" isOpen={true}>
                             <SecurityVideos></SecurityVideos>
                         </ButtonWithDrawer>
                     </UnavailableOverlay>
