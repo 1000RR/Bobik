@@ -12,7 +12,7 @@ const TopPanel: React.FC = ({}) => {
             alignItems={shrink ? "flex-start" : undefined}
             position={"fixed"}
             zIndex={10}
-            hideBackground={shrink}
+            hidebackground={!!shrink}
             minHeight={"50px"}
             className={`topPanel ${shrink ? "shrink" : ""}`}
         >

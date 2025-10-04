@@ -41,10 +41,10 @@ const PanelBackgroundColorStyle = css`
     background-color: rgba(60,60,60, .5);
 `;
 
-const CompositeStyledPanel = styled.div<{hideBackground?: boolean}>`
+const CompositeStyledPanel = styled.div<{hidebackground?: boolean}>`
     ${PanelSizeStyle}
     ${PanelLayoutStyle}
-    ${({ hideBackground }) => hideBackground ? '' : PanelBackgroundColorStyle}
+    ${({ hidebackground }) => hidebackground ? '' : PanelBackgroundColorStyle}
     ${PanelBorderStyle}
 `;
 
@@ -57,17 +57,17 @@ const Panel: React.FC<{
     alignItems?: CSSAlignItems,
     margin?: string,
     padding?: string
-    hideBackground?: boolean,
+    hidebackground?: boolean,
     justifyContent?: CSSJustifyContent,
     zIndex?: number,
     position?: CSSPosition,
     width?: string,
     height?: string,
     minHeight?: string
-}> = ({ className, children, flexDirection, gap, rowGap, alignItems, margin, padding, hideBackground, justifyContent, zIndex, position, width, height, minHeight }) => {
+}> = ({ className, children, flexDirection, gap, rowGap, alignItems, margin, padding, hidebackground, justifyContent, zIndex, position, width, height, minHeight }) => {
     
     return (
-        <CompositeStyledPanel hideBackground={hideBackground} className={className} style={{flexDirection:flexDirection, gap:gap, rowGap: rowGap, alignItems: alignItems, margin: margin, padding: padding, justifyContent: justifyContent, zIndex: zIndex, position: position, width: width, height: height, minHeight: minHeight}}>
+        <CompositeStyledPanel hidebackground={hidebackground} className={className} style={{flexDirection:flexDirection, gap:gap, rowGap: rowGap, alignItems: alignItems, margin: margin, padding: padding, justifyContent: justifyContent, zIndex: zIndex, position: position, width: width, height: height, minHeight: minHeight}}>
            {children}
         </CompositeStyledPanel>
     );

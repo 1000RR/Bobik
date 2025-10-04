@@ -47,12 +47,12 @@ const SpecialFunctions: React.FC<{
 
     return (
         <>
-        <Panel padding="10px" hideBackground={true} className={className}>
+        <Panel padding="10px" hidebackground={true} className={className}>
             <Button className="mediumbutton blueButton dimmable" onClick={clearDataHandler}>Clear Data</Button>
             <Button className="mediumbutton orangeButton dimmable" onClick={testAlarmsHandler}>Test Alarms (current profile-selected)</Button>
             <Button className="mediumbutton redButton dimmable" onClick={getAttentionHandler}>Get Attention</Button>
         </Panel>
-        <Panel hideBackground={true} padding="10px">
+        <Panel hidebackground={true} padding="10px">
             <div style={{width: "100%", display: "flex", justifyContent: "center", "fontSize": "1.2em"}}>Simulate incoming CAN device message</div>
             <div className="input-wrapper" style={{position: "relative", display: "inline-block"}}>
                 <input type="text" id="sender-field" className="dimmable input-field" name="sender" defaultValue="0x75" required />
@@ -70,7 +70,7 @@ const SpecialFunctions: React.FC<{
                 <input type="text" id="type-field" className="dimmable input-field" name="type" defaultValue="0x00" required />
                 <span className="input-hint" style={{position: "absolute", right: 7}}>TYPE</span>
             </div>
-            <Panel justifyContent={"space-between"} padding="10px" hideBackground={true} className={className}>
+            <Panel justifyContent={"space-between"} padding="10px" hidebackground={true} className={className}>
                 <Button id="can-send-single" className="smallbutton gray dimmable" onClick={sendSingleCan}>send 1x</Button>
                 <Button id="can-send-repeatedly" className="smallbutton gray dimmable" onClick={sendRepeatedlyCan}>send Nx</Button>
                 <Button id="can-stop-send" className="smallbutton gray dimmable" onClick={stopSendingCan}>stop</Button>

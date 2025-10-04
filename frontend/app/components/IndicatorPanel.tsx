@@ -199,7 +199,7 @@ const IndicatorPanel: React.FC<{
     className?: string
 }> = ({ className}) => {
     return (
-        <Panel padding="10px 10px 0px 10px" gap="10px" rowGap="10px" hideBackground={true} className={className}>
+        <Panel padding="10px 10px 0px 10px" gap="10px" rowGap="10px" hidebackground={true} className={className}>
              <SensorsPanel></SensorsPanel>
              <AlarmsPanel></AlarmsPanel>
         </Panel>

@@ -10,7 +10,7 @@ const TopPanelSpacer: React.FC<{
     const shrink = useScrollThreshold(10); //scrolled past 10px
     
     return (
-        <Panel hideBackground={true} minHeight={"0px"} height={shrink ? "0" : "120px"} className={"topPanel " + className}></Panel>
+        <Panel hidebackground={true} minHeight={"0px"} height={shrink ? "0" : "120px"} className={"topPanel " + className}></Panel>
     );
 };
 
