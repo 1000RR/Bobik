@@ -79,11 +79,9 @@ pre {
     );
 	background-attachment: local;
 	overscroll-behavior: none;
-
-
 }
 
-:root { --gap: 20px; }
+:root { --gap: 30px; }
 
 #securityVideo {
 	display: block;          /* <img>, <div>, etc. */
@@ -95,15 +93,15 @@ pre {
 }
 
 #securityVideo.large {
-	width: max(min(calc(100vw - 2*var(--gap)),  1920px), 1000px);
+	width: 1920px;
 }
 
 #securityVideo.medium {
-	width: max(min(calc(100vw - 2*var(--gap)),  1000px), 1000px);
+	width: 1000px
 }
 
 #securityVideo.small {
-	width: max(min(calc(100vw - 2*var(--gap)),  640px), 640px);
+	width: 640px;
 }
 
 .fadeoutImageRound {
