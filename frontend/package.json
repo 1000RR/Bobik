@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "build-static": "export NEXT_BUILD_CONFIG=\"static\" && next build && head -c 6 ./.next/BUILD_ID > ./out/_next/BUILD_ID && echo \" built on $(date)\" >> ./out/_next/BUILD_ID && cp ./public/manifest.json ./out/manifest.json && cp -r ./public/favicon.ico ./out/ && cat ./out/_next/BUILD_ID",
+    "outputBuildId": "head -c 6 ./.next/BUILD_ID > ./out/_next/BUILD_ID && echo \" built on $(date)\" >> ./out/_next/BUILD_ID && echo \"$(cat ./.next/BUILD_ID) $(date)\" >> ../BUILD_IDS",
+    "build-static": "export NEXT_BUILD_CONFIG=\"static\" && next build && npm run outputBuildId && cp ./public/manifest.json ./out/manifest.json && cp -r ./public/favicon.ico ./out/ && cat ./out/_next/BUILD_ID",
     "start": "next start",
     "lint": "next lint"
   },
