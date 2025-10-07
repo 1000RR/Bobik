@@ -423,8 +423,7 @@ def possiblyAddMember(msg):
 def playDenonThreadMain(currentlyTriggeredDevices, everAlarmedDuringAlarm):
     cwd = getThisDirAddress()
     playCommandArray = ["/usr/bin/mpg123"]
-    volume = "55"  # default
-
+    volume = "55"  # defaul
     ####types of sounds####
     # test sound from TEST_ALARM_ID
     # pick up your phones from CHECK_PHONES_ID

@@ -55,7 +55,7 @@ const SpecialFunctions: React.FC<{
         <Panel hidebackground={true} padding="10px">
             <div style={{width: "100%", display: "flex", justifyContent: "center", "fontSize": "1.2em"}}>Simulate incoming CAN device message</div>
             <div className="input-wrapper" style={{position: "relative", display: "inline-block"}}>
-                <input type="text" id="sender-field" className="dimmable input-field" name="sender" defaultValue="0x75" required />
+                <input type="text" id="sender-field" className="dimmable input-field" name="sender" defaultValue="0x30" required />
                 <span className="input-hint" style={{position: "absolute", right: 7}}>FROM</span>
             </div>
             <div className="input-wrapper" style={{position: "relative", display: "inline-block"}}>
