@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 type MjpegImageProps = {
@@ -11,7 +12,14 @@ type MjpegImageProps = {
   maxBackoff?: number;
   /** Pass through to the underlying <img> (className, style, alt, etc.). */
   imgProps?: Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "onLoad" | "onError">;
+  videoSize?: VIDEO_SIZE;
 };
+
+export enum VIDEO_SIZE {
+  SMALL = "small",
+  MEDIUM = "medium",
+  LARGE = "large"
+}
 
 const MjpegImage: React.FC<MjpegImageProps> = ({
   src,
@@ -19,12 +27,13 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
   initialBackoff = 1_000,
   maxBackoff = 15_000,
   imgProps = {},
+  videoSize: VideoSize
 }) => {
   const [bustedSrc, setBustedSrc] = useState<string>("");
   const backoffRef = useRef<number>(initialBackoff);
   const timerRef = useRef<number | null>(null);
   const mountedRef = useRef<boolean>(false);
-  const [videoSize, setVideoSize] = useState<string>("large");
+  const [videoSize, setVideoSize] = useState<VIDEO_SIZE>(VideoSize ?? VIDEO_SIZE.LARGE);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const bust = useCallback(() => {
@@ -66,12 +75,12 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
   }, [restartWithBackoff]);
 
   const handleClick = useCallback(() => {
-    if (videoSize == 'large') {
-      setVideoSize('medium');
-    } else if (videoSize == 'medium') {
-      setVideoSize('small');
+    if (videoSize == VIDEO_SIZE.LARGE) {
+      setVideoSize(VIDEO_SIZE.MEDIUM);
+    } else if (videoSize == VIDEO_SIZE.MEDIUM) {
+      setVideoSize(VIDEO_SIZE.SMALL);
     } else {
-      setVideoSize('large');
+      setVideoSize(VIDEO_SIZE.LARGE);
     }
 
     
