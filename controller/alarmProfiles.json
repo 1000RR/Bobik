@@ -195,6 +195,6 @@
     "alarmOutputDevices": ["0x77"],
     "playSound": "thisisatest.mp3",
     "playSoundVolume": 60,
-    "alarmTimeLengthSec": 2
+    "alarmTimeLengthSec": 10
     }
 ]
