@@ -105,3 +105,5 @@ DEVICE_TYPE_TEMP_HUMIDITY_SENSOR = 0x07
 
 FLOAT_DELAY_BETWEEN_POWER_ON_COMMANDS_SEC = 0.15
 FLOAT_ALARM_TEST_LENGTH_TIME_SEC = 0.05
+
+MP3_PLAYER_PROGRAM = "/usr/bin/mpg123", "-o", "alsa", "-a", "hw:2,0" #specific to raspberry pi 4b / Raspberry Pi OS 64

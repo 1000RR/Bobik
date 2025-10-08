@@ -422,7 +422,7 @@ def possiblyAddMember(msg):
 
 def playDenonThreadMain(currentlyTriggeredDevices, everAlarmedDuringAlarm):
     cwd = getThisDirAddress()
-    playCommandArray = ["/usr/bin/mpg123", "-o", "alsa", "-a", "hw:2,0"] #specific to raspberry pi 4b / Raspberry Pi OS 64
+    playCommandArray = [MP3_PLAYER_PROGRAM] 
     volume = "55"  # defaul
     ####types of sounds####
     # test sound from TEST_ALARM_ID
