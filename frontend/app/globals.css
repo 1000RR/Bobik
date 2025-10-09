@@ -207,15 +207,44 @@ pre {
 	}
 }
 
-.button-enabled {
-	background-color: rgb(140, 0, 124) !important;
-	color: rgb(241, 155, 248) !important;
-	border-color: rgb(190, 94, 179) !important;
+.drawer-button {
+	color: #3c3c3c;
+	border-color: #3c3c3c;
+	background-color: #9d9d9d;
+	transition-duration: 0s;
+
+	&:focus {
+		filter: brightness(120%);
+	}
+
+	&:active {
+		filter: brightness(110%);
+	}
 
 	@media (prefers-color-scheme: dark) {
-		background-color: rgb(56, 1, 61) !important;
-		color: rgb(158, 25, 187) !important;
-		border-color: rgb(136, 0, 120) !important;
+		background-color: #3c3c3c;
+		color: #999999;
+		border-color: #999999;
+
+		&:focus {
+			filter: brightness(120%);
+		}
+
+		&:active {
+			filter: brightness(140%);
+		}
+	}
+}
+
+.drawer-button.button-enabled {
+	background-color: rgb(217, 217, 217) !important;
+	color: rgb(82, 82, 82) !important;
+	border-color: rgb(82, 82, 82) !important;
+
+	@media (prefers-color-scheme: dark) {
+		background-color: rgb(104, 104, 104) !important;
+		color: rgb(178, 177, 177) !important;
+		border-color: rgb(195, 195, 195) !important;
 	}
 }
 

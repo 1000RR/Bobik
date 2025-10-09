@@ -28,7 +28,6 @@ const ButtonBorderStyle = css`
 	border: 1px;
 	border-style: solid;
 	border-radius: 5px;
-	border-color: darkgrey;
 	margin: 10px 10px 0px 10px;
 `;
 
@@ -42,56 +41,12 @@ const ButtonLayoutStyle = css`
 	padding: 10px;
 `;
 
-const ButtonPressStyle = css`
-	background-color:  #aaaaaa;
-	color: #3c3c3c;
-	border-color: #3c3c3c;
-	transition-duration: 0s;
-	
-	&:focus {
-		background-color: #bbbbbb;
-		border-color: #3c3c3c;
-		color: #3c3c3c;
-	}
-
-	&:active {
-		background-color: #dddddd;
-		border-color: #111111;
-		color: #111111;
-	}
-
-	@media (prefers-color-scheme: dark) {
-		background-color: #3c3c3c;
-		color: #999999;
-		border-color: #999999;
-
-		&:focus {
-			color: #c5c5c5;
-			background-color: #454545;
-			border-color: #aaaaaa;
-		}
-
-		&:active {
-			color: #d5c5c5;
-			background-color: #6f6f6f;
-			border-color: black;
-		}
-
-		.button-enabled {
-			color: white !important;
-			background-color: red !important;
-			border-color: white !important; 
-		}
-	}
-`;
-
 const CompositeStyledButton = styled.button.attrs({
   className: "noselect"
 })`
   ${ButtonSizeStyle}
   ${ButtonBorderStyle}
   ${ButtonLayoutStyle}
-  ${ButtonPressStyle}
   ${ButtonTextStyle}
 `;
 
@@ -99,7 +54,6 @@ const DrawerSpacing = css`
 	gap: 10px;
 	padding: 10px;
 `;
-
 
 const Drawer = styled.div<{
 	disableinternalspacing?: boolean
@@ -151,7 +105,7 @@ const ButtonWithDrawer: React.FC<{
 
 	return (
 	<>
-		<CompositeStyledButton className={`${className} ${isCollapsed ? '' : 'button-enabled'}`} onClick={handler}>
+		<CompositeStyledButton className={`drawer-button ${className ? className : ''} ${isCollapsed ? '' : 'button-enabled'}`} onClick={handler}>
 			{buttonText}
 		</CompositeStyledButton>
 		<Drawer style={{flexDirection: flexDirection, display: isCollapsed ? 'none' : 'flex', justifyContent: justifyContent, maxHeight: containsScrollable ? 'calc(100vh - 150px)': '' }} disableinternalspacing={disableinternalspacing}>
