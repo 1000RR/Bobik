@@ -77,11 +77,22 @@ const AppView: React.FC = () => {
             notifRef.current?.sendNotification(
                 `${ParseUtils.formatDate(new Date())}`,
                 `Triggered: ${anySensorTriggered}`,
-                'trigger',
+                'sensor trigger',
                 true
             );
         }
     }, [anySensorTriggered]);
+    
+    useEffect(() => {
+        if (appState.status.armStatus !== appState.priorStatus?.armStatus) {
+            notifRef.current?.sendNotification(
+                `${ParseUtils.formatDate(new Date())}`,
+                `Alarm ${appState.status.armStatus}`,
+                'arm status',
+                true
+            );
+        }
+    }, [appState.status.armStatus]); //priorStatus not included because change in status is a sufficient trigger
 
     useEffect(() => {
         if (alarmTriggered) {

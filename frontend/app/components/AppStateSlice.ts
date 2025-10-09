@@ -6,7 +6,7 @@ export type PastEvent = {
     trigger?: string;
     method?: string;
 }
-  
+
 export type PastEventsResponse = {
     pastEvents: PastEvent[];
 }
@@ -45,6 +45,7 @@ export type StatusResponse = {
 }
 
 export interface AppState {
+    priorStatus: StatusResponse | null
     status: StatusResponse;
     pastEvents: PastEventsResponse;
     alarmProfiles: AlarmProfilesResponse;
@@ -58,6 +59,7 @@ export type AppStateSlice = {
 }
 
 const initialState: AppState = {
+  priorStatus: null,
   status: {
     armStatus: "",
     alarmStatus: "",
@@ -91,6 +93,7 @@ export const AppStateSlice = createSlice({
   initialState: initialState,
   reducers: {
     setStatus: (state, action) => {
+      state.priorStatus = state.status
       state.status = action.payload
     },
     setPastEvents: (state, action) => {
