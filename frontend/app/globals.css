@@ -208,10 +208,14 @@ pre {
 }
 
 .button-enabled {
-	filter: sepia(30%) hue-rotate(190deg) saturate(100);
+	background-color: rgb(140, 0, 124) !important;
+	color: rgb(241, 155, 248) !important;
+	border-color: rgb(190, 94, 179) !important;
 
 	@media (prefers-color-scheme: dark) {
-		filter: sepia(30%) hue-rotate(160deg) saturate(40) brightness(60%);
+		background-color: rgb(56, 1, 61) !important;
+		color: rgb(158, 25, 187) !important;
+		border-color: rgb(136, 0, 120) !important;
 	}
 }
 
