@@ -87,7 +87,7 @@ const Button: React.FC<{
     id?: string
 }> = ({ className, children, buttonText, style, onClick, id}) => {
     return (
-        <CompositeStyledButton id={id} className={`${className} base-button`} style={style} onClick={(e)=>{e.currentTarget.blur(); onClick? onClick(e) : (()=>{})();}}>
+        <CompositeStyledButton id={id} className={`base-button ${className}`} style={style} onClick={(e)=>{e.currentTarget.blur(); onClick? onClick(e) : (()=>{})();}}>
             {buttonText}
             {children}
         </CompositeStyledButton>

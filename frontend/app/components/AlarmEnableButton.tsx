@@ -43,42 +43,7 @@ const ButtonTextStyle = css`
     font-size: 25px;
 `;
 
-const ButtonPressStyle = css`
-    &.alarmStateOn {
-        background-color: #215dbe;
-        border-color: #5eaeaf;
-        /*&:focus {
-            background-color: lightblue;
-            border-color: white;
-            color: white;
-        }
-        &:active {
-            background-color: #0099ff;
-            filter: saturate(1.2);
-            color: white;
-        }*/
-        @media (prefers-color-scheme: dark) {
-            filter: brightness(0.7);   
-            color: white;
-        }
-    }
 
-    &.alarmStateOff {
-        background-color:  #d00000;
-        /*&:focus {
-            background-color: lightcoral;
-            border-color: white;
-        }
-        &:active {
-            background-color: #ff3300;
-            filter: saturate(1.2);  
-        }*/
-        @media (prefers-color-scheme: dark) {
-            filter: brightness(0.7);
-            color: white;
-        }
-    }
-`;
 
 const CompositeStyledButton = styled.button.attrs({
   className: "noselect"
@@ -86,7 +51,6 @@ const CompositeStyledButton = styled.button.attrs({
   ${ButtonSizeStyle}
   ${ButtonBorderStyle}
   ${ButtonLayoutStyle}
-  ${ButtonPressStyle}
   ${ButtonTextStyle}
 `;
 
@@ -120,7 +84,7 @@ const AlarmEnableButton: React.FC<{
     });
 
     return (<div className={"line_height_reduced"} style={{ width: "100%" }}>
-        <CompositeStyledButton className={`${className} ${isArmed ? 'alarmStateOn' : 'alarmStateOff'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
+        <CompositeStyledButton className={`alarm-state-button ${className} ${isArmed ? 'alarm-state-on' : 'alarm-state-off'}`} onClick={(e)=>{e.currentTarget.blur(); /*handler(e);*/}}>
             {showIcon ? <Image className={`fadeoutImageRound scale_mobile ${alarmTriggered ? 'invertTransitions' : ''}`} alt="" height="90" width="90" src={isArmed ? imgSrcArmed : imgSrcDisarmed}></Image> : <PowerIndicator secondsPerRotation={isArmed ? 1 : 0} color={isArmed ? "cyan" : "maroon"} dotColor={isArmed ? "#215dbe" : "red"}></PowerIndicator>}
                 <Clock></Clock>
                 <div className={"alarm-profile"}>

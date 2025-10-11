@@ -148,7 +148,7 @@ const AppView: React.FC = () => {
                     <TopPanel></TopPanel>
                     <TopPanelSpacer></TopPanelSpacer>
                     <IndicatorPanel></IndicatorPanel>
-                    <ButtonWithDrawer flexDirection="column" buttonText="Alarm Control"><ArmButtonList buttonMode={ArmButtonMode.SWITCH_AND_ENABLE_QUICKLIST}></ArmButtonList></ButtonWithDrawer>
+                    <ButtonWithDrawer flexDirection="column" className={appState.status?.armStatus === 'ARMED' ? "alarm-state-on" : "alarm-state-off"} buttonText="Alarm Control"><ArmButtonList buttonMode={ArmButtonMode.SWITCH_AND_ENABLE_QUICKLIST}></ArmButtonList></ButtonWithDrawer>
                     <ButtonWithDrawer flexDirection="row" buttonText="UI & Alert Controls" keepChildrenInDomOnClose={true}>
                         <UIControls ref={notifRef}/>
                         {/* keep at top level - must always be rendered as local alarm depends on elements being in DOM */}

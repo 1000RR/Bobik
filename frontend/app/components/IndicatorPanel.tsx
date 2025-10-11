@@ -109,7 +109,7 @@ const SensorsPanel: React.FC<{
                     const isGarageDoor = sensorElement.name.toLowerCase().includes("garage car door");
                     const isntClickedGarageDoor = (isGarageDoor && !isButtonActivatedColor) || !isGarageDoor;
                     const hasAlarmedWithinArmPeriod = triggeredDevicesWithinArmCycle.includes(sensorElement.id);
-                    return <div key={index} id={sensorElement.id} onClick={isGarageDoor ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonActivatedColor && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray noselect ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${hasAlarmedWithinArmPeriod && !sensorElement.missing && !sensorElement.triggered ? " has_activated_during_alarm " : ""} ${(sensorElement.missing ? " highlight_red " : "")} dimmable`} >
+                    return <div key={index} id={sensorElement.id} onClick={isGarageDoor ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonActivatedColor && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray noselect ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${hasAlarmedWithinArmPeriod && !sensorElement.missing && !sensorElement.triggered ? " has_activated_during_alarm " : ""} ${(sensorElement.missing ? " highlight_red " : "")}`} >
                                 {isGarageDoor 
                                     ? <><IconLabel label={`quick tap ${garageButtonTapTimesThreshold}x`}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
                                     : sensorElement.name}
@@ -186,7 +186,7 @@ const AlarmsPanel: React.FC<{
         <div className={"no_select"} style={{zIndex: 1, position: "absolute", top: 0, left: 5}}>{`${deviceList.length} alarms`}</div>
         <div className={"no_select"} style={{zIndex: 1, position: "absolute", top: -2, right: 5}}>{Number.isInteger(myAlarmProfile?.alarmTimeLengthSec) ? (myAlarmProfile?.alarmTimeLengthSec > 0 ? `Alarms occur for ${myAlarmProfile?.alarmTimeLengthSec} sec` : 'alarms will sound while triggered') : ''}</div>
         {deviceList.map((alarmElement, index) => (
-            <div key={index} id={alarmElement.id} className={(alarmElement.triggered ? " invertTransitions " : "") + " thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray" + (alarmElement.enabled ? " highlight_green " : "") + (alarmElement.missing ? " highlight_red " : "") + " dimmable noselect"} >
+            <div key={index} id={alarmElement.id} className={(alarmElement.triggered ? " invertTransitions " : "") + " thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray" + (alarmElement.enabled ? " highlight_green " : "") + (alarmElement.missing ? " highlight_red " : "") + " noselect"} >
                  {alarmElement.name}
                  <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(alarmElement.id)}/>
 	         <DeviceId MyId={alarmElement.id}/>
