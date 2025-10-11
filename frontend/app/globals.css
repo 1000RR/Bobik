@@ -26,22 +26,6 @@
 	text-align: center;
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--background: rgb(36, 24, 53);
-		--foreground: #797979;
-	}
-
-	.background {
-		--background: rgb(36, 24, 53);
-		--foreground: #797979;
-	}
-
-	.dimmable, option {
-		filter: brightness(70%);
-	}
-}
-
 html, body {
 	color: var(--foreground);
 	background: var(--background);
@@ -195,16 +179,6 @@ pre {
 	&:active {
 		filter: brightness(140%);
 	}
-
-	@media (prefers-color-scheme: dark) {
-		&:focus {
-			filter: brightness(75%);
-		}
-	
-		&:active {
-			filter: brightness(90%);
-		}
-	}
 }
 
 .drawer-button {
@@ -220,39 +194,19 @@ pre {
 	&:active {
 		filter: brightness(110%);
 	}
-
-	@media (prefers-color-scheme: dark) {
-		background-color: #3c3c3c;
-		color: #999999;
-		border-color: #999999;
-
-		&:focus {
-			filter: brightness(120%);
-		}
-
-		&:active {
-			filter: brightness(140%);
-		}
-	}
 }
 
 .drawer-button.button-enabled {
-	background-color: rgb(217, 217, 217) !important;
-	color: rgb(82, 82, 82) !important;
-	border-color: rgb(82, 82, 82) !important;
-
-	@media (prefers-color-scheme: dark) {
-		background-color: rgb(104, 104, 104) !important;
-		color: rgb(178, 177, 177) !important;
-		border-color: rgb(195, 195, 195) !important;
-	}
+	background-color: rgb(217, 217, 217);
+	color: rgb(82, 82, 82);
+	border-color: rgb(82, 82, 82);
 }
 
 .alarm_button_enabled {
-	background-color: rgba(0, 208, 255, 1) !important;
-	border-width: 3px !important;
-	border-color:rgba(4, 113, 205, 1) !important;
-	color: rgba(4, 113, 205, 1) !important;
+	background-color: rgba(0, 208, 255, 1);
+	border-width: 3px;
+	border-color:rgba(4, 113, 205, 1);
+	color: rgba(4, 113, 205, 1);
 
 	&:focus {
 		filter: brightness(110%);
@@ -260,16 +214,6 @@ pre {
 
 	&:active {
 		filter: brightness(140%);
-	}
-
-	@media (prefers-color-scheme: dark) {
-		&:focus {
-			filter: brightness(70%);
-		}
-	
-		&:active {
-			filter: brightness(80%);
-		}
 	}
 }
 
@@ -477,9 +421,6 @@ img {
 }
 
  .ios-switch {
-	@media (prefers-color-scheme: dark) {
-		filter: brightness(80%);
-	}
 	position: relative;
 	width: 50px;
 	height: 28px;
@@ -550,6 +491,62 @@ img {
 @keyframes video-overlay-fade {
 	0%   { opacity: .5; }
 	100% { opacity: 0; }
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--background: rgb(36, 24, 53) !important;
+		--foreground: #797979 !important;
+	}
+
+	.background {
+		--background: rgb(36, 24, 53) !important;
+		--foreground: #797979 !important;
+	}
+
+	.dimmable, option {
+		filter: brightness(60%) !important;
+	}
+
+	.ios-switch {
+		filter: brightness(80%) !important;
+	}
+
+	.alarm_button_disabled {
+		&:focus {
+			filter: brightness(75%) !important;
+		}
+		&:active {
+			filter: brightness(90%) !important;;
+		}
+	}
+
+	.alarm_button_enabled {
+		&:focus {
+			filter: brightness(70%) !important;
+		}
+		&:active {
+			filter: brightness(80%) !important;
+		}
+	}
+
+	.drawer-button {
+		background-color: #3c3c3c !important;
+		color: #878787 !important;
+		border-color: #878787 !important;
+		&:focus {
+			filter: brightness(120%) !important;
+		}
+		&:active {
+			filter: brightness(140%) !important;
+		}
+	}
+
+	.drawer-button.button-enabled {
+		background-color: rgb(104, 104, 104) !important;
+		color: rgb(178, 177, 177) !important;
+		border-color: rgb(195, 195, 195) !important;
+	}
 }
 
 @media only screen and (min-device-width: 320px) and (max-device-width: 430px) and (-webkit-device-pixel-ratio: 2), 
