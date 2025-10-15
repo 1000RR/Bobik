@@ -159,12 +159,19 @@ pre {
 .highlight_red {
 	filter: brightness(20%) sepia(100%) saturate(3000%) hue-rotate(0) contrast(100%);
 	background-color: #880000 !important;
+	background: repeating-linear-gradient(
+		45deg,
+		rgba(83, 158, 255, 0.3), /* same hue, lower alpha */
+		rgba(83, 158, 255, 0.3) 10px,
+		transparent 10px,
+		transparent 20px
+	);
 }
 
 .has_activated_during_alarm {
 	filter: brightness(80%) sepia(100%) saturate(800%) hue-rotate(0) contrast(100%);
 	background-color: #444400 !important;
-	border: 1px solid !important;
+	border: 2px solid !important;
 }
 
 .alarm_button_disabled {
