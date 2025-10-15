@@ -188,16 +188,16 @@ pre {
 	transition-duration: 0s;
 
 	&:focus {
-		filter: brightness(120%);
+		filter: brightness(120%) !important;
 	}
 
 	&:active {
-		filter: brightness(110%);
+		filter: brightness(110%) !important;
 	}
 }
 
 .button-enabled {
-	filter: brightness(1.2);
+	filter: brightness(1.3);
 }
 
 .alarm_button_enabled {

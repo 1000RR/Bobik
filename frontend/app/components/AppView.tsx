@@ -84,10 +84,11 @@ const AppView: React.FC = () => {
     }, [anySensorTriggered]);
     
     useEffect(() => {
-        if (appState.status.armStatus !== appState.priorStatus?.armStatus) {
+        const currentStatus = appState.status.armStatus;
+        if (currentStatus !== appState.priorStatus?.armStatus) {
             notifRef.current?.sendNotification(
                 `${ParseUtils.formatDate(new Date())}`,
-                `Alarm ${appState.status.armStatus}`,
+                `Alarm ${currentStatus}${currentStatus === 'ARMED' ? " : " + appState.status.profile : ""}`,
                 'arm status',
                 true
             );
