@@ -116,7 +116,7 @@ const SensorsPanel: React.FC<{
                     const hasAlarmedWithinArmPeriod = triggeredDevicesWithinArmCycle.includes(sensorElement.id);
                     return <div key={index} id={sensorElement.id} onClick={isGarageDoor && hasGarageDoorOpener ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonActivatedColor && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray noselect ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${hasAlarmedWithinArmPeriod && !sensorElement.missing && !sensorElement.triggered ? " has_activated_during_alarm " : ""} ${(sensorElement.missing ? " highlight_red " : "")}`} >
                                 {isGarageDoor && hasGarageDoorOpener
-                                    ? <><IconLabel label={`quick tap ${garageButtonTapTimesThreshold}x`}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
+                                    ? <><IconLabel label={`quick tap ${garageButtonTapTimesThreshold}X`}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
                                     : sensorElement.name}
                                 <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(sensorElement.id)}/>
                                 <DeviceId MyId={sensorElement.id}/>
