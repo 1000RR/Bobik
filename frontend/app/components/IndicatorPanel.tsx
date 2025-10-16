@@ -16,13 +16,18 @@ export type DeviceDescriptor = {
     triggered: boolean
 };
 
-const garageButtonTapTimesThreshold = 4;
+const garageButtonTapTimesThreshold = 3; //CONST FOR CONSTANTS FILE
 
 const SensorsPanel: React.FC<{
     className?: string
 }> = ({ className }) => {
     const deviceList:Array<DeviceDescriptor> = [];
 
+    const hasGarageDoorOpener = useSelector(function (state: AppStateSlice) { //TODO: this is hard coded, which isn't great, and assumes only one garage door opener. Establish relationships between garage door sensors and openers in schema
+        return state.appState.status.memberDevicesReadable.some(
+            (device: string) => 
+                device.toLowerCase().includes("garage door opener"));
+    });
     const stateDeviceList = useSelector(function (state: AppStateSlice) {
         return state.appState.status.memberDevicesReadable;
     }).slice(0).sort((a: string, b:string) => a.localeCompare(b));
@@ -109,8 +114,8 @@ const SensorsPanel: React.FC<{
                     const isGarageDoor = sensorElement.name.toLowerCase().includes("garage car door");
                     const isntClickedGarageDoor = (isGarageDoor && !isButtonActivatedColor) || !isGarageDoor;
                     const hasAlarmedWithinArmPeriod = triggeredDevicesWithinArmCycle.includes(sensorElement.id);
-                    return <div key={index} id={sensorElement.id} onClick={isGarageDoor ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonActivatedColor && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray noselect ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${hasAlarmedWithinArmPeriod && !sensorElement.missing && !sensorElement.triggered ? " has_activated_during_alarm " : ""} ${(sensorElement.missing ? " highlight_red " : "")}`} >
-                                {isGarageDoor 
+                    return <div key={index} id={sensorElement.id} onClick={isGarageDoor && hasGarageDoorOpener ? garageDoorClickHandler : undefined} className={`${sensorElement.triggered && isntClickedGarageDoor ? " invertTransitions " : ""} ${isButtonActivatedColor && isGarageDoor ? "blueButton" : ""} thin_round_border status_icon_container_layout lower_opacity icon lowlight_gray noselect ${sensorElement.enabled && !sensorElement.missing ? " highlight_green " : ""} ${hasAlarmedWithinArmPeriod && !sensorElement.missing && !sensorElement.triggered ? " has_activated_during_alarm " : ""} ${(sensorElement.missing ? " highlight_red " : "")}`} >
+                                {isGarageDoor && hasGarageDoorOpener
                                     ? <><IconLabel label={`quick tap ${garageButtonTapTimesThreshold}x`}/><img src={garageOpen ? "/assets/garage_open.png" : "/assets/garage_closed.png"} alt=""></img> </>
                                     : sensorElement.name}
                                 <RequiredIcon required={!!myAlarmProfile?.missingDevicesThatTriggerAlarm?.includes(sensorElement.id)}/>
