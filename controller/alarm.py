@@ -422,7 +422,7 @@ def possiblyAddMember(msg):
 
 def playDenonThreadMain(currentlyTriggeredDevices, everAlarmedDuringAlarm):
     cwd = getThisDirAddress()
-    playCommandArray = [MP3_PLAYER_PROGRAM] 
+    playCommandArray = MP3_PLAYER_PROGRAM
     volume = "55"  # defaul
     ####types of sounds####
     # test sound from TEST_ALARM_ID
