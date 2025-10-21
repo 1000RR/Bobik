@@ -10,6 +10,8 @@ import os
 import debugpy
 from threading import Thread
 from alarmconstants import *
+import smtplib
+from email.mime.text import MIMEText
 
 # DEBUGGER debugpy
 # debugpy.listen(("0.0.0.0", 5678))
@@ -19,6 +21,7 @@ from alarmconstants import *
 debug = False
 LISTEN_PORT = 8080
 
+smtpClient = None
 armed = False  # initial condition
 alarmed = False
 pastEvents = []
@@ -78,12 +81,27 @@ with open(getThisDirAddress() + "/alarmProfiles.json", "r") as file:
     alarmProfiles = json.loads(file.read())
 
 
+try:
+    with open(getThisDirAddress() + "/server-keys/smtp.json", "r") as file:
+        smtpOptions = json.loads(file.read())
+    try:
+        smtpClient = smtplib.SMTP(smtpOptions["smtp_server"], smtpOptions["smtp_port"])
+        smtpClient.starttls();
+        smtpClient.login(smtpOptions.get("login"), smtpOptions.get("password"));
+        print("SMTP: ready - email alerts enabled on " + smtpOptions["smtp_server"] + ":" + smtpOptions["smtp_port"]);
+    except Exception as e:
+        print("SMTP: Could not establish connection - email alerts disabled")
+        smtpClient = None
+except Exception as e:
+    print("No SMTP options file found - email alerts disabled")
+    smtpOptions = None
+
+    
+
 # serial message format:
 #   {sender id hex}-{receiver id hex}-{message hex}-{devicetype hex}\n
 # when sending to 0xFF (home base arduino)
 #   {HOME_BASE_ID}-0xFF-{message hex}-{message 2 hex}\n
-
-
 
 
 # name of ARDUINO tty device
@@ -191,6 +209,12 @@ def setCurrentAlarmProfile(
 def addEvent(event):
     global pastEvents
     pastEvents.append(event);
+    if (smtpClient and "ALARM" in event['event']):
+        msg = MIMEText('BOBIK ALERT: ' + json.dumps(event));
+        msg['Subject'] = 'BOBIK ALERT: ' + event['event']
+        msg['From'] = "Bobik"
+        msg['To'] = 'recipient@example.com'
+        smtpClient.sendmail(msg["from"], smtpOptions.get("recipient"), msg.as_string());
 
 
 def getArmedStatus():
@@ -656,6 +680,10 @@ def exitSteps():
     sendMessage(
         [HOME_BASE_ID, BROADCAST_ID, SENSOR_POWER_OFF_COMMAND, DEVICE_TYPE_HOMEBASE]
     )  # all devices off (broadcast)
+
+    if smtpClient:
+        smtpClient.quit()
+
     print("\nPAST EVENTS LIST FOLLOWS:")
     for line in pastEvents:
         print(f"\t{line}")
