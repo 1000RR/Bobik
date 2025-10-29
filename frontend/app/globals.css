@@ -688,4 +688,13 @@ img {
 	.alarm_button {
 		transition-duration: 0s !important;
 	}
+
+	.video-fullscreen-button {
+		left: 10px;
+		top: 10px;
+		width: 30px;
+		min-height: 30px;
+		min-width: 30px;
+		height: 30px;
+	}
 }
