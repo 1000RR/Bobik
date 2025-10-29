@@ -77,7 +77,6 @@ const ArmButtonContainer: React.FC<{
     );
 };
 
-
 const ArmButtonList: React.FC<{
     className?: string,
     buttonMode?: ArmButtonMode

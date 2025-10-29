@@ -1,5 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import PowerIndicator from "@components/PowerIndicator";
+import { useSelector } from "react-redux";
+import { AppStateSlice } from "@components/AppStateSlice";
 
 type MjpegImageProps = {
   /** Your MJPEG endpoint, e.g. "/video/" */
@@ -35,6 +38,13 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
   const mountedRef = useRef<boolean>(false);
   const [videoSize, setVideoSize] = useState<VIDEO_SIZE>(VideoSize ?? VIDEO_SIZE.LARGE);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const videoElementRef = useRef<HTMLImageElement>(null);
+  const videoEnclosureRef = useRef<HTMLDivElement>(null);
+  const alarmStatusIndicatorRef = useRef<HTMLDivElement>(null);
+  const fullscreenButtonRef = useRef<HTMLDivElement>(null);
+  const isArmed = useSelector(function (state: AppStateSlice) { 
+        return state.appState.status?.armStatus === "ARMED"
+    });
 
   const bust = useCallback(() => {
     const sep = src.includes("#") ? "&" : "#";
@@ -75,6 +85,10 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
   }, [restartWithBackoff]);
 
   const handleClick = useCallback(() => {
+    if (videoElementRef?.current?.classList.contains('full')) {
+      return;
+    }
+    
     if (videoSize == VIDEO_SIZE.LARGE) {
       setVideoSize(VIDEO_SIZE.MEDIUM);
     } else if (videoSize == VIDEO_SIZE.MEDIUM) {
@@ -88,7 +102,13 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
       overlayRef?.current.classList.remove('flash')
       setTimeout(()=> overlayRef?.current?.classList.add('flash'), 50);
     }
-  }, [videoSize, overlayRef]);
+  }, [videoSize, overlayRef, videoElementRef]);
+
+   const handleToggleFullscreenClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    videoEnclosureRef.current?.classList.toggle('video-maximized');
+    videoElementRef.current?.classList.toggle('full');
+    alarmStatusIndicatorRef.current?.classList.toggle('displaynone');
+  }, [videoElementRef, videoEnclosureRef, alarmStatusIndicatorRef]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -102,7 +122,7 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
     document.addEventListener("visibilitychange", vis);
     window.addEventListener("online", online);
 
-    return () => {
+    return () => {``
       mountedRef.current = false;
       stopTimer();
       document.removeEventListener("visibilitychange", vis);
@@ -113,7 +133,13 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     bustedSrc.length ? 
-    <div style={{width: "fit-content", height: "fit-content", position: "relative"}}>
+    <div style={{width: "fit-content", height: "fit-content", position: "relative"}} ref={videoEnclosureRef}>
+      <div ref={fullscreenButtonRef} className="video-fullscreen-button" onClick={handleToggleFullscreenClick}>
+        <img src={"/assets/fullscreen.svg"} height="50" width="50" alt="Toggle Fullscreen" />
+      </div>
+      <div ref={alarmStatusIndicatorRef} className="video-fullscreen-alarm-status-indicator displaynone">
+        <PowerIndicator secondsPerRotation={isArmed ? 1 : 0} color={isArmed ? "cyan" : "maroon"} dotColor={isArmed ? "#215dbe" : "red"}></PowerIndicator>
+      </div>
       <div
         ref={overlayRef}
         className="video-overlay flash">{videoSize[0].toUpperCase()}
@@ -127,6 +153,7 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
           onError={handleError}
           onClick={handleClick}
           alt=""
+          ref={videoElementRef}
       />
       <style>{`
         

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="24" height="24" viewBox="0 0 24 24"
+     fill="none" stroke="#FFFFFF" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+
+
+  <rect x="0" y="0" width="24" height="24" fill="black" opacity="0.6" />
+
+  <path d="M3 9V3h6M3 3l8 8"/>
+  <path d="M21 9V3h-6M21 3l-8 8"/>
+  <path d="M3 15v6h6M3 21l8-8"/>
+  <path d="M21 15v6h-6M21 21l-8-8"/>
+</svg>
