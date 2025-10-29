@@ -1,4 +1,6 @@
 import React from "react";
+import { AppState, AppStateSlice } from "@components/AppStateSlice";
+import { useSelector } from "react-redux";
 
 interface PowerIndicatorProps {
   color?: string;       // main circle color (gradient)
@@ -17,12 +19,18 @@ const PowerIndicator: React.FC<PowerIndicatorProps> = ({
   secondsPerRotation = 1,
   rimInset = 3,
 }) => {
+  const appState: AppState = useSelector((state: AppStateSlice) => state.appState); //appState is the name of the slice
+
   const r = size / 2;
   const cx = r, cy = r;
   const orbitR = Math.max(0, r - rimInset - dotRadius);
 
-  // Fallback dot color if none provided
-  const effectiveDotColor = dotColor ?? "#000000";
+  const serviceAvailable = appState.isConnected && !appState.isError && appState.isLoaded;
+  const effectiveDotColor = (serviceAvailable && dotColor) ? dotColor : "#222222"; //dark grey if disconnected
+
+  if (!serviceAvailable) { //disconnected color
+    color = "#000000";
+  }
 
   return (
     <svg
