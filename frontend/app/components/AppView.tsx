@@ -180,7 +180,7 @@ const AppView: React.FC = () => {
                             <ButtonWithDrawer flexDirection="row" buttonText="Garage Door"><GarageDoorButton margin="10px"></GarageDoorButton></ButtonWithDrawer>
                         </ButtonWithDrawer>
                     </> : <></>}
-                    {!serviceAvailable && (appState.isError && !appState.isConnected) ? unavailableContent : loadingContent}
+                    {!serviceAvailable ? ((appState.isError && !appState.isConnected) ? unavailableContent : loadingContent) : <></>}
                     <ButtonWithDrawer flexDirection="row" buttonText="Security Video Stream" isOpen={true}><SecurityVideos></SecurityVideos></ButtonWithDrawer>
                     <BuildId></BuildId>
                 </div>
