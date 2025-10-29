@@ -108,8 +108,9 @@ export const AppStateSlice = createSlice({
     setIsError: (state, action) => {
       state.isError = action.payload
       if (action.payload === true) { //reset state on error/disconnect
+        state.priorStatus = state.status;
         state.status = initialState.status;
-         state.pastEvents = initialState.pastEvents;
+        state.pastEvents = initialState.pastEvents;
       }
     },
     setIsLoaded: (state, action) => {
