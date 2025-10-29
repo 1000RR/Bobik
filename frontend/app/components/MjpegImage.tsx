@@ -88,7 +88,6 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
     if (videoElementRef?.current?.classList.contains('full')) {
       return;
     }
-    
     if (videoSize == VIDEO_SIZE.LARGE) {
       setVideoSize(VIDEO_SIZE.MEDIUM);
     } else if (videoSize == VIDEO_SIZE.MEDIUM) {
@@ -102,7 +101,7 @@ const MjpegImage: React.FC<MjpegImageProps> = ({
       overlayRef?.current.classList.remove('flash')
       setTimeout(()=> overlayRef?.current?.classList.add('flash'), 50);
     }
-  }, [videoSize, overlayRef, videoElementRef]);
+  }, [videoSize, overlayRef]);
 
    const handleToggleFullscreenClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     videoEnclosureRef.current?.classList.toggle('video-maximized');
