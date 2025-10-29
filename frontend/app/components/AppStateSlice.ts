@@ -97,16 +97,20 @@ export const AppStateSlice = createSlice({
       state.status = action.payload
     },
     setPastEvents: (state, action) => {
-        state.pastEvents = action.payload
+      state.pastEvents = action.payload
     },
     setAlarmProfiles: (state, action) => {
-        state.alarmProfiles = action.payload
+      state.alarmProfiles = action.payload
     },
     setIsConnected: (state, action) => {
-        state.isConnected = action.payload
+      state.isConnected = action.payload
     },
     setIsError: (state, action) => {
       state.isError = action.payload
+      if (action.payload === true) { //reset state on error/disconnect
+        state.status = initialState.status;
+         state.pastEvents = initialState.pastEvents;
+      }
     },
     setIsLoaded: (state, action) => {
       state.isLoaded = action.payload
