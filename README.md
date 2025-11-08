@@ -1,5 +1,5 @@
 
-<img width="899" alt="bobik" src="https://github.com/user-attachments/assets/b32ab92e-6264-4e49-999e-a96790421e8a" />
+<img width="2696" height="2644" alt="Screenshot 2025-11-08 at 11 54 35 AM" src="https://github.com/user-attachments/assets/f2ec9d8a-f580-4753-894e-d0b82c820c8a" />
 
 
 ## Idea
