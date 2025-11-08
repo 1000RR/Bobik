@@ -16,4 +16,4 @@ BACKLOG:
 - move past events log from memory to DB; DB should have a sweep job based on back date and/or number of events.
   - searching for events from UI.
 - front end security: implement CSP.
-- install dependencies script should include pip dependencies (both on device at (re)install time and in dev env)
+- dockerize
