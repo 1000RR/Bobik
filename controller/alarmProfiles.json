@@ -1,200 +1,212 @@
-[
-    {
-    "index": 0,
-    "name": "Night",
-    "sensorsThatTriggerAlarm": [ "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 1,
-    "name": "Away",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99", "0x15", "0x10", "0x77"],
-    "playSound": "scaryalarm.mp3",
-    "playSoundVolume": 45,
-    "alarmTimeLengthSec": 30
-}, {
-    "index": 2,
-    "name": "Visual Test 15s | Perimeter",
-    "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x50", "0x40"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x51"],
-    "alarmTimeLengthSec": 15
-}, {
-    "index": 3,
-    "name": "Office - Perimeter",
-    "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x50", "0x40"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x50", "0x40"],
-    "alarmOutputDevices": ["0x99"],
-    "alarmTimeLengthSec": 5
-}, {
-    "index": 4,
-    "name": "Night - All Alarms 10s | Garage Perimeter Sensors",
-    "sensorsThatTriggerAlarm": [ "0x31", "0x30"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30"],
-    "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 5,
-    "name": "Night - All Alarms 10s | All Sensors",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 6,
-    "name": "All Alarms 5s | All Sensors",
-    "alarmTimeLengthSec": 5
-}, {
-    "index": 7,
-    "name": "Visual Test 15s | All Sensors",
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x51"],
-    "alarmTimeLengthSec": 15
-}, {
-    "index": 8,
-    "name": "Visual Alarm 15s | Garage Sensors",
-    "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x80"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x80"],
-    "alarmOutputDevices": ["0x51"],
-    "alarmTimeLengthSec": 15
-}, {
-    "index": 9,
-    "name": "Test - Denon Alarm 10s | All Sensors",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x77"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 10,
-    "name": "Night - Office Alarms 10s | Garage side door & movement",
-    "sensorsThatTriggerAlarm": [ "0x31", "0x80"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x80"],
-    "alarmOutputDevices": ["0x99", "0x77"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 11,
-    "name": "Night - Office Alarms 10s | Garage side door & movement; Kitchen movement",
-    "sensorsThatTriggerAlarm": [ "0x31", "0x80", "0x75"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x80", "0x75"],
-    "alarmOutputDevices": ["0x99", "0x77"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 12,
-    "name": "Night - Office Buzzer 7s | Garage side door & movement",
-    "sensorsThatTriggerAlarm": [ "0x31", "0x80"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x80"],
-    "alarmOutputDevices": ["0x99"],
-    "alarmTimeLengthSec": 7
-}, {
-    "index": 13,
-    "name": "Home/Day - All Alarms Except Garage 10s | Garage Perimeter Sensors",
-    "sensorsThatTriggerAlarm": ["0x31", "0x30"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30"],
-    "alarmOutputDevices": ["0x99", "0x77", "0x10"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 14,
-    "name": "Home/Day - Office Alarms 10s | Garage Perimeter Sensors",
-    "sensorsThatTriggerAlarm": ["0x31", "0x30"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30"],
-    "alarmOutputDevices": ["0x99", "0x77"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 15,
-    "name": "Office 10s | All Sensors",
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x75", "0x80", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 16,
-    "name": "Night - Office Alarms 10s | All Garage Sensors",
-    "sensorsThatTriggerAlarm": [ "0x31", "0x30", "0x80"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x80"],
-    "alarmOutputDevices": ["0x99", "0x77"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 17,
-    "name": "Night - Office Alarms 10s | Garage Perimeter Sensors",
-    "sensorsThatTriggerAlarm": [ "0x31", "0x30"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30"],
-    "alarmOutputDevices": ["0x99", "0x77"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 18,
-    "name": "Night - Office Alarms 10s | All Sensors",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99", "0x77"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 19,
-    "name": "Away - Scary Loud Denon",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99", "0x77", "0x10", "0x15"],
-    "playSound": "scaryalarm.mp3",
-    "playSoundVolume": 65,
-    "alarmTimeLengthSec": 30
-}, {
-    "index": 20,
-    "name": "All Alarms As Long As Alarmed | All Sensors",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99", "0x15", "0x10", "0x77"],
-    "alarmTimeLengthSec": 0
-}, {
-    "index": 21,
-    "name": "Office and Denon As Long As Alarmed | All Sensors",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99", "0x77"],
-    "alarmTimeLengthSec": 0
-}, {
-    "index": 22,
-    "name": "Office Buzzer As Long As Alarmed | All Sensors",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99"],
-    "alarmTimeLengthSec": 0
-}, {
-    "index": 23,
-    "name": "Test Denon Only 1s | All Sensors",
-    "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x77"],
-    "alarmTimeLengthSec": 1
-}, {
-    "index": 24,
-    "name": "Test Silent 10s | 60/61/62 Multidevice Node",
-    "sensorsThatTriggerAlarm": ["0x60", "0x61", "0x62"],
-    "missingDevicesThatTriggerAlarm": [],
-    "alarmOutputDevices": ["0x51"],
-    "alarmTimeLengthSec": 10
-}, {
-    "index": 25,
-    "name": "Night extended silent 8s",
-    "sensorsThatTriggerAlarm": ["0x80", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x51"],
-    "alarmTimeLengthSec": 8
-}, {
-    "index": 26,
-    "name": "Night Extended 8s",
-    "sensorsThatTriggerAlarm": ["0x80", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
-    "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
-    "alarmTimeLengthSec": 8
-}, {
-    "index": 27,
-    "name": "Denon Test 10s | perimeter",
-    "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
-    "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
-    "alarmOutputDevices": ["0x77"],
-    "playSound": "thisisatest.mp3",
-    "playSoundVolume": 60,
-    "alarmTimeLengthSec": 10
-    }
-]
+{
+    "profiles": [
+        {
+        "index": 0,
+        "name": "Night",
+        "sensorsThatTriggerAlarm": [ "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
+        "missingDevicesThatTriggerAlarm": [],
+        "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 1,
+        "name": "Away",
+        "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x99", "0x15", "0x10", "0x77"],
+        "playSound": "scaryalarm.mp3",
+        "playSoundVolume": 45,
+        "alarmTimeLengthSec": 30
+    }, {
+        "index": 2,
+        "name": "NO ALARM 15s | Perimeter",
+        "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x50", "0x40"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x51"],
+        "alarmTimeLengthSec": 15
+    }, {
+        "index": 3,
+        "name": "Office 5s | Perimeter",
+        "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x50", "0x40"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x50", "0x40"],
+        "alarmOutputDevices": ["0x99"],
+        "alarmTimeLengthSec": 5
+    }, {
+        "index": 4,
+        "name": "Night - All Alarms 10s | Garage Perimeter Sensors",
+        "sensorsThatTriggerAlarm": [ "0x31", "0x30"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30"],
+        "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 5,
+        "name": "Night - All Alarms 10s | All Sensors",
+        "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 6,
+        "name": "All Alarms 5s | All Sensors",
+        "alarmTimeLengthSec": 5
+    }, {
+        "index": 7,
+        "name": "NO ALARM 15s | All Sensors",
+        "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x51"],
+        "alarmTimeLengthSec": 15
+    }, {
+        "index": 8,
+        "name": "NO ALARM 15s | Garage Sensors",
+        "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x80"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x80"],
+        "alarmOutputDevices": ["0x51"],
+        "alarmTimeLengthSec": 15
+    }, {
+        "index": 9,
+        "name": "Test - Denon Alarm 10s | All Sensors",
+        "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x77"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 10,
+        "name": "Night - Office Alarms 10s | Garage side door & movement",
+        "sensorsThatTriggerAlarm": [ "0x31", "0x80"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x80"],
+        "alarmOutputDevices": ["0x99", "0x77"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 11,
+        "name": "Night - Office Alarms 10s | Garage side door & movement; Kitchen movement",
+        "sensorsThatTriggerAlarm": [ "0x31", "0x80", "0x75"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x80", "0x75"],
+        "alarmOutputDevices": ["0x99", "0x77"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 12,
+        "name": "Night - Office Buzzer 7s | Garage side door & movement",
+        "sensorsThatTriggerAlarm": [ "0x31", "0x80"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x80"],
+        "alarmOutputDevices": ["0x99"],
+        "alarmTimeLengthSec": 7
+    }, {
+        "index": 13,
+        "name": "Home/Day - All Alarms Except Garage 10s | Garage Perimeter Sensors",
+        "sensorsThatTriggerAlarm": ["0x31", "0x30"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30"],
+        "alarmOutputDevices": ["0x99", "0x77", "0x10"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 14,
+        "name": "Home/Day - Office Alarms 10s | Garage Perimeter Sensors",
+        "sensorsThatTriggerAlarm": ["0x31", "0x30"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30"],
+        "alarmOutputDevices": ["0x99", "0x77"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 15,
+        "name": "Office 10s | All Sensors",
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x75", "0x80", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x99"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 16,
+        "name": "Night - Office Alarms 10s | All Garage Sensors",
+        "sensorsThatTriggerAlarm": [ "0x31", "0x30", "0x80"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x80"],
+        "alarmOutputDevices": ["0x99", "0x77"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 17,
+        "name": "Night - Office Alarms 10s | Garage Perimeter Sensors",
+        "sensorsThatTriggerAlarm": [ "0x31", "0x30"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30"],
+        "alarmOutputDevices": ["0x99", "0x77"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 18,
+        "name": "Night - Office Alarms 10s | All Sensors",
+        "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x99", "0x77"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 19,
+        "name": "Away - LOUD 1min",
+        "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
+        "missingDevicesThatTriggerAlarm": [],
+        "alarmOutputDevices": ["0x99", "0x77", "0x10", "0x15"],
+        "playSound": "scaryalarm.mp3",
+        "playSoundVolume": 65,
+        "alarmTimeLengthSec": 60
+    }, {
+        "index": 20,
+        "name": "All Alarms As Long As Alarmed | All Sensors",
+        "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x99", "0x15", "0x10", "0x77"],
+        "alarmTimeLengthSec": 0
+    }, {
+        "index": 21,
+        "name": "Office and Denon As Long As Alarmed | All Sensors",
+        "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x99", "0x77"],
+        "alarmTimeLengthSec": 0
+    }, {
+        "index": 22,
+        "name": "Office Buzzer As Long As Alarmed | All Sensors",
+        "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x99"],
+        "alarmTimeLengthSec": 0
+    }, {
+        "index": 23,
+        "name": "Test Denon Only 1s | All Sensors",
+        "sensorsThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x77"],
+        "alarmTimeLengthSec": 1
+    }, {
+        "index": 24,
+        "name": "Test Silent 10s | 60/61/62 Multidevice Node",
+        "sensorsThatTriggerAlarm": ["0x60", "0x61", "0x62"],
+        "missingDevicesThatTriggerAlarm": [],
+        "alarmOutputDevices": ["0x51"],
+        "alarmTimeLengthSec": 10
+    }, {
+        "index": 25,
+        "name": "Night extended silent 8s",
+        "sensorsThatTriggerAlarm": ["0x80", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x51"],
+        "alarmTimeLengthSec": 8
+    }, {
+        "index": 26,
+        "name": "Night Extended 8s",
+        "sensorsThatTriggerAlarm": ["0x80", "0x31", "0x30", "0x40", "0x50", "0x60", "0x61", "0x62"],
+        "missingDevicesThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x99", "0x77", "0x15", "0x10"],
+        "alarmTimeLengthSec": 8
+    }, {
+        "index": 27,
+        "name": "Denon Test 10s | perimeter",
+        "sensorsThatTriggerAlarm": ["0x31", "0x30", "0x40", "0x50"],
+        "missingDevicesThatTriggerAlarm": ["0x80", "0x75", "0x31", "0x30", "0x40", "0x50"],
+        "alarmOutputDevices": ["0x77"],
+        "playSound": "thisisatest.mp3",
+        "playSoundVolume": 60,
+        "alarmTimeLengthSec": 10
+        }
+    ],
+    "quickSetAlarmProfiles": [
+        0,
+        26,
+        1,
+        19,
+        3,
+        15,
+        2,
+        7
+    ]
+}

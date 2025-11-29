@@ -63,7 +63,7 @@ const AppView: React.FC = () => {
     const alarmTriggered = appState.status.alarmStatus === 'ALARM';
 
     const unavailableContent = <div style={{display: "flex", flexDirection: "column", alignItems: "center", fontSize: "40px", textAlign: "center", fontWeight: "normal", fontFamily: "futura"}}>
-        Alarm Service Unavailable
+        Alarm Unavailable
         <Image className="fadeoutImageRound" src={"/assets/dogsleep.jpg"} width="150" height="150" alt=""></Image>
     </div>;
     const loadingContent = <div style={{display: "flex", flexDirection: "column", alignItems: "center", fontSize: "40px", textAlign: "center", fontWeight: "normal", fontFamily: "futura"}}>

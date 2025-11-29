@@ -62,23 +62,20 @@ alwaysKeepOnSet = {
     "0x50",
 }  # set of devices to always keep powered on (active). This should be limited to non-emitting sensors. #TODO: removing this logic inhibited the intended operation of the garage door sensor when disarmed. It makes sense to always have non-relay devices transmitting and not respond to base power commands, with base filtering the.
 avrSoundChannel = "SAT/CBL"
-quickSetAlarmProfiles = [
-    0,
-    26,
-    1,
-    3,
-    15,
-    2,
-    7,
-]  # quick set alarm profile buttons in UI (subset of all profiles, indexed by respective array index)
+quickSetAlarmProfiles = []  # quick set alarm profile buttons in UI (subset of all profiles, indexed by respective array index, loaded from alarmProfiles.json)
 
+#TODO: decouple DENON code into a generic audio output module: power commands, cur channel remembering, channel switching, channel return prior to off, volume command with memory, play command, output device auto-selection...
+#TODO: server: websocket disconnect handling - there are corner cases intermittently noticeable from old ipad, in the absence of a speedy connection, but not with wifi off (perhaps ipad doesn't inform browser when wifi is off)
+#TODO: refactor alwaysKeepOnSet - these should be defined in alarmProfiles, which will be more aptly named as systemConfiguration. On startup, this should be parsed and validated. alwaysKeepOnSet are devices (by deviceType) that are non-relay gated, i.e. always receiving an input on a hardware level (not harmful mmWave emitters in a PIR housing).
 
 def getThisDirAddress():
     return os.path.dirname(__file__)
 
 
 with open(getThisDirAddress() + "/alarmProfiles.json", "r") as file:
-    alarmProfiles = json.loads(file.read())
+    tempAlarmProfiles = json.loads(file.read())
+    alarmProfiles = tempAlarmProfiles["profiles"]
+    quickSetAlarmProfiles = tempAlarmProfiles["quickSetAlarmProfiles"]
 
 
 try:
