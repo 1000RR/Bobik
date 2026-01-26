@@ -844,7 +844,7 @@ def handleMessage(msg):
 
 #missingDevicesThatTriggerAlarm is optional and additive - if not present, no missing devices trigger the alarm
 #sensorsThatTriggerAlarm is optional - if not present, all devices trigger the alarm
-def getProfilesJsonString():
+def generateProfilesJsonString():
     profilesJSON = ""
     for profile in alarmProfiles:
         profilesJSON += json.dumps(profile) + ","
@@ -854,7 +854,7 @@ def getProfilesJsonString():
     return strReturn
 
 
-def getStatusJsonString():
+def generateStatusJsonString():
     outgoingMessageDict = {
         "armStatus": "ARMED" if armed else "DISARMED",
         "alarmStatus": "ALARM" if alarmed else "NORMAL",
@@ -879,7 +879,7 @@ def getStatusJsonString():
     return json.dumps(outgoingMessageDict)
 
 
-def getPastEventsJsonString():
+def generatePastEventsJsonString():
     outgoingMessage = '{"pastEvents": ' + str(pastEvents).replace("'", '"')
     outgoingMessage += "}"
     return outgoingMessage
@@ -956,7 +956,7 @@ def run(webserver_message_queue):
                 toggleArmed(getTimeSec(), f"WEB API {message['ip']}")
             elif message["request"] == "ALARM-STATUS":
                 message["responseQueue"].put(
-                    {"response": getStatusJsonString(), "web_request_id": message["web_request_id"]}
+                    {"response": generateStatusJsonString(), "web_request_id": message["web_request_id"]}
                 )
             elif message["request"].startswith("SET-ALARM-PROFILE-"):
                 profileNumber = int(
@@ -964,9 +964,9 @@ def run(webserver_message_queue):
                 )
                 setCurrentAlarmProfile(profileNumber, f"WEB API {message['ip']}")
             elif message["request"] == "GET-ALARM-PROFILES":
-                prev_pastEvents = getProfilesJsonString()
+                prev_pastEvents = generateProfilesJsonString()
                 message["responseQueue"].put(
-                    {"response": getProfilesJsonString(), "web_request_id": message["web_request_id"]}
+                    {"response": generateProfilesJsonString(), "web_request_id": message["web_request_id"]}
                 )
             elif message["request"] == "FORCE-ALARM-SOUND-ON":
                 currentlyTriggeredDevices[hex(TEST_ALARM_ID)] = getTimeSec()
@@ -1000,7 +1000,7 @@ def run(webserver_message_queue):
                 stopsendingcan()
             elif message["request"] == "GET-PAST-EVENTS":
                 message["responseQueue"].put(
-                    {"response": getPastEventsJsonString(), "web_request_id": message["web_request_id"]}
+                    {"response": generatePastEventsJsonString(), "web_request_id": message["web_request_id"]}
                 )
 
         if not line:
