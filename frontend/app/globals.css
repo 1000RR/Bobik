@@ -701,8 +701,8 @@ img {
 
 @media only screen and (min-width: 390px) and (max-width: 460px) and (min-resolution: 2.6dppx) { /*pixel 10 pro and pro XL*/
 	.icon {
-		max-width: 105px !important;
-		min-height: 105px;
+		max-width: 95px !important;
+		min-height: 95px;
 		padding: 0 !important;
 		margin: 0 !important;
 		font-size: 1.05em !important;
