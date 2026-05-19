@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "outputBuildId": "head -c 6 ./.next/BUILD_ID > ./out/_next/BUILD_ID && echo \" built on $(date)\" >> ./out/_next/BUILD_ID && echo \"$(cat ./.next/BUILD_ID) $(date)\" >> ../BUILD_IDS",
     "build-static": "export NEXT_BUILD_CONFIG=\"static\" && next build && npm run outputBuildId && cp ./public/manifest.json ./out/manifest.json && cp -r ./public/favicon.ico ./out/ && cat ./out/_next/BUILD_ID",
@@ -13,8 +13,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.1",
     "comlink": "^4.4.2",
-    "next": "^15.1.5",
-    "next-pwa": "^5.6.0",
+    "next": "16.2.6",
     "polished": "^4.3.1",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -27,9 +26,9 @@
     "@types/node": "^20",
     "@types/react": "^19.0.9",
     "@types/react-dom": "^19.0.3",
-    "eslint": "^8",
-    "eslint-config-next": "15.0.4",
-    "postcss": "^8",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.5",
+    "postcss": "^8.5.10",
     "tailwindcss": "^3.4.1",
     "typescript": "^5",
     "worker-loader": "^3.0.8"
