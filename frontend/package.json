@@ -2,6 +2,10 @@
   "name": "nextapp",
   "version": "0.1.0",
   "private": true,
+  "browserslist": [
+    "ios_saf >= 15",
+    "safari >= 15"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
