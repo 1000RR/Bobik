@@ -181,7 +181,7 @@ export const UIControls = forwardRef<NotificationController>((_, ref) => {
       </label>
     </Panel>
 
-      <AlarmAudio srcDataUri={loudAlarmEnabled ? '/alarm-loud.mp3' : '/alarm-beep-short.mp3'} ref={alarmRef} loop={true} volume={1.0} />
+      <AlarmAudio srcDataUri={loudAlarmEnabled ? '/assets/audio/alarm-loud.mp3' : '/assets/audio/alarm-beep-short.mp3'} ref={alarmRef} loop={true} volume={1.0} />
     </>
   );
 });
