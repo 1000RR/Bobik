@@ -6,4 +6,4 @@ controller/server-keys
 controller/__pycache__
 .vscode/*.*
 .vscode/
-BUILD_IDS
+STATIC_BUILD_IDS
