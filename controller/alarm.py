@@ -20,7 +20,6 @@ from email.mime.text import MIMEText
 
 debug = False
 LISTEN_PORT = 8080
-
 smtpClient = None
 armed = False  # initial condition
 alarmed = False
@@ -70,6 +69,8 @@ quickSetAlarmProfiles = []  # quick set alarm profile buttons in UI (subset of a
 
 def getThisDirAddress():
     return os.path.dirname(__file__)
+
+DENON_SCRIPTS_FOLDER = getThisDirAddress() + "/denonscripts"
 
 
 with open(getThisDirAddress() + "/alarmProfiles.json", "r") as file:
@@ -285,7 +286,7 @@ def getMemberDeviceDictEntry(
         "deviceType": deviceType,
         "lastSeen": lastSeen,
         "lastSeenReadable": lastSeenReadable,
-        "friendlyName": lastArmedTimeSec,
+        "friendlyName": friendlyName,
         "lastArmedTimeSec": lastArmedTimeSec,
     }
 
@@ -320,7 +321,8 @@ def decodeLine(line):
 def encodeLine(message):  # [myCanId, addressee, message, myDeviceType]
     printableArr = message.copy()
     printableArr.append(getTimeSec())
-    # print("SENDING ", np.array(printableArr));
+    if (debug == True):
+        print("SENDING ", np.array(printableArr));
     return (
         hex(message[0])
         + "-"
@@ -462,7 +464,7 @@ def playDenonThreadMain(currentlyTriggeredDevices, everAlarmedDuringAlarm):
     ):
         return
     setDenonPlayState(startPowerStatus, startChannelStatus, volume, cwd)
-    playDenonSounds(playCommandArray, cwd)
+    playDenonSounds(playCommandArray, cwd + "/sounds")
     setDenonOriginalState(startPowerStatus, startChannelStatus, startVolume, cwd)
 
 
@@ -480,7 +482,7 @@ def determineStuffToPlay(
         volume = "79"
         currentlyTriggeredDevices.pop(hex(CHECK_PHONES_ID))
     else:
-        playCommandArray.append("./alert.mp3")
+        playCommandArray.append("alert.mp3")
         soundByteOverride, volumeOverride = getCurrentProfileSoundByteData()
         if soundByteOverride and volumeOverride:
             volume = volumeOverride
@@ -509,29 +511,29 @@ def setDenonPlayState(startPowerStatus, startChannelStatus, volume, cwd):
     # turn on and switch to $avrSoundChannel if previously off OR previously channel isn't $avrSoundChannel;
     # then sleep the appropriate number of seconds to let denon get ready
     if startPowerStatus != "ON" or startChannelStatus != avrSoundChannel:
-        subprocess.run("./denonon.sh", cwd=cwd)
+        subprocess.run(DENON_SCRIPTS_FOLDER + "/denonon.sh", cwd=cwd)
         time.sleep(8 if startPowerStatus != "ON" else 3)
 
     # set volume
-    subprocess.run(["./denonvol.sh", str(volume)], cwd=str(cwd))
+    subprocess.run([DENON_SCRIPTS_FOLDER + "/denonvol.sh", str(volume)], cwd=str(cwd))
 
 
 def setDenonOriginalState(startPowerStatus, startChannelStatus, startVolume, cwd):
     # turn off if was off before
     if startPowerStatus != "ON":  # TODO: add condition: and the alarm has been canceled
-        subprocess.run(getThisDirAddress() + "/denonoff.sh", cwd=cwd)
+        subprocess.run(DENON_SCRIPTS_FOLDER + "/denonoff.sh", cwd=cwd)
     # otherwise, set volume to old volume
     else:
-        subprocess.run(["./denonvol.sh", startVolume], cwd=cwd)
+        subprocess.run([DENON_SCRIPTS_FOLDER + "/denonvol.sh", startVolume], cwd=cwd)
         if startChannelStatus != avrSoundChannel:
-            subprocess.run(["./denonchannel.sh", startChannelStatus], cwd=cwd)
+            subprocess.run([DENON_SCRIPTS_FOLDER + "/denonchannel.sh", startChannelStatus], cwd=cwd)
 
 
 def getDenonInitialState(cwd):
     # store original power status
     startPowerStatus = str(
         subprocess.run(
-            "./denonpowerstatus.sh", cwd=cwd, stderr=None, capture_output=True
+            DENON_SCRIPTS_FOLDER + "/denonpowerstatus.sh", cwd=cwd, stderr=None, capture_output=True
         ).stdout
     ).translate({ord(c): None for c in "b\\n'"})
 
@@ -543,14 +545,14 @@ def getDenonInitialState(cwd):
     # store original channel
     startChannelStatus = str(
         subprocess.run(
-            "./denonchannelstatus.sh", cwd=cwd, stderr=None, capture_output=True
+            DENON_SCRIPTS_FOLDER + "/denonchannelstatus.sh", cwd=cwd, stderr=None, capture_output=True
         ).stdout
     ).translate({ord(c): None for c in "b\\n'"})
 
     # store original volume
     tempvol = str(
         subprocess.run(
-            "./denonvolumestatus.sh", cwd=cwd, stderr=None, capture_output=True
+            DENON_SCRIPTS_FOLDER + "/denonvolumestatus.sh", cwd=cwd, stderr=None, capture_output=True
         ).stdout
     ).translate({ord(c): None for c in "b\\n'"})
     if tempvol == "--":
@@ -709,7 +711,6 @@ def hasMissingDevicesThatTriggerAlarm():
                 return True
         return False
     return False  # if no missingDevicesThatTriggerAlarm list, no missing devices trigger
-    
 
 
 def hasTriggeredDevicesThatTriggerAlarm():
