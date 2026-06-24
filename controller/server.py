@@ -8,9 +8,14 @@ import json
 import os
 from queue import Queue
 import ssl
+import debugpy
 from flask import Flask, jsonify, request
 from flask_socketio import SocketIO, emit
 from uuid import uuid4
+
+# DEBUGGER debugpy
+#debugpy.listen(("0.0.0.0", 5678))
+#print("Waiting for debugger attach...")
 
 thisDir = os.path.dirname(os.path.abspath(__file__))
 serverKeysDir = thisDir + "/server-keys"

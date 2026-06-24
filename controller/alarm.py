@@ -1,26 +1,27 @@
-import serial
+#base packages
 from datetime import datetime
 import math
-import numpy as np
 import time
 import atexit
 import json
-import subprocess
 import os
-import debugpy
-from threading import Thread
-from alarmconstants import *
 import smtplib
 from email.mime.text import MIMEText
 
-# DEBUGGER debugpy
-# debugpy.listen(("0.0.0.0", 5678))
-# print("Waiting for debugger attach...")
-# debugpy.trace_this_thread(True)
+#installed packages
+import serial
+import numpy as np
+
+#local libraries
+from alarmconstants import *
 
 debug = False
 LISTEN_PORT = 8080
 smtpClient = None
+PLUGIN_NAMES = ["plugins.denon.denonplugin"]
+_local_devices = {}  # {device_id_int: plugin_module}
+_loaded_plugins = []  # held here so they're not garbage-collected
+
 armed = False  # initial condition
 alarmed = False
 pastEvents = []
@@ -35,7 +36,6 @@ everTriggered = {}
 currentlyTriggeredDevices = {}  # map of {string hex id:int alarmTimeSec}
 currentlyMissingDevices = []
 everMissingDevices = {}
-denonPlayThread = 0
 lastSentMessageTimeMsec = 0
 lastAlarmTime = 0
 armSetTimeSec = 0  # movement detection devices tend to send an alarm signal shortly after being powered on. This is used to ignore such signals if they occur within a few seconds of arming.
@@ -63,14 +63,11 @@ alwaysKeepOnSet = {
 avrSoundChannel = "SAT/CBL"
 quickSetAlarmProfiles = []  # quick set alarm profile buttons in UI (subset of all profiles, indexed by respective array index, loaded from alarmProfiles.json)
 
-#TODO: decouple DENON code into a generic audio output module: power commands, cur channel remembering, channel switching, channel return prior to off, volume command with memory, play command, output device auto-selection...
 #TODO: server: websocket disconnect handling - there are corner cases intermittently noticeable from old ipad, in the absence of a speedy connection, but not with wifi off (perhaps ipad doesn't inform browser when wifi is off)
 #TODO: refactor alwaysKeepOnSet - these should be defined in alarmProfiles, which will be more aptly named as systemConfiguration. On startup, this should be parsed and validated. alwaysKeepOnSet are devices (by deviceType) that are non-relay gated, i.e. always receiving an input on a hardware level (not harmful mmWave emitters in a PIR housing).
 
 def getThisDirAddress():
     return os.path.dirname(__file__)
-
-DENON_SCRIPTS_FOLDER = getThisDirAddress() + "/denonscripts"
 
 
 with open(getThisDirAddress() + "/alarmProfiles.json", "r") as file:
@@ -293,18 +290,12 @@ def getMemberDeviceDictEntry(
 
 def resetMemberDevices():
     global memberDevices
-    memberDevices = {
-        hex(DENON_ID): getMemberDeviceDictEntry(
-            id=hex(DENON_ID),
-            firstSeen=getTimeSec(),
-            firstSeenReadable=getReadableTime(),
-            deviceType="0x10",
-            lastSeen=getTimeSec(),
-            lastSeenReadable=getTimeSec(),
-            friendlyName=getFriendlyDeviceName(DENON_ID),
-            lastArmedTimeSec=-1,
-        )
-    }
+    memberDevices = {}
+    for dev_id, plugin in _local_devices.items():
+        entry_fn = getattr(plugin, "get_device_entry", None)
+        if entry_fn:
+            device_dict_entry = entry_fn()
+            memberDevices[device_dict_entry["id"]] = device_dict_entry
 
 
 def decodeLine(line):
@@ -337,21 +328,22 @@ def encodeLine(message):  # [myCanId, addressee, message, myDeviceType]
 
 def sendMessage(messageArray):
     global lastSentMessageTimeMsec
-    global denonPlayThread
 
     outgoing = encodeLine(messageArray)
     ser.write(bytearray(outgoing, "ascii"))
     ser.flushOutput()
     lastSentMessageTimeMsec = getTimeMsec()
-    if messageArray[1] == DENON_ID or messageArray[1] == BROADCAST_ID:
-        if messageArray[2] == ALARM_ENABLE_COMMAND and not (
-            denonPlayThread and denonPlayThread.is_alive()
-        ):
-            denonPlayThread = Thread(
-                target=playDenonThreadMain,
-                args=(currentlyTriggeredDevices, everTriggeredWithinAlarmCycle),
-            )
-            denonPlayThread.start()
+
+    # Route to local device plugins
+    receiver_id = messageArray[1]
+    cmd = messageArray[2]
+
+    if ALARM_ENABLE_COMMAND in (cmd,) and _local_devices:
+        for dev_id, plugin in _local_devices.items():
+            if receiver_id == BROADCAST_ID or receiver_id == dev_id:
+                cb = getattr(plugin, "on_alarm_enabled", None)
+                if cb:
+                    cb(currentlyTriggeredDevices, everTriggeredWithinAlarmCycle)
 
 
 def getCurrentProfileSoundByteData():
@@ -441,126 +433,6 @@ def possiblyAddMember(msg):
                 print(
                     f"Removing missing device {hex(senderId)} at {getReadableTime()}."
                 )
-
-
-def playDenonThreadMain(currentlyTriggeredDevices, everAlarmedDuringAlarm):
-    cwd = getThisDirAddress()
-    playCommandArray = MP3_PLAYER_PROGRAM
-    volume = "55"  # defaul
-    ####types of sounds####
-    # test sound from TEST_ALARM_ID
-    # pick up your phones from CHECK_PHONES_ID
-    # sound byte override
-    # fall back to saying the sensors that are activated
-
-    playCommandArray, volume = determineStuffToPlay(
-        playCommandArray, volume, everAlarmedDuringAlarm, currentlyTriggeredDevices
-    )
-    startPowerStatus, startChannelStatus, startVolume = getDenonInitialState(cwd)
-    if (
-        startPowerStatus == False
-        and startChannelStatus == False
-        and startVolume == False
-    ):
-        return
-    setDenonPlayState(startPowerStatus, startChannelStatus, volume, cwd)
-    playDenonSounds(playCommandArray, cwd + "/sounds")
-    setDenonOriginalState(startPowerStatus, startChannelStatus, startVolume, cwd)
-
-
-def determineStuffToPlay(
-    playCommandArray, volume, everAlarmedDuringAlarm, currentlyTriggeredDevices
-):
-    sound = ""
-    # playCommandArray.append("./alert.mp3")
-
-    if hex(TEST_ALARM_ID) in currentlyTriggeredDevices:
-        sound = "thisisatest.mp3"
-        currentlyTriggeredDevices.pop(hex(TEST_ALARM_ID))
-    elif hex(CHECK_PHONES_ID) in currentlyTriggeredDevices:
-        sound = "checkyourphones.mp3"
-        volume = "79"
-        currentlyTriggeredDevices.pop(hex(CHECK_PHONES_ID))
-    else:
-        playCommandArray.append("alert.mp3")
-        soundByteOverride, volumeOverride = getCurrentProfileSoundByteData()
-        if soundByteOverride and volumeOverride:
-            volume = volumeOverride
-            sound = soundByteOverride
-
-    # if special case sound found above, use it
-    if sound:
-        playCommandArray.append(sound)
-    # otherwise, play names of sensors active
-    else:
-        for device in everAlarmedDuringAlarm:
-            resolvedMp3 = MP3_ALARM_DICTIONARY[device]
-            if resolvedMp3:
-                playCommandArray.append(resolvedMp3)
-        # playCommandArray.append('compromised.mp3')
-
-    return playCommandArray, volume
-
-
-def playDenonSounds(playCommandArray, cwd):
-    # play sound(s)
-    subprocess.run(playCommandArray, cwd=cwd)
-
-
-def setDenonPlayState(startPowerStatus, startChannelStatus, volume, cwd):
-    # turn on and switch to $avrSoundChannel if previously off OR previously channel isn't $avrSoundChannel;
-    # then sleep the appropriate number of seconds to let denon get ready
-    if startPowerStatus != "ON" or startChannelStatus != avrSoundChannel:
-        subprocess.run(DENON_SCRIPTS_FOLDER + "/denonon.sh", cwd=cwd)
-        time.sleep(8 if startPowerStatus != "ON" else 3)
-
-    # set volume
-    subprocess.run([DENON_SCRIPTS_FOLDER + "/denonvol.sh", str(volume)], cwd=str(cwd))
-
-
-def setDenonOriginalState(startPowerStatus, startChannelStatus, startVolume, cwd):
-    # turn off if was off before
-    if startPowerStatus != "ON":  # TODO: add condition: and the alarm has been canceled
-        subprocess.run(DENON_SCRIPTS_FOLDER + "/denonoff.sh", cwd=cwd)
-    # otherwise, set volume to old volume
-    else:
-        subprocess.run([DENON_SCRIPTS_FOLDER + "/denonvol.sh", startVolume], cwd=cwd)
-        if startChannelStatus != avrSoundChannel:
-            subprocess.run([DENON_SCRIPTS_FOLDER + "/denonchannel.sh", startChannelStatus], cwd=cwd)
-
-
-def getDenonInitialState(cwd):
-    # store original power status
-    startPowerStatus = str(
-        subprocess.run(
-            DENON_SCRIPTS_FOLDER + "/denonpowerstatus.sh", cwd=cwd, stderr=None, capture_output=True
-        ).stdout
-    ).translate({ord(c): None for c in "b\\n'"})
-
-    # if cannot find denon, cannot play -> exit thread
-    if startPowerStatus == "":
-        print(">>>>DENON NOT FOUND")
-        return False, False, False  # signals quit now
-
-    # store original channel
-    startChannelStatus = str(
-        subprocess.run(
-            DENON_SCRIPTS_FOLDER + "/denonchannelstatus.sh", cwd=cwd, stderr=None, capture_output=True
-        ).stdout
-    ).translate({ord(c): None for c in "b\\n'"})
-
-    # store original volume
-    tempvol = str(
-        subprocess.run(
-            DENON_SCRIPTS_FOLDER + "/denonvolumestatus.sh", cwd=cwd, stderr=None, capture_output=True
-        ).stdout
-    ).translate({ord(c): None for c in "b\\n'"})
-    if tempvol == "--":
-        tempvol = "0"
-
-    startVolume = str(int(float(tempvol) + 81))
-
-    return startPowerStatus, startChannelStatus, startVolume
 
 
 def getFriendlyDeviceName(address):
@@ -926,6 +798,27 @@ def run(webserver_message_queue):
     global lastCheckedMissingDevicesMsec
     global currentAlarmProfile
     global alwaysKeepOnSet  # TODO: LEGACY - for unpowered devices that listen to on/off commands. In new iteration, only powered devices should listen to this.
+
+    # Load local device plugins
+    for plugin_name in PLUGIN_NAMES:
+        import importlib
+        mod = importlib.import_module(plugin_name)
+        _loaded_plugins.append(mod)  # hold reference so it's not GC'd
+
+        dev_id_fn = getattr(mod, "device_id", None)
+        if dev_id_fn:
+            dev_id = dev_id_fn()
+            _local_devices[dev_id] = mod
+            print(f"Plugin loaded: {plugin_name} (device_id={hex(dev_id)})")
+
+        # Provide callbacks TO the plugin
+        register_fn = getattr(mod, "register", None)
+        if register_fn:
+            register_fn({
+                "alarm_get_profile_sound_byte_data": getCurrentProfileSoundByteData,
+                "device_dictionary": DEVICE_DICTIONARY,
+                "mp3_alarm_dictionary": MP3_ALARM_DICTIONARY,
+            })
 
     resetMemberDevices()
 
