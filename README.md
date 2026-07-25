@@ -14,8 +14,6 @@ In action: https://github.com/user-attachments/assets/3d294808-4be6-42b3-b0bd-dd
 
 BACKLOG:
 - hardware and software support for CANBUS-adjacent Vsource line voltage monitoring and threshold warning in UI / email / alarm(s).
-- support for UPS status monitoring and state change warning in UI / email.
-- move past events log from memory to DB; DB should have a sweep job based on back date and/or number of events.
-  - searching for events from UI.
-- front end security: implement CSP.
+- support for UPS/voltage-based status monitoring and state change warning in UI / email.
+- move past events log from memory to DB;
 - dockerize
