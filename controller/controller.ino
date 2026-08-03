@@ -38,6 +38,9 @@ constexpr uint8_t MIN_SERIAL_BYTES_FOR_CAN_FRAME = 24;
 constexpr uint8_t CAN_TX_QUEUE_CAPACITY = 8;
 constexpr uint8_t MAX_CAN_TX_BUSY_RETRIES = 20;
 constexpr size_t SERIAL_LINE_CAPACITY = 64;
+constexpr size_t DEVICE_ID_SET_BYTES = 32;
+constexpr size_t OLED_ROW_CHARACTERS = 21;
+constexpr size_t OLED_ROW_BUFFER_SIZE = OLED_ROW_CHARACTERS + 1;
 
 /*
  * Serial envelope: <senderCanId>-<addressee>-<command>-<payload>\n
@@ -61,6 +64,25 @@ struct CanTxItem {
   uint32_t lastAttemptMillis;
 };
 
+struct DeviceIdSet {
+  uint8_t bytes[DEVICE_ID_SET_BYTES];
+};
+
+struct AppState {
+  bool armed;
+  bool alarmed;
+  bool alarmBlinkOn;
+  DeviceIdSet activeAlarmDeviceIds;
+  DeviceIdSet allAlarmDeviceIds;
+};
+
+struct DisplayRows {
+  char armed[OLED_ROW_BUFFER_SIZE];
+  char alarm[OLED_ROW_BUFFER_SIZE];
+  char activeDevices[OLED_ROW_BUFFER_SIZE];
+  char allDevices[OLED_ROW_BUFFER_SIZE];
+};
+
 MCP2515 mcp2515(MCP2515_CS_PIN);
 
 char serialLine[SERIAL_LINE_CAPACITY];
@@ -77,9 +99,8 @@ int stableArmButtonState = HIGH;
 int lastRawArmButtonState = HIGH;
 uint32_t rawButtonStateChangedMillis = 0;
 
-bool armedStatus = false;
-bool alarmedStatus = false;
-bool alarmBlinkOn = false;
+AppState appState = {};
+DisplayRows displayRows = {};
 bool splashActive = false;
 
 uint32_t splashStartedMillis = 0;
@@ -87,9 +108,6 @@ uint32_t lastOledRefreshMillis = 0;
 uint32_t lastAlarmBlinkMillis = 0;
 uint32_t lastCanInitAttemptMillis = 0;
 uint32_t lastCanErrorPollMillis = 0;
-
-String strActiveAlarmedDevicesIdList = "";
-String strAllAlarmedDevicesIdList = "";
 
 /* Diagnostic counters are intentionally retained even when output is rate-limited. */
 unsigned long serialParseErrorCount = 0;
@@ -135,8 +153,8 @@ void setLedPin(bool value, uint8_t pin) {
 }
 
 void applyLedState() {
-  setLedPin(armedStatus, ARMED_LED_PIN);
-  setLedPin(alarmedStatus ? alarmBlinkOn : !armedStatus, DISARMED_LED_PIN);
+  setLedPin(appState.armed, ARMED_LED_PIN);
+  setLedPin(appState.alarmed ? appState.alarmBlinkOn : !appState.armed, DISARMED_LED_PIN);
 }
 
 void setupOled() {
@@ -283,8 +301,32 @@ bool parseSerialMessage(const char *line, size_t length, ProtocolMessage &messag
   return true;
 }
 
-String alarmDeviceToken(uint8_t deviceId) {
-  return "0x" + String(deviceId, HEX) + " ";
+void clearDeviceIdSet(DeviceIdSet &deviceIds) {
+  for (size_t index = 0; index < DEVICE_ID_SET_BYTES; index++) {
+    deviceIds.bytes[index] = 0;
+  }
+}
+
+void addDeviceId(DeviceIdSet &deviceIds, uint8_t deviceId) {
+  const uint8_t mask = static_cast<uint8_t>(1U << (deviceId & 0x07));
+  deviceIds.bytes[deviceId >> 3] |= mask;
+}
+
+void removeDeviceId(DeviceIdSet &deviceIds, uint8_t deviceId) {
+  const uint8_t mask = static_cast<uint8_t>(1U << (deviceId & 0x07));
+  deviceIds.bytes[deviceId >> 3] &= static_cast<uint8_t>(~mask);
+}
+
+bool containsDeviceId(const DeviceIdSet &deviceIds, uint8_t deviceId) {
+  const uint8_t mask = static_cast<uint8_t>(1U << (deviceId & 0x07));
+  return (deviceIds.bytes[deviceId >> 3] & mask) != 0;
+}
+
+void clearAlarmState() {
+  appState.alarmed = false;
+  appState.alarmBlinkOn = false;
+  clearDeviceIdSet(appState.activeAlarmDeviceIds);
+  clearDeviceIdSet(appState.allAlarmDeviceIds);
 }
 
 bool isValidAlarmDeviceId(uint8_t deviceId) {
@@ -301,7 +343,7 @@ bool processBaseStationMessage(const ProtocolMessage &message) {
       if (message.payload != DEVICE_TYPE_HOMEBASE) {
         return false;
       }
-      armedStatus = true;
+      appState.armed = true;
       applyLedState();
       return true;
 
@@ -309,11 +351,8 @@ bool processBaseStationMessage(const ProtocolMessage &message) {
       if (message.payload != DEVICE_TYPE_HOMEBASE) {
         return false;
       }
-      armedStatus = false;
-      alarmedStatus = false;
-      alarmBlinkOn = false;
-      strActiveAlarmedDevicesIdList = "";
-      strAllAlarmedDevicesIdList = "";
+      appState.armed = false;
+      clearAlarmState();
       applyLedState();
       return true;
 
@@ -321,20 +360,15 @@ bool processBaseStationMessage(const ProtocolMessage &message) {
       if (!isValidAlarmDeviceId(message.payload)) {
         return false;
       }
-      if (!alarmedStatus) {
-        alarmedStatus = true;
-        alarmBlinkOn = true;
+      if (!appState.alarmed) {
+        appState.alarmed = true;
+        appState.alarmBlinkOn = true;
         lastAlarmBlinkMillis = millis();
         applyLedState();
       }
 
-      const String token = alarmDeviceToken(message.payload);
-      if (strActiveAlarmedDevicesIdList.indexOf(token) == -1) {
-        strActiveAlarmedDevicesIdList += token;
-      }
-      if (strAllAlarmedDevicesIdList.indexOf(token) == -1) {
-        strAllAlarmedDevicesIdList += token;
-      }
+      addDeviceId(appState.activeAlarmDeviceIds, message.payload);
+      addDeviceId(appState.allAlarmDeviceIds, message.payload);
       return true;
     }
 
@@ -342,11 +376,7 @@ bool processBaseStationMessage(const ProtocolMessage &message) {
       if (!isValidAlarmDeviceId(message.payload)) {
         return false;
       }
-      const String token = alarmDeviceToken(message.payload);
-      const int tokenIndex = strActiveAlarmedDevicesIdList.indexOf(token);
-      if (tokenIndex >= 0) {
-        strActiveAlarmedDevicesIdList.remove(tokenIndex, token.length());
-      }
+      removeDeviceId(appState.activeAlarmDeviceIds, message.payload);
       return true;
     }
 
@@ -354,10 +384,7 @@ bool processBaseStationMessage(const ProtocolMessage &message) {
       if (message.payload != DEVICE_TYPE_HOMEBASE) {
         return false;
       }
-      alarmedStatus = false;
-      alarmBlinkOn = false;
-      strActiveAlarmedDevicesIdList = "";
-      strAllAlarmedDevicesIdList = "";
+      clearAlarmState();
       applyLedState();
       return true;
 
@@ -586,44 +613,96 @@ void serviceArmButton(uint32_t now) {
 }
 
 void serviceAlarmLed(uint32_t now) {
-  if (!alarmedStatus || !hasElapsed(now, lastAlarmBlinkMillis, ALARM_BLINK_INTERVAL_MS)) {
+  if (!appState.alarmed || !hasElapsed(now, lastAlarmBlinkMillis, ALARM_BLINK_INTERVAL_MS)) {
     return;
   }
 
   lastAlarmBlinkMillis = now;
-  alarmBlinkOn = !alarmBlinkOn;
+  appState.alarmBlinkOn = !appState.alarmBlinkOn;
   applyLedState();
 }
 
+void clearDisplayRow(char row[OLED_ROW_BUFFER_SIZE]) {
+  for (size_t index = 0; index < OLED_ROW_CHARACTERS; index++) {
+    row[index] = ' ';
+  }
+  row[OLED_ROW_CHARACTERS] = '\0';
+}
+
+void copyTextToDisplayRow(char row[OLED_ROW_BUFFER_SIZE], size_t offset, const char *text) {
+  while (*text != '\0' && offset < OLED_ROW_CHARACTERS) {
+    row[offset++] = *text++;
+  }
+}
+
+char hexDigit(uint8_t value) {
+  return value < 10 ? static_cast<char>('0' + value)
+                    : static_cast<char>('a' + value - 10);
+}
+
+void renderDeviceIds(const DeviceIdSet &deviceIds, char row[OLED_ROW_BUFFER_SIZE]) {
+  clearDisplayRow(row);
+  size_t position = 0;
+
+  for (uint16_t candidate = 1; candidate < BASE_STATION_ADDRESS; candidate++) {
+    const uint8_t deviceId = static_cast<uint8_t>(candidate);
+    if (!containsDeviceId(deviceIds, deviceId)) {
+      continue;
+    }
+
+    const size_t tokenLength = deviceId < 0x10 ? 4 : 5;
+    if (position + tokenLength > OLED_ROW_CHARACTERS) {
+      break;
+    }
+
+    row[position++] = '0';
+    row[position++] = 'x';
+    if (deviceId >= 0x10) {
+      row[position++] = hexDigit(deviceId >> 4);
+    }
+    row[position++] = hexDigit(deviceId & 0x0F);
+    row[position++] = ' ';
+  }
+}
+
+void renderDisplayRows(const AppState &state, DisplayRows &rows) {
+  clearDisplayRow(rows.armed);
+  clearDisplayRow(rows.alarm);
+  clearDisplayRow(rows.activeDevices);
+  clearDisplayRow(rows.allDevices);
+
+  copyTextToDisplayRow(rows.armed, 0, state.armed ? "ENABLED" : "DISABLED");
+  if (state.alarmed) {
+    copyTextToDisplayRow(rows.alarm, 8, "ALARM");
+    renderDeviceIds(state.activeAlarmDeviceIds, rows.activeDevices);
+    renderDeviceIds(state.allAlarmDeviceIds, rows.allDevices);
+  } else {
+    copyTextToDisplayRow(rows.alarm, 6, "NO ALARM");
+  }
+}
+
 void outputToLcd() {
+  renderDisplayRows(appState, displayRows);
   ssd1306_setFixedFont(ssd1306xled_font6x8);
 
-  if (armedStatus) {
+  if (appState.armed) {
     ssd1306_negativeMode();
   }
-  ssd1306_printFixed(0, 0, armedStatus ? "ENABLED              " : "DISABLED             ", STYLE_NORMAL);
-  if (armedStatus) {
+  ssd1306_printFixed(0, 0, displayRows.armed, STYLE_NORMAL);
+  if (appState.armed) {
     ssd1306_positiveMode();
   }
 
-  if (alarmedStatus) {
-    if (alarmBlinkOn) {
-      ssd1306_negativeMode();
-    }
-    ssd1306_printFixed(0, 8, "        ALARM        ", STYLE_BOLD);
-    if (alarmBlinkOn) {
-      ssd1306_positiveMode();
-    }
-
-    String output = strActiveAlarmedDevicesIdList + "                     ";
-    ssd1306_printFixed(0, 16, &output[0], STYLE_BOLD);
-    output = strAllAlarmedDevicesIdList + "                     ";
-    ssd1306_printFixed(0, 24, &output[0], STYLE_BOLD);
-  } else {
-    ssd1306_printFixed(0, 8, "      NO ALARM       ", STYLE_BOLD);
-    ssd1306_printFixed(0, 16, "                     ", STYLE_BOLD);
-    ssd1306_printFixed(0, 24, "                     ", STYLE_BOLD);
+  if (appState.alarmed && appState.alarmBlinkOn) {
+    ssd1306_negativeMode();
   }
+  ssd1306_printFixed(0, 8, displayRows.alarm, STYLE_BOLD);
+  if (appState.alarmed && appState.alarmBlinkOn) {
+    ssd1306_positiveMode();
+  }
+
+  ssd1306_printFixed(0, 16, displayRows.activeDevices, STYLE_BOLD);
+  ssd1306_printFixed(0, 24, displayRows.allDevices, STYLE_BOLD);
 }
 
 void serviceDisplay(uint32_t now) {
