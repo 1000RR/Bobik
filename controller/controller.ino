@@ -6,6 +6,10 @@
 #include "protocol.h"
 #include "serial_transport.h"
 
+// Keep Arduino's prototype generator from placing these inside the anonymous namespace.
+void setup();
+void loop();
+
 namespace {
 
 using namespace bobik;
