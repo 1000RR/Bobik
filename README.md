@@ -4,16 +4,19 @@
 In action: https://github.com/user-attachments/assets/3d294808-4be6-42b3-b0bd-ddd065aa5b89
 
 
-## Idea
-#### Alarm when certain sensors detect movement and/or entry.
-#### Control via WebUI over HTTPS&WSS gated by either mTLS or password for some session length. Observe SSL cert topology best practices. 
+## Purpose 
+#### Perimeter home/office alarm using a multitude of hardware motion and perimeter breach alarms. Controlled via a web UI on a local IP or domain with mTLS client authentication.
 
 ### Resilience
-#### should be resilient to power outages (for a given amount of time), disconnection of devices on the CAN bus is treated as a security event (alarm trigger) for those devices explicitly being monitored. With the frontend being the main control surface, the topology of network devices' uninterruptable power supply, and possibly WiFi access is critical.
+#### Resilient to power outages for a reasonable amount of time
+#### Timeout of expected devices on the CAN bus is treated as a logged security event (alarm trigger)
+#### In the absence of a hardware arm/disarm trigger (ie code keypad, garage opener trigger, etc) WiFi or other network access means is critical to the operation of the control plane
 
 
 BACKLOG:
+- move past events log from memory to DB. In Control UI, show events in a paginated fashion (boundary of today in this TZ - 7 days; fetch prior button fetches prior 7 days; define maximum number of events in window / reuse DOM nodes so as to not take performance penalty. 
+- dockerize python server (controller)
+- mTLS client cert revocation (state + nginx checks)
 - hardware and software support for CANBUS-adjacent Vsource line voltage monitoring and threshold warning in UI / email / alarm(s).
-- support for UPS/voltage-based status monitoring and state change warning in UI / email.
-- move past events log from memory to DB;
-- dockerize
+
+ 
