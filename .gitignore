@@ -8,3 +8,4 @@ controller/__pycache__
 .vscode/
 BUILD_IDS
 .pio/
+.opencode
