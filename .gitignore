@@ -2,7 +2,6 @@
 server-keys/*.*
 server-keys/
 crypto-NOCHECKIN/
-controller/server-keys
 controller/__pycache__
 .vscode/*.*
 .vscode/
